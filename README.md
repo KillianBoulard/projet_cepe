@@ -1,4 +1,7 @@
-# projet_cepe
+# Projet CEPE
+- Laurent BIGAS 
+- Mathieu DA SILVA
+- Killian BOULARD
 
 18/01 : 
 Groupe formés
