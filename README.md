@@ -20,8 +20,6 @@ Modélisation des donénes (problématique de regression, classification, prése
 19/04 : 
 Préparer la présentation du sujet
 
-# Thématiques abordées : 
-
 # Source des données : 
 
 Données métérologiques (depuis 2010) : 
