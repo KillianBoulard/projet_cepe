@@ -30,3 +30,6 @@ https://www.infoclimat.fr/opendata/
 
 Interventions réalisées par les services d'incendie et de secours :
 https://www.data.gouv.fr/fr/datasets/interventions-realisees-par-les-services-d-incendie-et-de-secours/#resources
+
+Base de données des incendies : 
+https://bdiff.agriculture.gouv.fr/incendies
