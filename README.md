@@ -25,3 +25,6 @@ Préparer la présentation du sujet
 # Source des données : 
 
 Données métérologiques (depuis 2010) : https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/table/?flg=fr&sort=date
+
+données climat :
+https://www.infoclimat.fr/opendata/
