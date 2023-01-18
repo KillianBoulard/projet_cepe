@@ -20,7 +20,7 @@ Modélisation des donénes (problématique de regression, classification, prése
 19/04 : 
 Préparer la présentation du sujet
 
-# Source des données : 
+# Sources des données : 
 
 Données métérologiques (depuis 2010) : 
 https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/table/?flg=fr&sort=date
