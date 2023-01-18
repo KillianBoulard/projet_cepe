@@ -1,12 +1,12 @@
 # Projet CEPE : Modelisation des risques climatiques 
 
-Contributeurs : 
+#Contributeurs : 
 - Laurent BIGAS 
 - Mathieu DA SILVA
 - Killian BOULARD
 
 
-Jalons du projet : 
+#Jalons du projet : 
 18/01 : 
 Groupe formés
 sujet défini 
