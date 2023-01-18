@@ -22,4 +22,6 @@ Préparer la présentation du sujet
 
 # Thématiques abordées : 
 
-# Source des données (api) : 
+# Source des données : 
+
+Données métérologiques : https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/export/?flg=fr&sort=date
