@@ -24,4 +24,4 @@ Préparer la présentation du sujet
 
 # Source des données : 
 
-Données métérologiques : [https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/export/?flg=fr&sort=date]
+Données métérologiques : https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/table/?flg=fr&sort=date
