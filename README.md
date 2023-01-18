@@ -1,11 +1,12 @@
 # Projet CEPE
+
+Contributeurs : 
 - Laurent BIGAS 
 - Mathieu DA SILVA
 - Killian BOULARD
 
 
 Jalons du projet : 
-
 18/01 : 
 Groupe formés
 sujet défini 
@@ -18,3 +19,7 @@ Modélisation des donénes (problématique de regression, classification, prése
 
 19/04 : 
 Préparer la présentation du sujet
+
+Thématiques abordées : 
+
+Source des données (api) : 
