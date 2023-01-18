@@ -1,4 +1,4 @@
-# Projet CEPE
+# Projet CEPE : Modelisation des risques climatiques 
 
 Contributeurs : 
 - Laurent BIGAS 
