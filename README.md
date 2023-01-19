@@ -8,7 +8,7 @@
 
 # Jalons du projet : 
 18/01 : 
-Groupe formés
+Groupes formés
 sujet défini 
 --> problématique 
 --> data
