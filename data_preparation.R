@@ -70,6 +70,5 @@ test_incendies = incendies %>%
           surface_parcourue, occurence_commune_mois)
 
 
-  #summarise(retard_moyen = mean(dep_delay, na.rm = TRUE))
 colnames(test_incendies)
 head(test_incendies)
