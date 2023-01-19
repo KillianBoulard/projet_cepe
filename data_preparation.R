@@ -15,8 +15,6 @@ as_tibble(incendies)
 as_tibble(meteo)
 
 
-slice(incendies, 1:5)
-
 
 #Nettoyage et préparation du fichier des incendies 
 new = mutate(incendies, month=(format(Date.de.première.alerte,"%m")))
