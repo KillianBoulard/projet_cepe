@@ -18,13 +18,16 @@ as_tibble(meteo)
 #Renommage
 incendies = rename(incendies,
     "annee" = Année,
+    "numero" = Numéro,
     "code_insee" = Code.INSEE,
     "nom_commune" = Nom.de.la.commune,
-    "date_alerte" = Origine.de.l.alerte,
+    "date_alerte" = Date.de.première.alerte,
+    "origine_alerte" = Origine.de.l.alerte,
     "moyens_premiere_intervention" = Moyens.de.première.intervention,
     "surface_parcourue" = Surface.parcourue..m2.,
     "surface_foret" = Surface.forêt..m2.,
     "surface_maquis" = Surface.maquis.garrigues..m2.,
+    "surface_nat_autre_foret" = Autres.surfaces.naturelles.hors.forêt..m2.,
     "surface_agricole" = Surfaces.agricoles..m2.,
     "surface_autre_terre_boisee" =  Surface.autres.terres.boisées..m2.,
     "surface_non_boisee_nat" = Surfaces.non.boisées.naturelles..m2.,
@@ -41,7 +44,8 @@ incendies = rename(incendies,
     "enterv_equipe" = Intervention.de.l.équipe.RCCI,
     "deces_bat_touches" = Décès.ou.bâtiments.touchés,
     "nb_deces" = Nombre.de.décès,
-    "nb_bat_tot_detruit" = Nombre.de.bâtiments.partiellement.détruits,
+    "nb_bat_tot_detruit" = Nombre.de.bâtiments.totalement.détruits,
+    "nb_bat_part_detruit" = Nombre.de.bâtiments.partiellement.détruits,
     "hygrometrie" = Hygrométrie,
     "v_moyenn_vent" = Vitesse.moyenne.du.vent,
     "dir_vent" = Direction.du.vent,
@@ -49,13 +53,11 @@ incendies = rename(incendies,
     "presence_contour_valide" = Présence.d.un.contour.valide
   )
   
-
-
-  
-  mutate(mois=as.Date(Date.de.première.alerte, format = "%d/%m/%Y"),
-         test = format(mois,"%m"))
+#création d'un nouvel id par ordre chronologique et ajout d'une variable année / mois
+new = incendies %>%
+        mutate(
+         date_incendie = as.Date(date_incendie, format = "%d/%m/%Y"),
+         test = format(date_incendie,"%m"))
 
 colnames(incendies)
-
-select(new, Date.de.première.alerte, mois, test)
 
