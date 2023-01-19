@@ -19,6 +19,7 @@ as_tibble(meteo)
 incendies = rename(incendies,
     "annee" = Année,
     "numero" = Numéro,
+    "departement" = Département,
     "code_insee" = Code.INSEE,
     "nom_commune" = Nom.de.la.commune,
     "date_alerte" = Date.de.première.alerte,
@@ -53,11 +54,22 @@ incendies = rename(incendies,
     "presence_contour_valide" = Présence.d.un.contour.valide
   )
   
-#création d'un nouvel id par ordre chronologique et ajout d'une variable année / mois
-new = incendies %>%
-        mutate(
-         date_incendie = as.Date(date_incendie, format = "%d/%m/%Y"),
-         test = format(date_incendie,"%m"))
+#filtrage des données et ajout d'une colonne mois + formattage de date_alert
+test_incendies = incendies %>%
+  mutate(
+          date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
+          mois = format(date_alerte,"%m")) %>%
+  group_by(
+    annee, mois, code_insee) %>%
+  mutate(
+    occurence_commune_mois = n(),
+    surface_parcourue = sum(surface_parcourue),
+    ) %>%
+  select(
+          annee, mois, departement, nom_commune, code_insee,
+          surface_parcourue, occurence_commune_mois)
 
-colnames(incendies)
 
+  #summarise(retard_moyen = mean(dep_delay, na.rm = TRUE))
+colnames(test_incendies)
+head(test_incendies)
