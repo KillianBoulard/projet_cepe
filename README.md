@@ -33,3 +33,7 @@ https://www.data.gouv.fr/fr/datasets/interventions-realisees-par-les-services-d-
 
 Base de données des incendies : 
 https://bdiff.agriculture.gouv.fr/incendies
+
+
+Télécharger les datasets : 
+https://drive.google.com/drive/folders/145zMbCeSOzcLvNtUfKnrgVJeg7An3cEa?usp=sharing
