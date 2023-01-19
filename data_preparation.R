@@ -14,6 +14,4 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", header = T, sep=";"
 as_tibble(incendies)
 as_tibble(meteo)
 
-#Ajout
-slice_head(incendies, prop = 0.2)
 
