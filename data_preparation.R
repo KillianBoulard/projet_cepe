@@ -14,18 +14,3 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", header = T, sep=";"
 as_tibble(incendies)
 as_tibble(meteo)
 
-
-slice(incendies, 1:5)
-
-
-#Nettoyage et préparation du fichier des incendies 
-new = mutate(incendies, month=(format(Date.de.première.alerte,"%m")))
-
-new = incendies %>%
-  mutate(mois=as.Date(Date.de.première.alerte, format = "%d/%m/%Y"),
-         test = format(mois,"%m"))
-
-
-
-select(new, Date.de.première.alerte, mois, test)
-
