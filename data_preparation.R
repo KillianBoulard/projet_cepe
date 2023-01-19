@@ -14,16 +14,38 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", header = T, sep=";"
 as_tibble(incendies)
 as_tibble(meteo)
 
-
-
 #Nettoyage et préparation du fichier des incendies 
-new = mutate(incendies, month=(format(Date.de.première.alerte,"%m")))
+#Renommage
+incendies = rename(incendies,
+    "annee" = Année,
+    "code_insee" = Code.INSEE,
+    "nom_commune" = Nom.de.la.commune,
+    "date_alerte" = Origine.de.l.alerte,
+    "moyens_premiere_intervention" = Moyens.de.première.intervention,
+    "surface_parcourue" = Surface.parcourue..m2.,
+    "surface_foret" = Surface.forêt..m2.,
+    "surface_maquis" = Surface.maquis.garrigues..m2.,
+    "surface_agricole" = Surfaces.agricoles..m2.,
+    "surface_autre_terre_boisee" =  Surface.autres.terres.boisées..m2.,
+    "surface_non_boisee_nat" = Surfaces.non.boisées.naturelles..m2.,
+    "surface_non_boisee_art" = Surfaces.non.boisées.artificialisées..m2.,
+    "surface_non_boisee" = Surfaces.non.boisées..m2.,
+    "precision_surf" =,
+    "surface_feu_initiale" = ,
+    "voie_caross_proche" =,
+    "act_hab_proche" =,
+    "type_peupl" =,
+    "connaissance" =,
+    "source_enquete" =,
+  )
+  
 
-new = incendies %>%
+
+  
   mutate(mois=as.Date(Date.de.première.alerte, format = "%d/%m/%Y"),
          test = format(mois,"%m"))
 
-
+colnames(incendies)
 
 select(new, Date.de.première.alerte, mois, test)
 
