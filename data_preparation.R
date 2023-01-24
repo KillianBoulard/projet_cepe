@@ -14,7 +14,7 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", header = T, sep=";"
 as_tibble(incendies)
 as_tibble(meteo)
 
-#Nettoyage et préparation du fichier des incendies 
+#Nettoyage et préparation du fichier des incenbdies 
 #Renommage
 incendies = rename(incendies,
     "annee" = Année,
@@ -74,9 +74,6 @@ test_incendies = incendies %>%
   select(
     annee, mois, annee_m_1, mois_m_1, departement, nom_commune, code_insee,
     surface_parcourue, occurence_commune_mois)
-
-
-
 
 
 test_incendies = incendies %>%
