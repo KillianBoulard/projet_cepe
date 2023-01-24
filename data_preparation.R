@@ -6,8 +6,10 @@ library(wesanderson)
 
 library(rpart)
 
+setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
 
-incendies<- read.csv(file="C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/Incendies2021b.csv",
+
+incendie20<- read.csv(file="Incendies20.csv",
                      col.names = c("annee","id","departement","code_insee",
                                    "nom_commune","date_alerte","origine_alerte","moyens_premiere_intervention",
                                    "surface_parcourue","surface_foret","surface_maquis",
