@@ -47,5 +47,13 @@ https://drive.google.com/drive/folders/145zMbCeSOzcLvNtUfKnrgVJeg7An3cEa?usp=sha
 
 
 
+idées de variables utiles :
+nombre d'incendie meme mois année N-1
+nombre de jour sans pluie
+nombre d'incendie dans un rayon de x kilometre autour de la commune
+nombre d'enregistrement de directions de vent de type N/S/E/O/NE... sur le mois considéré
+vitesse moyenne du vent sur le mois considéré
 
 
+données a prévoir : la surface brulée des mois +1
+le nombre d"incendies  sur les prochains mois
