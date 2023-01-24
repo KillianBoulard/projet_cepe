@@ -83,12 +83,12 @@ incendies$precision_surf <-as.factor(incendies$precision_surf)
 incendies$nature <-as.factor(incendies$nature)
 incendies$annee<-as.factor(incendies$annee)
 incendies$departement<-as.factor(incendies$departement)
+incendies$date_alerte <-  as.Date(incendies$date_alerte,format = "%d/%m/%Y")
 
 
 
 
 
-incendies$date_alerte <-  as.Date(incendies$date_alerte)
 
 
 incendiestest<-incendies %>% filter (nature != "" & dir_ven !="")
@@ -107,7 +107,9 @@ ggplot(data=incendiestest,aes(x=annee,fill=nature),position="dodge")+geom_bar()
 
 
 
-incendies_vent<-incendies %>% select(annee,code_insee,date_alerte,v_moyenn_vent,dir_ven)
+incendies_vent<-incendies %>% select(annee,id,code_insee,date_alerte,v_moyenn_vent,dir_ven) %>% 
+  filter(dir_ven !="") %>% mutate (mois= format(date_alerte, format = "%m"))
+
 
 
 summary(incendies)
