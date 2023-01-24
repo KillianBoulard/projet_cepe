@@ -3,9 +3,9 @@ library(ggplot2)
 library(dplyr)
 # Charger
 library(wesanderson)
-
+library(explore)
 library(rpart)
-
+library(ggthemes)
 setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
 
 
@@ -101,15 +101,38 @@ ggplot(incendies, aes(x=nb_event, color=nature)) +
 
 
 ggplot(data=incendies,aes(x=nature,fill=dir_ven),position="dodge")+geom_bar()
+ 
 ggplot(data=incendies,aes(x=annee,fill=nature),position="dodge")+geom_bar()
+
+
+
+ggplot(incendies, aes(x = annee, fill=nature)) +
+  geom_bar(position = position_dodge()) +
+  geom_text(stat="count",
+            aes(label=stat(count)), 
+            position = position_dodge(width=1), 
+            vjust=-0.5)+
+  labs(title="répartition des incendies par nature", 
+       x="Année de l'incendie", y = "nb incendies")
+  theme_economist_white()
+
+
+
 
 ggplot(data=incendiestest,aes(x=annee,fill=nature),position="dodge")+geom_bar()
 
 
 
+geom_bar(stat="identity", position=position_dodge())
+
+
 incendies_vent<-incendies %>%  
   filter(dir_ven !="") %>% mutate (mois= format(date_alerte, format = "%m")) %>%
   select(annee,id,mois,code_insee,v_moyenn_vent,dir_ven)
+
+summary(incendies_vent)
+
+
 
 
 incendies_vent <- mutate(incendies_vent,
@@ -148,3 +171,7 @@ incendies2B009<-incendies_vent %>% filter(code_insee=="2B009")  %>%
 
 
 summary(incendies)
+
+incendies_vent %>% explore_all(n = n)
+
+
