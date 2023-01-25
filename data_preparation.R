@@ -66,6 +66,7 @@ test_incendies = incendies %>%
     date_m_1 = as.Date(date_alerte, format = "%d/%m/%Y") %m+% months(-1),
     date_m_12 = as.Date(date_alerte, format = "%d/%m/%Y") %m+% months(-12),
     
+    #Formattage des dates pour future jointure m-1 et m-12
     annee = format(date_alerte," %Y"),
     mois = format(date_alerte," %m"),
     annee_m_1 = format(date_m_1, "%Y"),
