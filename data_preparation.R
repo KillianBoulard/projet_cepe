@@ -76,7 +76,15 @@ test_incendies = incendies %>%
   mutate(
     occurence_commune_mois = n(),
     surface_parcourue = sum(surface_parcourue),
-    vit_moy_vent_N = sum(dir_vent=="N", na.rm=TRUE),
+    nb_vent_N = sum(dir_vent=="N", na.rm=TRUE),
+    nb_vent_S = sum(dir_vent=="S", na.rm=TRUE),
+    nb_vent_O = sum(dir_vent=="O", na.rm=TRUE),
+    nb_vent_E = sum(dir_vent=="E", na.rm=TRUE),
+    nb_vent_SE = sum(dir_vent=="SE", na.rm=TRUE),
+    nb_vent_SO = sum(dir_vent=="SO", na.rm=TRUE),
+    nb_vent_NE = sum(dir_vent=="NE", na.rm=TRUE),
+    nb_vent_NO = sum(dir_vent=="NO", na.rm=TRUE),
+    vit_moy_vent_N = nb_vent_N / mean(v_moyenn_vent, dir_vent =="N", na.rm=TRUE),
     vit_moy_vent_S = sum(dir_vent=="S", na.rm=TRUE),
     vit_moy_vent_O = sum(dir_vent=="O", na.rm=TRUE),
     vit_moy_vent_E = sum(dir_vent=="E", na.rm=TRUE),
@@ -93,7 +101,7 @@ test_incendies = incendies %>%
     surface_parcourue, occurence_commune_mois, nb_vent_N)
 
 
-
+#Ajout / jointure pour ajouter les variables concernant les mois M-1 et M-12
 
 incendies_vent <- mutate(incendies_vent,
                          nb_vent_N = ifelse(dir_ven=="N",1,0),
