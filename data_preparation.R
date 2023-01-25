@@ -80,6 +80,7 @@ test_incendies = incendies %>%
     occurence_commune_mois = n(),
     surface_parcourue = sum(surface_parcourue),
     
+    #Poids des différentes origines
     nb_origine_indetermine = sum(origine_alerte == "Indéterminé") / n(),
     nb_origine_autre = sum(origine_alerte=="Autre", na.rm=TRUE) / n(),
     nb_origine_moy_aer = sum(origine_alerte=="Moyen aérien", na.rm=TRUE) / n(),
@@ -88,11 +89,12 @@ test_incendies = incendies %>%
     nb_origine_pomp_pre_pos = sum(origine_alerte=="Pompiers pré-positionnés", na.rm=TRUE) / n(),
     nb_origine_cam = sum(origine_alerte=="Vigie-caméra", na.rm=TRUE) / n(),
     
-    nb_nat_accidentelle = sum(nature == "Accidentelle"),
-    nb_nat_inv_part = sum(nature == "Involontaire (particulier)"),
-    nb_nat_inv_trav = sum(nature == "Involontaire (travaux)"),
-    nb_nat_malv = sum(nature == "Malveillance"),
-    nb_nat_naturelle = sum(nature == "Naturelle")
+    #Poids des différentes natures
+    nb_nat_accidentelle = sum(nature == "Accidentelle" , na.rm = T) / n(),
+    nb_nat_inv_part = sum(nature == "Involontaire (particulier)", na.rm = T) / n(),
+    nb_nat_inv_trav = sum(nature == "Involontaire (travaux)", na.rm = T) / n(),
+    nb_nat_malv = sum(nature == "Malveillance", na.rm = T) / n(),
+    nb_nat_naturelle = sum(nature == "Naturelle", na.rm = T) /n()
     
   ) %>%
   distinct(
