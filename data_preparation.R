@@ -60,20 +60,26 @@ test_incendies = incendies %>%
   mutate(
     date_alerte = as.Date(date_alerte),
     date_m_1 = as.Date(date_alerte, format = "%d/%m/%Y") %m+% months(-1),
+    date_m_12 = as.Date(date_alerte, format = "%d/%m/%Y") %m+% months(-12),
     annee = format(date_alerte," %Y"),
     mois = format(date_alerte," %m"),
     annee_m_1 = format(date_m_1, "%Y"),
-    mois_m_1 = format(date_m_1," %m")) %>%
+    mois_m_1 = format(date_m_1," %m"),
+    annee_m_12 = format(date_m_12, "%Y"),
+    mois_m_12 = format(date_m_12," %m")) %>%
   group_by(
     annee, mois, code_insee) %>%
   mutate(
     occurence_commune_mois = n(),
     surface_parcourue = sum(surface_parcourue),
+    
   ) %>%
+  distinct(
+    annee, mois, annee_m_1, mois_m_1, annee_m_12, mois_m_12, departement, nom_commune, code_insee,
+    surface_parcourue, occurence_commune_mois) %>%
   select(
-    mois, annee_m_1, mois_m_1, departement, nom_commune, code_insee,
+    annee, mois, annee_m_1, mois_m_1, annee_m_12, mois_m_12, departement, nom_commune, code_insee,
     surface_parcourue, occurence_commune_mois)
-
 
 
 colnames(test_incendies)
