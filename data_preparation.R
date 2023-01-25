@@ -56,16 +56,14 @@ incendies = rename(incendies,
   )
   
 #filtrage des données et ajout d'une colonne mois + formattage de date_alert
-d <- ymd(as.Date('2004-01-01')) %m+% months(-1)
-d
-
 test_incendies = incendies %>%
   mutate(
-    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
+    date_alerte = as.Date(date_alerte),
     date_m_1 = as.Date(date_alerte, format = "%d/%m/%Y") %m+% months(-1),
-    mois = format(date_alerte,"%m"),
-    annee_m_1 = format(date_m_1,"%Y"),
-    mois_m_1 = format(date_m_1,"%m")) %>%
+    annee = format(date_alerte," %Y"),
+    mois = format(date_alerte," %m"),
+    annee_m_1 = format(date_m_1, "%Y"),
+    mois_m_1 = format(date_m_1," %m")) %>%
   group_by(
     annee, mois, code_insee) %>%
   mutate(
@@ -73,23 +71,9 @@ test_incendies = incendies %>%
     surface_parcourue = sum(surface_parcourue),
   ) %>%
   select(
-    annee, mois, annee_m_1, mois_m_1, departement, nom_commune, code_insee,
+    mois, annee_m_1, mois_m_1, departement, nom_commune, code_insee,
     surface_parcourue, occurence_commune_mois)
 
-
-test_incendies = incendies %>%
-  mutate(
-          date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
-          mois = format(date_alerte,"%m")) %>%
-  group_by(
-    annee, mois, code_insee) %>%
-  mutate(
-    occurence_commune_mois = n(),
-    surface_parcourue = sum(surface_parcourue),
-    ) %>%
-  select(
-          annee, mois, departement, nom_commune, code_insee,
-          surface_parcourue, occurence_commune_mois)
 
 
 colnames(test_incendies)
