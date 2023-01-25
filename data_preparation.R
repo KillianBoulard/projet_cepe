@@ -122,12 +122,7 @@ test_incendies = incendies %>%
 #Ajout / jointure pour ajouter les variables concernant les mois M-1 et M-12
 
 
+
 summary(incendies)
-
-incendies_vent %>% explore_all(n = n)
-
-
-
-
 colnames(test_incendies)
 head(test_incendies)
