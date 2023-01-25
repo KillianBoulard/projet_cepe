@@ -26,9 +26,9 @@ library(xgboost, warn.conflicts = FALSE)
 library(gbm, warn.conflicts = FALSE)
 library(ibr, warn.conflicts = FALSE)
 library(svm, warn.conflicts = FALSE)
-library(dplyr)
-library(tidyverse)
-library(lubridate)
+library(dplyr, warn.conflicts = FALSE)
+library(tidyverse, warn.conflicts = FALSE)
+library(lubridate, warn.conflicts = FALSE)
 
 
 
