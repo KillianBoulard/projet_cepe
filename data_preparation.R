@@ -76,66 +76,24 @@ test_incendies = incendies %>%
   mutate(
     occurence_commune_mois = n(),
     surface_parcourue = sum(surface_parcourue),
-    nb_vent_N = sum(dir_vent=="N", na.rm=TRUE),
-    nb_vent_S = sum(dir_vent=="S", na.rm=TRUE),
-    nb_vent_O = sum(dir_vent=="O", na.rm=TRUE),
-    nb_vent_E = sum(dir_vent=="E", na.rm=TRUE),
-    nb_vent_SE = sum(dir_vent=="SE", na.rm=TRUE),
-    nb_vent_SO = sum(dir_vent=="SO", na.rm=TRUE),
-    nb_vent_NE = sum(dir_vent=="NE", na.rm=TRUE),
-    nb_vent_NO = sum(dir_vent=="NO", na.rm=TRUE),
-    vit_moy_vent_N = nb_vent_N / mean(v_moyenn_vent, dir_vent =="N", na.rm=TRUE),
-    vit_moy_vent_S = sum(dir_vent=="S", na.rm=TRUE),
-    vit_moy_vent_O = sum(dir_vent=="O", na.rm=TRUE),
-    vit_moy_vent_E = sum(dir_vent=="E", na.rm=TRUE),
-    vit_moy_vent_SE = sum(dir_vent=="SE", na.rm=TRUE),
-    vit_moy_vent_SO = sum(dir_vent=="SO", na.rm=TRUE),
-    vit_moy_vent_NE = sum(dir_vent=="NE", na.rm=TRUE),
-    vit_moy_vent_NO = sum(dir_vent=="NO", na.rm=TRUE)
+    nb_origine_indetermine = sum(origine_alerte=="Indéterminé", na.rm=TRUE),
+    nb_origine_autre = sum(origine_alerte=="Autre", na.rm=TRUE),
+    nb_origine_moy_aer = sum(origine_alerte=="Moyen aérien", na.rm=TRUE),
+    nb_origine_patrouille = sum(origine_alerte=="Patrouille", na.rm=TRUE),
+    nb_origine_pomp_pre_pos = sum(origine_alerte=="Pompiers pré-positionnés", na.rm=TRUE),
+    nb_origine_cam = sum(origine_alerte=="Vigie-caméra", na.rm=TRUE)
   ) %>%
   distinct(
     annee, mois, annee_m_1, mois_m_1, annee_m_12, mois_m_12, departement, nom_commune, code_insee,
-    surface_parcourue, occurence_commune_mois, nb_vent_N) %>%
+    surface_parcourue, occurence_commune_mois, nb_origine_indetermine, nb_origine_autre,
+    nb_origine_moy_aer, nb_origine_patrouille, nb_origine_pomp_pre_pos, nb_origine_cam) %>%
   select(
     annee, mois, annee_m_1, mois_m_1, annee_m_12, mois_m_12, departement, nom_commune, code_insee,
-    surface_parcourue, occurence_commune_mois, nb_vent_N)
+    surface_parcourue, occurence_commune_mois, nb_origine_indetermine, nb_origine_autre,
+    nb_origine_moy_aer, nb_origine_patrouille, nb_origine_pomp_pre_pos, nb_origine_cam)
 
 
 #Ajout / jointure pour ajouter les variables concernant les mois M-1 et M-12
-
-incendies_vent <- mutate(incendies_vent,
-                         nb_vent_N = ifelse(dir_ven=="N",1,0),
-                         nb_vent_S = ifelse(dir_ven=="S",1,0),
-                         nb_vent_O = ifelse(dir_ven=="O",1,0),
-                         nb_vent_E = ifelse(dir_ven=="E",1,0),
-                         nb_vent_SE = ifelse(dir_ven=="SE",1,0),
-                         nb_vent_SO = ifelse(dir_ven=="SO",1,0),
-                         nb_vent_NE = ifelse(dir_ven=="NE",1,0),
-                         nb_vent_NO = ifelse(dir_ven=="NO",1,0)
-)
-
-incendies_vent <- incendies_vent %>% 
-  group_by(annee,code_insee) %>% 
-  mutate ( moyenne_vent =mean(v_moyenn_vent),
-           somme_vent=sum(nb_vent_N)+sum(nb_vent_S)+sum(nb_vent_O)+sum(nb_vent_E)+sum(nb_vent_SE)+
-             sum(nb_vent_SO)+sum(nb_vent_NE)+sum(nb_vent_NO),
-           nb_vent_N=sum(nb_vent_N)/somme_vent,
-           nb_vent_S=sum(nb_vent_S)/somme_vent,
-           nb_vent_O=sum(nb_vent_O)/somme_vent,
-           nb_vent_E =sum(nb_vent_E)/somme_vent,
-           nb_vent_SE =sum(nb_vent_SE)/somme_vent,
-           nb_vent_SO =sum(nb_vent_SO)/somme_vent,
-           nb_vent_NE =sum(nb_vent_NE)/somme_vent,
-           nb_vent_NO =sum(nb_vent_NO)/somme_vent) %>% 
-  select(annee,code_insee,moyenne_vent,somme_vent,nb_vent_N,nb_vent_S,
-         nb_vent_O,nb_vent_E ,nb_vent_SE ,nb_vent_SO ,nb_vent_NE ,nb_vent_NO ) %>% slice(1)
-
-
-
-incendies2B009<-incendies_vent %>% filter(code_insee=="2B009")  %>% 
-  group_by(annee,code_insee) %>%
-  summarise(moyenne_vent2=mean(v_moyenn_vent)) %>% select(annee,code_insee,moyenne_vent2) 
-
 
 
 summary(incendies)
