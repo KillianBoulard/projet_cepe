@@ -6,7 +6,13 @@ library(wesanderson)
 library(explore)
 library(rpart)
 library(ggthemes)
+
+#travail
 setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
+
+
+#taff
+setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
 
 
 # incendie20<- read.csv(file="Incendies20.csv",
@@ -54,7 +60,7 @@ incendies<- read.csv(file="Incendies.csv",
                                     "v_moyenn_vent","dir_ven","temperature","precision_donnee","presence_contour_valide"),
                       header = T, 
                       sep=";",
-                      encoding='utf-8',skip = 6)
+                      encoding='UTF-8',skip = 6)
 
 
 
@@ -83,7 +89,8 @@ incendies$precision_surf <-as.factor(incendies$precision_surf)
 incendies$nature <-as.factor(incendies$nature)
 incendies$annee<-as.factor(incendies$annee)
 incendies$departement<-as.factor(incendies$departement)
-incendies$date_alerte <-  as.Date(incendies$date_alerte,format = "%d/%m/%Y")
+
+incendies$date_alerte <-  as.Date(incendies$date_alerte,format = "%Y-%m-%d")
 
 
 
@@ -159,9 +166,8 @@ incendies_vent <- incendies_vent %>%
                            nb_vent_SO =sum(nb_vent_SO)/somme_vent,
                            nb_vent_NE =sum(nb_vent_NE)/somme_vent,
                            nb_vent_NO =sum(nb_vent_NO)/somme_vent) %>% 
-                  select(annee,code_insee,moyenne_vent,somme_vent,nb_vent_N,nb_vent_S,
+                         select(annee,code_insee,moyenne_vent,somme_vent,nb_vent_N,nb_vent_S,
                          nb_vent_O,nb_vent_E ,nb_vent_SE ,nb_vent_SO ,nb_vent_NE ,nb_vent_NO ) %>% slice(1)
-  
 
 
 incendies2B009<-incendies_vent %>% filter(code_insee=="2B009")  %>% 
