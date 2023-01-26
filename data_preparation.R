@@ -72,7 +72,8 @@ test_incendies = incendies %>%
     annee_m_1 = format(date_m_1, "%Y"),
     mois_m_1 = format(date_m_1," %m"),
     annee_m_12 = format(date_m_12, "%Y"),
-    mois_m_12 = format(date_m_12," %m")) %>%
+    mois_m_12 = format(date_m_12," %m")
+    ) %>%
   
   group_by(
     annee, mois, code_insee) %>%
