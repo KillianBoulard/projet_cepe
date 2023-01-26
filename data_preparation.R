@@ -60,7 +60,7 @@ incendies = rename(incendies,
 # Mise en forme des données pouvant avoir une importance lors de la modelisation
 test_incendies = incendies %>%
   mutate(
-    date_alerte = as.Date(date_alerte),
+    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
     dir_vent = as.character(dir_vent, na.rm= T),
     v_moyenn_vent = as.double(v_moyenn_vent, na.rm= T),
     date_m_1 = as.Date(date_alerte, format = "%d/%m/%Y") %m+% months(-1),
