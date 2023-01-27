@@ -49,12 +49,24 @@ https://drive.google.com/drive/folders/145zMbCeSOzcLvNtUfKnrgVJeg7An3cEa?usp=sha
 
 # idées de variables utiles :
  - nombre d'incendie meme mois année N-1
-- nombre de jour sans pluie
-- nombre d'incendie dans un rayon de x kilometre autour de la commune
-- nombre d'enregistrement de directions de vent de type N/S/E/O/NE... sur le mois considéré
-- vitesse moyenne du vent sur le mois considéré
+- nombre de jour moyen sans pluie precedant le feu 
+- nombre d'incendie dans un rayon de x kilometre autour de la commune mois M-1
+- nombre d'incendie dans un rayon de x kilometre autour de la commune mois M-12
+
+- proportion de directions de vent de type N/S/E/O/NE... sur le mois -1 / commune lorsqu'il y a eut un incendie.
+- vitesse moyenne du vent sur le mois -1 /commune lorsqu'il y a eut incendie
+
+- proportion de directions de vent de type N/S/E/O/NE... sur le mois -12 / commune lorsqu'il y a eut un incendie.
+- vitesse moyenne du vent sur le mois -12 /commune lorsqu'il y a eut incendie
+
+- direction moyenne du vent sur le mois precedent/commune (fichier meteo) voir si corrélation avec la direction du vent dans le fichier incendie
+- direction moyenne du vent sur le mois precedent/commune (fichier meteo) voir si corrélation avec la direction du vent dans le fichier incendie
+- vitesse moyenne du vent sur le mois -1 /commune (fichier meteo)
+- vitesse moyenne du vent sur le mois -12 /commune (fichier meteo)
+- hygrometrie moyenne sur le mois M / commune
+- hygrometrie moyenne sur le mois M-1 / commune
 
 
 # données a prévoir : 
-la surface brulée des mois +1
+la surface brulée des mois + 1, 2,3,4
 le nombre d"incendies  sur les prochains mois
