@@ -54,7 +54,7 @@ incendies<- read.csv(file="Incendies.csv",
                                     "v_moyenn_vent","dir_ven","temperature","precision_donnee","presence_contour_valide"),
                       header = T, 
                       sep=";",
-                      encoding='utf-8',skip = 6)
+                      encoding='UTF-8',skip = 6)
 
 
 
