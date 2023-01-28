@@ -45,7 +45,7 @@ https://drive.google.com/drive/folders/145zMbCeSOzcLvNtUfKnrgVJeg7An3cEa?usp=sha
 ![image](https://user-images.githubusercontent.com/122978605/213425363-7739d9a6-1dfb-4a0f-8cd8-a4024d0942e4.png)
 
 
-
+## 	`rgb(9, 105, 218)`!! les données incendies contiennent les données des departements d'outremer
 
 # idées de variables utiles :
  - nombre d'incendie meme mois année N-1
