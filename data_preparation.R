@@ -58,9 +58,9 @@ incendies = rename(incendies,
 #Data prep : fichier indendie :
 # Formattage des variables ;
 # Mise en forme des données pouvant avoir une importance lors de la modelisation
-test_incendies = incendies %>%
+clean_incendies = incendies %>%
   mutate(
-    date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
+    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
     dir_vent = as.character(dir_vent, na.rm= T),
     v_moyenn_vent = as.double(v_moyenn_vent, na.rm= T),
     date_m_1 = date_alerte %m+% months(-1),
@@ -83,7 +83,7 @@ test_incendies = incendies %>%
     surface_parcourue = sum(surface_parcourue),
     
     #Poids des différentes origines
-    poids_origine_indetermine = sum(origine_alerte == "Indéterminé") / n(),
+    poids_origine_indetermine = sum(origine_alerte == "Indéterminée") / n(),
     poids_origine_autre = sum(origine_alerte=="Autre", na.rm=TRUE) / n(),
     poids_origine_moy_aer = sum(origine_alerte=="Moyen aérien", na.rm=TRUE) / n(),
     poids_origine_patrouille = sum(origine_alerte=="Patrouille", na.rm=TRUE) / n(),
@@ -122,9 +122,10 @@ test_incendies = incendies %>%
     poids_nat_accidentelle, poids_nat_inv_part, poids_nat_inv_trav, poids_nat_malv, poids_nat_naturelle,
     poids_nat_ind)
 
+write_xlsx(clean_incendies, getwd())
 
-#Ajout / jointure pour ajouter les variables concernant les mois M-1 et M-12
 
+#Clean des données méteo
 
 
 summary(incendies)
