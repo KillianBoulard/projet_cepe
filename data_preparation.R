@@ -127,7 +127,7 @@ write_xlsx(clean_incendies, getwd())
 
 #Clean des données méteo
 
-
+#TeST
 summary(incendies)
 colnames(test_incendies)
 head(test_incendies)
