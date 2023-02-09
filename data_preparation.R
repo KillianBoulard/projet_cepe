@@ -187,4 +187,4 @@ summary(incendies)
 
 incendies_vent %>% explore_all(n = n)
 
-
+#sa mere la police
