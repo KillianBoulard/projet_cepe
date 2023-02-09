@@ -175,6 +175,8 @@ incendies_vent <- incendies_vent %>%
 #test
 
 
+
+
 incendies2B009<-incendies_vent %>% filter(code_insee=="2B009")  %>% 
                 group_by(annee,code_insee) %>%
                 summarise(moyenne_vent2=mean(v_moyenn_vent)) %>% select(annee,code_insee,moyenne_vent2) 
