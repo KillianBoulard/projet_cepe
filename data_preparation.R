@@ -186,5 +186,3 @@ incendies2B009<-incendies_vent %>% filter(code_insee=="2B009")  %>%
 summary(incendies)
 
 incendies_vent %>% explore_all(n = n)
-
-#sa mere la police
