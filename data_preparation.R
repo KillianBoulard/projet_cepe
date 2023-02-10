@@ -172,7 +172,6 @@ incendies_vent <- incendies_vent %>%
 
 
 
-#test
 
 
 
