@@ -67,12 +67,12 @@ clean_incendies = incendies %>%
     date_m_12 = date_alerte %m+% months(-12),
     
     #Formattage des dates pour future jointure sur m-1 et m-12
-    annee = format(date_alerte," %Y"),
-    mois = format(date_alerte," %m"),
+    annee = format(date_alerte,"%Y"),
+    mois = format(date_alerte,"%m"),
     annee_m_1 = format(date_m_1, "%Y"),
-    mois_m_1 = format(date_m_1," %m"),
+    mois_m_1 = format(date_m_1,"%m"),
     annee_m_12 = format(date_m_12, "%Y"),
-    mois_m_12 = format(date_m_12," %m")
+    mois_m_12 = format(date_m_12,"%m")
     ) %>%
   
   group_by(
@@ -124,9 +124,19 @@ clean_incendies = incendies %>%
 
 write_xlsx(clean_incendies, getwd())
 
+#DJ
+m_12_incendies <- dplyr::left_join(clean_incendies, clean_incendies,
+            by = c('code_insee' = 'code_insee',
+                   'annee_m_12' = 'annee',
+                   'mois_m_12' = 'mois'))
+
+m_1_incendies <- dplyr::left_join(clean_incendies, clean_incendies,
+                                   by = c('code_insee' = 'code_insee',
+                                          'annee_m_1' = 'annee',
+                                          'mois_m_1' = 'mois'))
+
 
 #Clean des données méteo
-
 
 summary(incendies)
 colnames(test_incendies)
