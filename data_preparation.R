@@ -137,7 +137,6 @@ m_1_incendies <- dplyr::left_join(clean_incendies, clean_incendies,
 
 
 #Clean des données méteo
-
 summary(incendies)
 colnames(test_incendies)
 head(test_incendies)
