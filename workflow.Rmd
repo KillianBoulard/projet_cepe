@@ -1,18 +1,313 @@
 ---
 title: "R Notebook"
 output: html_notebook
+authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 ```{r}
-plot(cars)
+library(tidymodels)
+library(tidyverse)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+## Data import
+```{r}
+setwd("C:/Users/User/Desktop/Cours et documents/Formation R ensae/Module 4 classif non supervisée tidymodel")
+dataini = readRDS("readmission_avc.rds")
+dataini
+glimpse(dataini)
+```
+## Exploratory data analysis
+- Checking missing values
+- tabs and plots
+```{r}
+is.na(dataset)
+colSums(is.na(dataset))
+apply(is.na(dataini), MARGIN = 2, sum)
+dim(dataini)
+```
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+## Data preprocessing Part I
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+dataset = dataini %>%
+  filter(!is.na(id_D)) %>%
+  mutate(target = as.factor((if_else(id_D == '', 0, 1)))) %>%
+  mutate_at(c('modeEntree', 'modeSortie', 'sexe'), as.factor) %>% #as.ch
+  select(-c(id, id_D)) %>%
+  mutate(nbda = if_else(is.na(nbda), 0, as.numeric(nbda))) %>%
+  filter(duree>1 & modeSortie !=9)
+
+dataset
+```
+
+## Resample library : training set, validation
+
+```{r}
+set.seed(42)
+dataset_split = initial_split(dataset, prop = 0.8, strata = target)
+training = training(dataset_split)
+test_set = testing(dataset_split)
+
+training
+
+set.seed(42)
+train_split = initial_split(training, prop = 0.8, strata = target)
+train_set = training(train_split)
+eval_set = testing(train_split)
+train_set
+
+cat(dim(train_set),'/',dim(eval_set),'/',dim(test_set))
+```
+
+## 2 Recipes library : create a collection of recipes
+### 2.1 Basic recipe
+```{r}
+rec_basic = recipe(data = train_set, target~.) %>%
+  step_impute_mode(sexe) %>%
+  step_impute_mean(age) %>%
+  step_normalize(age) %>% #Centre et réduit, step_scale = juste réduire
+  step_other(ghm2, threshold = 0.05) %>%
+  step_dummy(ghm2) #Encodage 0 ou 1
+
+rec_basic
+prep(rec_basic)
+
+juice(prep(rec_basic)) #Design matrix
+formula(prep(rec_basic))
+```
+
+Version plus généralisable
+
+```{r}
+basic_rec = recipe(data= train_set, target~.) %>%
+  step_impute_mode(all_nominal_predictors()) %>%
+  step_impute_mean(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_other(ghm2, threshold = 0.02) %>%
+  step_other(dp, threshold = 0.05) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_zv(all_predictors()) #suppression des catégorie identiques (toujours egale 0) notamment a cause des facteurs
+
+juice(prep(basic_rec))
+```
+
+### 2.2 Interaction recipe
+
+```{r}
+rec_interaction = basic_rec %>% 
+                  step_interact(~age : starts_with('dp'))
+
+juice(prep(rec_interaction))
+```
+
+### 2.3 Spline recipe
+
+```{r}
+rec_spline = 
+  # basic_rec %>% 
+  rec_interaction %>% 
+  step_ns(age, duree, deg_free = 3) #On peut aussi mettre tune()
+juice(prep(rec_spline))
+```
+
+
+
+## 3. Parsnip library : creating model and fitting
+### 3.1 logistical model and workflow
+
+model is 
+* a model 
+* a engine (package)
+* a mode (classification / regression)
+
+```{r}
+log_mod = logistic_reg() %>%
+  set_engine('glm')
+  set_mode('classification')
+```
+
+wf is
+* declarer un workflow
+* ajouter un recipe
+* ajouter un modèle
+
+```{r}
+log_wf = workflow() %>%
+  add_recipe(rec_basic) %>%
+  add_model(log_mod)
+
+log_wf
+
+log_fit = fit(log_wf, train_set)
+              
+predict(log_fit, eval_set)
+predict(log_fit, eval_set, type = 'prob')
+
+
+log_pred = eval_set %>%
+  select(target) %>%
+  bind_cols(
+    predict(log_fit, eval_set),
+    predict(log_fit, eval_set, type = 'prob')
+  )
+
+log_pred
+```
+
+### 3.2 RandomForest model and workflow
+```{r}
+rf_mod = rand_forest() %>% 
+  set_engine('ranger') %>% 
+  set_mode('classification')
+```
+
+
+```{r}
+rf_wf = workflow() %>% 
+  add_recipe(basic_rec) %>% 
+  add_model(rf_mod)
+
+rf_fit = fit(rf_wf, train_set)
+
+rf_fit %>% 
+  predict(eval_set, type = 'prob')
+
+rf_fit %>% 
+  predict(eval_set)
+
+rf_pred = eval_set %>% 
+  select(target) %>% 
+  bind_cols(
+    rf_fit %>% 
+  predict(eval_set, type = 'prob'),
+    rf_fit %>% 
+  predict(eval_set)
+  )
+
+rf_pred
+
+```
+
+### 3.3 Xgboost
+
+```{r}
+xg_mod = boost_tree(trees = tune(), min_n = tune(), tree_depth = tune(), learn_rate = tune(),
+                     loss_reduction = tune()) %>% 
+  set_engine('xgboost') %>% 
+  set_mode('classification')
+```
+
+```{r}
+rf_wf = workflow() %>% 
+  add_recipe(basic_rec) %>% 
+  add_model(rf_mod)
+
+rf_fit = fit(rf_wf, train_set)
+
+rf_fit %>% 
+  predict(eval_set, type = 'prob')
+
+rf_fit %>% 
+  predict(eval_set)
+
+rf_pred = eval_set %>% 
+  select(target) %>% 
+  bind_cols(
+    rf_fit %>% 
+  predict(eval_set, type = 'prob'),
+    rf_fit %>% 
+  predict(eval_set)
+  )
+
+rf_pred
+```
+
+## 4. Yardstick library : Evaluer les performances des modèles
+###4.1 Evaluer log
+
+```{r}
+log_pred
+
+accuracy(log_pred, target, .pred_class)
+
+log_pred %>% 
+  group_by(target, .pred_class) %>% 
+  summarise(n=n())
+  
+roc_auc(log_pred, target, .pred_0) #mesure comment l'aglo séparer les classes 1 et 0
+roc_auc(log_pred, target, .pred_1, event_level = 'second') #ou comme ça
+```
+
+###4.2 Evaluer RF
+
+```{r}
+rf_pred
+accuracy(rf_pred, target, .pred_class)
+roc_auc(rf_pred, target, .pred_0) #mesure comment l'aglo séparer les classes 1 et 0
+```
+
+### Workflowset
+
+```{r}
+wf_set = 
+workflow_set(
+  preproc = list(
+    basic = basic_rec,
+    inter = rec_interaction,
+    spline = rec_spline
+  ),
+  models = list(
+    log = log_mod,
+    rf = rf_mod,
+    xg = xg_mod
+  )
+)
+```
+
+###validation croisée
+
+```{r}
+set.seed(42)
+folds = vfold_cv(training ,v=5)
+
+keep_pred = control_grid(save_pred = T, save_workflow = T)
+
+set.seed(42)
+res_wf_set =
+wf_set %>%
+  workflow_map(
+    resamples = folds,
+    metrics = metric_set(accuracy, roc_auc), #ex : accuracy, roc_auc, f_meas, specifity...
+    control = keep_pred,
+    verbose = T, #Pendant le training permet d'avoir un suivi
+    grid = 20 #Par rapport au paramètres définis dans XG, il va tester X combinaisons
+  )
+    
+rank_results(res_wf_set, rank_metric='roc_auc')
+  
+```
+ 
+```{r}
+best_result = 
+res_wf_set %>% 
+  extract_workflow_set_result('inter_xg') %>% 
+  select_best(metric = 'roc_auc')
+```
+
+## 8 Best model, last fit and final prediction
+
+```{r}
+best_res_fit = 
+res_wf_set %>% 
+  extract_workflow('inter_xg') %>% 
+  finalize_workflow(best_result) %>% 
+  last_fit(split = dataset_split) #Il reconnait que c'est les données de test
+
+best_res_fit %>%  collect_metrics()
+best_res_fit %>%  collect_predictions()
+
+```
+ 
+ 
+ 
+ ## En résumer, il faut surtout faire la partie 1, 2 et 4
