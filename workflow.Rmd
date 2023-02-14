@@ -1,39 +1,85 @@
 ---
-title: "R Notebook"
+title: "Projet climat LBP"
 output: html_notebook
 authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 ---
 
+## Déclaration des librairies
 ```{r}
 library(tidymodels)
 library(tidyverse)
 ```
 
-## Data import
-```{r}
-setwd("C:/Users/User/Desktop/Cours et documents/Formation R ensae/Module 4 classif non supervisée tidymodel")
-dataini = readRDS("readmission_avc.rds")
-dataini
-glimpse(dataini)
+```{r setup}
+knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
 ```
-## Exploratory data analysis
-- Checking missing values
-- tabs and plots
+
+## Import des données
+
 ```{r}
-is.na(dataset)
-colSums(is.na(dataset))
-apply(is.na(dataini), MARGIN = 2, sum)
-dim(dataini)
+incendies <- read.csv(file="Incendies.csv", header = T, sep=";", skip = 6,  encoding="UTF-8")
+inc_dataset = rename(incendies,
+                   "annee" = Année,
+                   "numero" = Numéro,
+                   "departement" = Département,
+                   "code_insee" = Code.INSEE,
+                   "nom_commune" = Nom.de.la.commune,
+                   "date_alerte" = Date.de.première.alerte,
+                   "origine_alerte" = Origine.de.l.alerte,
+                   "moyens_premiere_intervention" = Moyens.de.première.intervention,
+                   "surface_parcourue" = Surface.parcourue..m2.,
+                   "surface_foret" = Surface.forêt..m2.,
+                   "surface_maquis" = Surface.maquis.garrigues..m2.,
+                   "surface_nat_autre_foret" = Autres.surfaces.naturelles.hors.forêt..m2.,
+                   "surface_agricole" = Surfaces.agricoles..m2.,
+                   "surface_autre_terre_boisee" =  Surface.autres.terres.boisées..m2.,
+                   "surface_non_boisee_nat" = Surfaces.non.boisées.naturelles..m2.,
+                   "surface_non_boisee_art" = Surfaces.non.boisées.artificialisées..m2.,
+                   "surface_non_boisee" = Surfaces.non.boisées..m2.,
+                   "precision_surf" = Précision.des.surfaces,
+                   "surface_feu_initiale" = Surface.de.feu.à.l.arrivée.des.secours...0.1.ha,
+                   "voie_caross_proche" = Voie.carrossable.la.plus.proche,
+                   "act_hab_proche" = Activité.ou.habitation.la.plus.proche,
+                   "type_peupl" = Type.de.peuplement,
+                   "connaissance" = Connaissance,
+                   "source_enquete" = Source.de.l.enquête,
+                   "nature" = Nature,
+                   "enterv_equipe" = Intervention.de.l.équipe.RCCI,
+                   "deces_bat_touches" = Décès.ou.bâtiments.touchés,
+                   "nb_deces" = Nombre.de.décès,
+                   "nb_bat_tot_detruit" = Nombre.de.bâtiments.totalement.détruits,
+                   "nb_bat_part_detruit" = Nombre.de.bâtiments.partiellement.détruits,
+                   "hygrometrie" = Hygrométrie,
+                   "v_moyenn_vent" = Vitesse.moyenne.du.vent,
+                   "dir_vent" = Direction.du.vent,
+                   "precision_donnee" = Précision.de.la.donnée,
+                   "presence_contour_valide" = Présence.d.un.contour.valide
+)
+
+glimpse(inc_dataset)
+```
+
+## Exploration des données
+- Vérification des valeurs manquantes ;
+- Tableaux / plots ; 
+- Renommage des colonnes.
+
+```{r}
+is.na(inc_dataset)
+colSums(is.na(inc_dataset))
+apply(is.na(inc_dataset), MARGIN = 2, sum)
+dim(inc_dataset)
 ```
 
 ## Data preprocessing Part I
 
 ```{r}
-dataset = dataini %>%
+inc_dataset = inc_dataset %>%
   filter(!is.na(id_D)) %>%
-  mutate(target = as.factor((if_else(id_D == '', 0, 1)))) %>%
-  mutate_at(c('modeEntree', 'modeSortie', 'sexe'), as.factor) %>% #as.ch
-  select(-c(id, id_D)) %>%
+  mutate(target = surface_parcourue) %>%
+  mutate_at(c('origine_alerte', 'nature', 'dir_vent'), as.factor) %>% #as.ch
+  select(-c(nb_bat_tot_detruit, nb_bat_part_detruit,
+            nb_deces, surface_agricole)) %>%
   mutate(nbda = if_else(is.na(nbda), 0, as.numeric(nbda))) %>%
   filter(duree>1 & modeSortie !=9)
 
