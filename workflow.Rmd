@@ -6,7 +6,6 @@ authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 
 ## Déclaration des librairies
 ```{r}
-test
 library(tidymodels)
 library(tidyverse)
 ```
