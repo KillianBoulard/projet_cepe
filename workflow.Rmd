@@ -8,14 +8,42 @@ authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 ```{r}
 library(tidymodels)
 library(tidyverse)
-test
 ```
 
 ```{r setup}
 knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
 ```
 
-## Import des données
+## Import des données communes
+
+```{r}
+communes <- read.csv(file="laposte_hexasmal.csv", header = T, sep=";",  encoding="UTF-8")
+com_dataset = communes %>% 
+                    select(code_insee = Code_commune_INSEE,
+                           nom_commune = Nom_commune ,
+                           gps = coordonnees_gps)
+rm(communes)
+```
+
+## Création d'une matrice janvier 2011 à décembre 2019
+
+```{r}
+#Année
+annee = as.data.frame(matrix(2011:2019, nrow = 9, ncol = 1))
+annee=annee %>% 
+  rename("annee" = "V1") %>% 
+  mutate(annee = as.character(annee))
+#Mois
+mois = as.data.frame(matrix(01:12, nrow = 12, ncol = 1))
+mois=mois %>% 
+  rename("mois" = "V1") %>% 
+  mutate(mois = as.character(mois))
+
+date_dataset = crossing(annee, mois)
+rm(annee,mois)
+```
+
+## Import des données incendies
 
 ```{r}
 incendies <- read.csv(file="Incendies.csv", header = T, sep=";", skip = 6,  encoding="UTF-8")
@@ -57,8 +85,34 @@ inc_dataset = rename(incendies,
                    "presence_contour_valide" = Présence.d.un.contour.valide
 )
 
+rm(incendies)
 glimpse(inc_dataset)
 ```
+
+## Création de la base de travail :
+
+```{r}
+
+
+start_dataset = inc_dataset %>%
+  mutate(
+    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
+    #Formattage des dates pour future jointure sur m-1 et m-12
+    annee = format(date_alerte,"%Y"),
+    mois = format(date_alerte,"%m"),
+    ) %>%
+  group_by(
+    annee, mois, code_insee) %>%
+  distinct(
+    annee, mois, code_insee) %>% 
+  select(
+    annee, mois,code_insee)
+
+s = date_dataset %>% 
+  left_join(start_dataset)
+
+```
+
 
 ## Exploration des données
 - Vérification des valeurs manquantes ;
