@@ -8,6 +8,7 @@ authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 ```{r}
 library(tidymodels)
 library(tidyverse)
+test
 ```
 
 ```{r setup}
