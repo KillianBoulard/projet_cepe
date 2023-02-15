@@ -13,3 +13,4 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", header = T, sep=";"
 #Date processing en tibble
 as_tibble(incendies)
 as_tibble(meteo)
+test
