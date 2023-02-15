@@ -56,6 +56,8 @@ inc_dataset = rename(incendies,
                    "presence_contour_valide" = Présence.d.un.contour.valide
 )
 
+inc_dataset %>% 
+  distinct(nom_commune)
 glimpse(inc_dataset)
 ```
 
@@ -66,9 +68,11 @@ glimpse(inc_dataset)
 
 ```{r}
 is.na(inc_dataset)
+table(inc_dataset$origine_alerte)
 colSums(is.na(inc_dataset))
 apply(is.na(inc_dataset), MARGIN = 2, sum)
 dim(inc_dataset)
+colnames(inc_dataset)
 ```
 
 ## Data preprocessing Part I
