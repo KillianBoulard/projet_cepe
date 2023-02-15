@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+.RDataTmp
 .projet_cepe.Rproj
 projet_cepe.Rproj
