@@ -202,7 +202,7 @@ ST_DET_COMM<-incendies %>% ##filter(code_insee=="01286") %>%
           select(-moy_surface_agricole) %>%
     ungroup()
 
-
+#testgit
 
 
 
