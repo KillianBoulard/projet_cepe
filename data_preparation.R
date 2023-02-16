@@ -2,8 +2,8 @@ library(csvread)
 library(ggplot2)
 library(dplyr)
 # Charger
-library(wesanderson)
-library(explore)
+# library(wesanderson)
+# library(explore)
 library(rpart)
 library(ggthemes)
 
