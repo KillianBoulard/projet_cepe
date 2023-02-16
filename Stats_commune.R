@@ -59,13 +59,13 @@ table (incendies$origine_alerte)
 incendies$surface_agricole<-as.integer(incendies$surface_agricole)
 
 
-temp<-incendies %>% filter(code_insee=="01286") %>% 
+temp<-incendies %>% ##filter(code_insee=="01286") %>% 
                     select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
                            surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
                            surface_non_boisee_art,suface_non_boisee,nature) %>% filter(as.integer(annee)<2020) %>%
-                    select(- c(annee,surface_parcourue)) %>%
-                    mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))%>%
-                    mutate(
+                    select(- c(annee, surface_parcourue))                           %>%
+                      mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))           %>%
+                      mutate(
                       nature_ind = ifelse(nature=="",1,0) ,
                       nature_acc = ifelse(nature=="Accidentelle",1,0),
                       nature_inv_part = ifelse(nature=="Involontaire (particulier)",1,0),
@@ -85,39 +85,53 @@ temp<-incendies %>% filter(code_insee=="01286") %>%
                      select(- c(nature,origine_alerte))
 
 
-temp2<-temp
 
-
-temp2 <- temp2 %>% group_by(code_insee) %>% 
-  mutate ( moy_surface_foret_parcourue  = mean(surface_foret),
-           moy_surface_maquis_parcourue = mean(surface_maquis),
+temp <- temp2 %>% group_by(code_insee) %>% 
+  mutate ( moy_surface_foret  = mean(surface_foret),
+           moy_surface_maquis = mean(surface_maquis),
            moy_surface_nat_autre_foret = mean(surface_nat_autre_foret),
            moy_surface_agricole        = mean(surface_agricole),
            moy_surface_autre_terre_boisee  = mean(surface_autre_terre_boisee),
            moy_surface_non_boisee_nat     = mean(surface_non_boisee_nat),
            moy_surface_non_boisee_art     = mean(surface_non_boisee_art),
-           moy_suface_non_boisee          = mean(suface_non_boisee)
-           )
+           moy_suface_non_boisee          = mean(suface_non_boisee),
+           
+           moy_nature_ind      = 	mean(nature_ind),
+           moy_nature_acc      = 	mean(nature_acc),
+           moy_nature_inv_part = 	mean(nature_inv_part),
+           moy_nature_inv_trav = 	mean(nature_inv_trav),
+           moy_nature_nat      = 	mean(nature_nat),
+           moy_nature_malv     = 	mean(nature_malv), 
+           
+           
+           moy_orig_alerte_autr  = mean(orig_alerte_autr ),
+           moy_orig_alerte_ind   = mean(orig_alerte_ind  ),
+           moy_orig_alerte_mae   = mean(orig_alerte_mae  ),
+           moy_orig_alerte_pat   = mean(orig_alerte_pat  ),
+           moy_orig_alerte_ppr   = mean(orig_alerte_ppr  ),
+           moy_orig_alerte_pop   = mean(orig_alerte_pop  ),
+           moy_orig_alerte_vcam  = mean(orig_alerte_vcam )
+           
+       )
 
 
 
-                                                                                                       
-
-
-
-                    
-
-
-tempGB <- temp %>% group_by(code_insee)
-
-
-
-
-
-%>%
-  summarise(moyenne_vent2=mean(v_moyenn_vent)) %>% select(annee,code_insee,moyenne_vent2) 
-
-
+tempGB <- temp2 %>% distinct(code_insee,
+                             ###info surface par commune
+                             moy_surface_foret,
+                             moy_surface_maquis,
+                             moy_surface_nat_autre_foret,                               
+                             moy_surface_agricole,
+                             moy_surface_autre_terre_boisee,
+                             moy_surface_non_boisee_nat,moy_surface_non_boisee_art,moy_suface_non_boisee,
+                             ###info nature incendie
+                             moy_nature_ind,moy_nature_acc,moy_nature_inv_part,moy_nature_inv_trav,moy_nature_nat,
+                             moy_nature_malv,
+                             ###info origine incendie
+                             moy_orig_alerte_autr, moy_orig_alerte_ind  ,moy_orig_alerte_mae  ,
+                             moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam )
+                             
+                             ) 
 
 
 
