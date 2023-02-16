@@ -22,6 +22,9 @@ Préparer la présentation du sujet
 
 # Sources des données : 
 
+Base des communes : 
+https://public.opendatasoft.com/explore/dataset/correspondance-code-insee-code-postal/information/?flg=fr
+
 Données métérologiques (depuis 2010) : 
 https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/table/?flg=fr&sort=date
 
