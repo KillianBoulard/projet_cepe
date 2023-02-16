@@ -151,16 +151,17 @@ incendies_vent <- incendies_vent %>%
                   mutate ( moyenne_vent =mean(v_moyenn_vent),
                            somme_vent=sum(nb_vent_N)+sum(nb_vent_S)+sum(nb_vent_O)+sum(nb_vent_E)+sum(nb_vent_SE)+
                              sum(nb_vent_SO)+sum(nb_vent_NE)+sum(nb_vent_NO),
-                           nb_vent_N=sum(nb_vent_N)/somme_vent,
-                           nb_vent_S=sum(nb_vent_S)/somme_vent,
-                           nb_vent_O=sum(nb_vent_O)/somme_vent,
-                           nb_vent_E =sum(nb_vent_E)/somme_vent,
-                           nb_vent_SE =sum(nb_vent_SE)/somme_vent,
-                           nb_vent_SO =sum(nb_vent_SO)/somme_vent,
-                           nb_vent_NE =sum(nb_vent_NE)/somme_vent,
-                           nb_vent_NO =sum(nb_vent_NO)/somme_vent) %>% 
-                  select(annee,code_insee,moyenne_vent,somme_vent,nb_vent_N,nb_vent_S,
-                         nb_vent_O,nb_vent_E ,nb_vent_SE ,nb_vent_SO ,nb_vent_NE ,nb_vent_NO ) %>% slice(1)
+                           Prop_vent_N=sum(nb_vent_N)/somme_vent,
+                           Prop_vent_S=sum(nb_vent_S)/somme_vent,
+                           Prop_vent_O=sum(nb_vent_O)/somme_vent,
+                           Prop_vent_E =sum(nb_vent_E)/somme_vent,
+                           Prop_vent_SE =sum(nb_vent_SE)/somme_vent,
+                           Prop_vent_SO =sum(nb_vent_SO)/somme_vent,
+                           Prop_vent_NE =sum(nb_vent_NE)/somme_vent,
+                           Prop_vent_NO =sum(nb_vent_NO)/somme_vent) %>% 
+                  select(annee,code_insee,moyenne_vent,Prop_ent_N,Prop_vent_S,
+                         Prop_vent_O,Prop_vent_E ,Prop_vent_SE ,Prop_vent_SO ,
+                         Prop_vent_NE ,Prop_vent_NO ) %>% slice(1)
   
 
 
