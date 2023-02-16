@@ -18,7 +18,7 @@ knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formati
 ## Import des données communes
 
 ```{r}
-communes <- read.csv(file="laposte_hexasmal.csv", header = T, sep=";",  encoding="UTF-8")
+communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
 com_dataset = communes %>% 
                     distinct(code_insee = Code_commune_INSEE,
                            nom_commune = Nom_commune ,
@@ -88,7 +88,14 @@ inc_dataset = rename(incendies,
 ## Création de la base de travail :
 
 ```{r}
-## Version complète : 35K communes * 13 années * 12 mois
+distinct_incendie = inc_dataset %>% 
+  distinct(code_insee)
+
+distinct_commune = com_dataset %>% 
+  distinct(code_insee)
+
+test = distinct_incendie %>% left_join(distinct_commune, keep=T)
+
 start_dataset = inc_dataset %>%
   mutate(
     date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
@@ -100,17 +107,24 @@ start_dataset = inc_dataset %>%
   distinct(
     annee, mois, code_insee)
 
+
+## Version complète : 35K communes * 13 années * 12 mois
 base_dataset = crossing(date_dataset, com_dataset) %>% 
   left_join(start_dataset, keep= T,suffix = c('_1', '_2'), by=c("annee","mois","code_insee")) %>%       
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
   select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1, -c(nom_commune))
 
-## Version avec uniquement les ville présentes dans incendies : 
+## Version avec uniquement les villes présentes dans incendies : 
 # 7k communes * 13 années * 12 mois
-start_dataset = inc_dataset %>%
+insee_feu = inc_dataset %>% 
   distinct(code_insee)
 
-base_dataset = crossing(date_dataset, start_dataset)
+base_dataset = crossing(date_dataset, insee_feu)%>%
+  left_join(com_dataset, keep= F,suffix = c('_1', '_2'), by="code_insee") %>% 
+  left_join(start_dataset, keep= T,suffix = c('_1', '_2'), 
+          by=c("annee","mois","code_insee")) %>%       
+  mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
+  select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1, -c(nom_commune))
 
 
 
@@ -121,7 +135,6 @@ base_dataset %>%
 
 rm(list = setdiff(ls(), c("base_dataset","inc_dataset")))
 ```
-
 
 ## Exploration des données
 - Vérification des valeurs manquantes ;
