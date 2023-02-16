@@ -20,17 +20,16 @@ knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formati
 ```{r}
 communes <- read.csv(file="laposte_hexasmal.csv", header = T, sep=";",  encoding="UTF-8")
 com_dataset = communes %>% 
-                    select(code_insee = Code_commune_INSEE,
+                    distinct(code_insee = Code_commune_INSEE,
                            nom_commune = Nom_commune ,
                            gps = coordonnees_gps)
-rm(communes)
 ```
 
-## Création d'une matrice janvier 2011 à décembre 2019
+## Création d'une matrice janvier 2010 à décembre 2022
 
 ```{r}
 #Année
-annee = as.data.frame(matrix(2011:2019, nrow = 9, ncol = 1))
+annee = as.data.frame(matrix(2010:2022, nrow = 13, ncol = 1))
 annee=annee %>% 
   rename("annee" = "V1") %>% 
   mutate(annee = as.character(annee))
@@ -41,7 +40,6 @@ mois=mois %>%
   mutate(mois = as.character(mois))
 
 date_dataset = crossing(annee, mois)
-rm(annee,mois)
 ```
 
 ## Import des données incendies
@@ -85,33 +83,43 @@ inc_dataset = rename(incendies,
                    "precision_donnee" = Précision.de.la.donnée,
                    "presence_contour_valide" = Présence.d.un.contour.valide
 )
-
-rm(incendies)
-glimpse(inc_dataset)
 ```
 
 ## Création de la base de travail :
 
 ```{r}
-
-
+## Version complète : 35K communes * 13 années * 12 mois
 start_dataset = inc_dataset %>%
   mutate(
-    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
-    #Formattage des dates pour future jointure sur m-1 et m-12
+    date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
     annee = format(date_alerte,"%Y"),
     mois = format(date_alerte,"%m"),
     ) %>%
   group_by(
     annee, mois, code_insee) %>%
   distinct(
-    annee, mois, code_insee) %>% 
-  select(
-    annee, mois,code_insee)
+    annee, mois, code_insee)
 
-s = date_dataset %>% 
-  left_join(start_dataset)
+base_dataset = crossing(date_dataset, com_dataset) %>% 
+  left_join(start_dataset, keep= T,suffix = c('_1', '_2'), by=c("annee","mois","code_insee")) %>%       
+  mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
+  select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1, -c(nom_commune))
 
+## Version avec uniquement les ville présentes dans incendies : 
+# 7k communes * 13 années * 12 mois
+start_dataset = inc_dataset %>%
+  distinct(code_insee)
+
+base_dataset = crossing(date_dataset, start_dataset)
+
+
+
+base_dataset %>%
+  group_by(annee,mois) %>% 
+  filter(presence_feu == 1) %>%
+  summarise(n())
+
+rm(list = setdiff(ls(), c("base_dataset","inc_dataset")))
 ```
 
 
