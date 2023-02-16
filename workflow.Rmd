@@ -20,9 +20,14 @@ knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formati
 ```{r}
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
 com_dataset = communes %>% 
-                    distinct(code_insee = Code_commune_INSEE,
-                           nom_commune = Nom_commune ,
-                           gps = coordonnees_gps)
+                    distinct(code_insee = X.U.FEFF.Code.INSEE,
+                             population = Population,
+                             altitude_moy = Altitude.Moyenne,
+                             superficie = Superficie,
+                           gps = geo_point_2d) %>% 
+                    mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>% 
+                replace(communes$code_insee == "13055", "13001") %>% 
+                replace(communes$code_insee == "83999", "83067") 
 ```
 
 ## Création d'une matrice janvier 2010 à décembre 2022
@@ -45,7 +50,7 @@ date_dataset = crossing(annee, mois)
 ## Import des données incendies
 
 ```{r}
-incendies <- read.csv(file="Incendies.csv", header = T, sep=";", skip = 6,  encoding="UTF-8")
+incendies <- read.csv(file="Incendies.csv", header = T, sep=";",  encoding="UTF-8")
 inc_dataset = rename(incendies,
                    "annee" = Année,
                    "numero" = Numéro,
@@ -94,7 +99,7 @@ distinct_incendie = inc_dataset %>%
 distinct_commune = com_dataset %>% 
   distinct(code_insee)
 
-test = distinct_incendie %>% left_join(distinct_commune, keep=T)
+test = distinct_incendie %>% anti_join(distinct_commune, keep =T)
 
 start_dataset = inc_dataset %>%
   mutate(
