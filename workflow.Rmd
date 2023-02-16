@@ -12,6 +12,7 @@ library(tidyverse)
 
 ```{r setup}
 knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
+knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
 ```
 
 ## Import des données communes
