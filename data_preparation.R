@@ -170,8 +170,7 @@ incendies_vent <- incendies_vent %>%
                                 prop_vent_O,prop_vent_E ,prop_vent_SE ,prop_vent_SO ,
                                 prop_vent_NE ,prop_vent_NO ) %>% slice(1)
 
-
-
+#test
 
 
 
