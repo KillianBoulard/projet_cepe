@@ -2,11 +2,17 @@ library(csvread)
 library(ggplot2)
 library(dplyr)
 # Charger
-library(wesanderson)
-library(explore)
+# library(wesanderson)
+# library(explore)
 library(rpart)
 library(ggthemes)
+
+#travail
 setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
+
+
+#taff
+setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
 
 
 # incendie20<- read.csv(file="Incendies20.csv",
@@ -60,7 +66,7 @@ incendies<- read.csv(file="Incendies.csv",
 
 #incendies<-rbind(incendie20,incendie21)
 
-
+#test
 
 #correction des champs texte et transformation en vecteurs si nécessaire ##
 incendies$origine_alerte <- gsub('IndÃ©terminÃ©', 'Indetermine', incendies$origine_alerte)
@@ -83,7 +89,8 @@ incendies$precision_surf <-as.factor(incendies$precision_surf)
 incendies$nature <-as.factor(incendies$nature)
 incendies$annee<-as.factor(incendies$annee)
 incendies$departement<-as.factor(incendies$departement)
-incendies$date_alerte <-  as.Date(incendies$date_alerte,format = "%d/%m/%Y")
+
+incendies$date_alerte <-  as.Date(incendies$date_alerte,format = "%Y-%m-%d")
 
 
 
@@ -102,6 +109,7 @@ ggplot(incendies, aes(x=nb_event, color=nature)) +
 
 ggplot(data=incendies,aes(x=nature,fill=dir_ven),position="dodge")+geom_bar()
  
+
 ggplot(data=incendies,aes(x=annee,fill=nature),position="dodge")+geom_bar()
 
 
@@ -128,51 +136,8 @@ geom_bar(stat="identity", position=position_dodge())
 
 incendies_vent<-incendies %>%  
   filter(dir_ven !="") %>% mutate (mois= format(date_alerte, format = "%m")) %>%
-  select(annee,id,mois,code_insee,v_moyenn_vent,dir_ven)
+  select(annee,mois,code_insee,v_moyenn_vent,dir_ven)
 
 summary(incendies_vent)
-
-
-
-
-incendies_vent <- mutate(incendies_vent,
-                  nb_vent_N = ifelse(dir_ven=="N",1,0),
-                  nb_vent_S = ifelse(dir_ven=="S",1,0),
-                  nb_vent_O = ifelse(dir_ven=="O",1,0),
-                  nb_vent_E = ifelse(dir_ven=="E",1,0),
-                  nb_vent_SE = ifelse(dir_ven=="SE",1,0),
-                  nb_vent_SO = ifelse(dir_ven=="SO",1,0),
-                  nb_vent_NE = ifelse(dir_ven=="NE",1,0),
-                  nb_vent_NO = ifelse(dir_ven=="NO",1,0)
-                  )
-             
-incendies_vent <- incendies_vent %>% 
-                  group_by(annee,code_insee) %>% 
-                  mutate ( moyenne_vent =mean(v_moyenn_vent),
-                           somme_vent=sum(nb_vent_N)+sum(nb_vent_S)+sum(nb_vent_O)+sum(nb_vent_E)+sum(nb_vent_SE)+
-                             sum(nb_vent_SO)+sum(nb_vent_NE)+sum(nb_vent_NO),
-                           Prop_vent_N=sum(nb_vent_N)/somme_vent,
-                           Prop_vent_S=sum(nb_vent_S)/somme_vent,
-                           Prop_vent_O=sum(nb_vent_O)/somme_vent,
-                           Prop_vent_E =sum(nb_vent_E)/somme_vent,
-                           Prop_vent_SE =sum(nb_vent_SE)/somme_vent,
-                           Prop_vent_SO =sum(nb_vent_SO)/somme_vent,
-                           Prop_vent_NE =sum(nb_vent_NE)/somme_vent,
-                           Prop_vent_NO =sum(nb_vent_NO)/somme_vent) %>% 
-                  select(annee,code_insee,moyenne_vent,Prop_ent_N,Prop_vent_S,
-                         Prop_vent_O,Prop_vent_E ,Prop_vent_SE ,Prop_vent_SO ,
-                         Prop_vent_NE ,Prop_vent_NO ) %>% slice(1)
-  
-
-
-incendies2B009<-incendies_vent %>% filter(code_insee=="2B009")  %>% 
-                group_by(annee,code_insee) %>%
-                summarise(moyenne_vent2=mean(v_moyenn_vent)) %>% select(annee,code_insee,moyenne_vent2) 
-
-
-
-summary(incendies)
-
-incendies_vent %>% explore_all(n = n)
 
 
