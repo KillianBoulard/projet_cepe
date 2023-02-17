@@ -120,6 +120,10 @@ dataINC<- incendies %>% filter(nature !="") %>% filter(departement== 83 | depart
 ggplot(data=dataINC,aes(x=annee,fill=nature),position="dodge")+geom_bar() +
   coord_flip()
 
+ggplot(data=dataINC,aes(x=annee,fill=origine_alerte),position="dodge")+geom_bar() +
+  coord_flip()
+
+
 
 ggplot(data = dataINC) +
   geom_histogram(aes(x = surface_parcourue)) +

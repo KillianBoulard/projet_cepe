@@ -138,7 +138,7 @@ ST_DET_COMM<-incendies %>% ##filter(code_insee=="01286") %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
          surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
          surface_non_boisee_art,suface_non_boisee,nature) %>% 
-  filter(as.integer(annee)<2020)                          %>%
+  #filter(as.integer(annee)<2020)                          %>%
   select(- c(annee, surface_parcourue))                   %>%
   mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
   mutate(
@@ -199,8 +199,8 @@ ST_DET_COMM<-incendies %>% ##filter(code_insee=="01286") %>%
            ###info origine incendie
            moy_orig_alerte_autr, moy_orig_alerte_ind  ,moy_orig_alerte_mae  ,
            moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam ) %>% 
-          select(-moy_surface_agricole) %>%
-    ungroup()
+           select(-moy_surface_agricole) %>%
+           ungroup()
 
 
 
