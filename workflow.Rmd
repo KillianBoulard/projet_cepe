@@ -20,14 +20,12 @@ knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formati
 ```{r}
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
 com_dataset = communes %>% 
-                    distinct(code_insee = Code.INSEE,
+                    distinct(code_insee = X.U.FEFF.Code.INSEE,
                              population = Population,
                              altitude_moy = Altitude.Moyenne,
                              superficie = Superficie,
                            gps = geo_point_2d) %>% 
-                    mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>% 
-                replace(communes$code_insee == "13055", "13001") %>% 
-                replace(communes$code_insee == "83999", "83067") 
+                    mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee))
 ```
 
 ## Création d'une matrice janvier 2010 à décembre 2022
@@ -92,15 +90,19 @@ inc_dataset = rename(incendies,
 )
 
 inc_dataset = inc_dataset %>% 
- mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee))
-```
+ mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
+  mutate(code_insee = ifelse(code_insee == '13055',"13001",code_insee)) %>% 
+  mutate(code_insee = ifelse(code_insee == '83999',"83067",code_insee)) %>% 
+  filter(annee > 2009)
+```  
+
 
 ## Création de la base de travail :
 
 ```{r}
 start_dataset = inc_dataset %>%
   mutate(
-    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
+    date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
     annee = format(date_alerte,"%Y"),
     mois = format(date_alerte,"%m"),
     ) %>%
@@ -116,6 +118,12 @@ base_dataset = crossing(date_dataset, com_dataset) %>%
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
   select(!ends_with("_2"),code_insee = code_insee_1, annee = annee_1, mois = mois_1)
 
+#Test de coherence : cela doit donner 24,465k observations
+test = base_dataset %>% 
+  filter(presence_feu == 1 ) %>% 
+  summarise(n())
+
+
 ## Version avec uniquement les villes présentes dans incendies : 
 # 7k communes * 13 années * 12 mois
 insee_feu = inc_dataset %>% 
@@ -126,9 +134,9 @@ base_dataset = crossing(date_dataset, insee_feu) %>%
   left_join(start_dataset, keep= T,suffix = c('_1', '_2'), 
           by=c("annee","mois","code_insee")) %>%       
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
-  select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1, -c(nom_commune))
+  select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1)
 
-
+#Test de coherence : cela doit donner 24,465k observations
 test = base_dataset %>% 
   filter(presence_feu == 1 ) %>% 
   summarise(n())
@@ -136,6 +144,8 @@ test = base_dataset %>%
 
 rm(list = setdiff(ls(), c("base_dataset","inc_dataset")))
 ```
+
+
 
 ## Exploration des données
 - Vérification des valeurs manquantes ;
