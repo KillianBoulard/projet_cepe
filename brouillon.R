@@ -70,3 +70,66 @@ temp<-incendies %>% ##filter(code_insee=="01286") %>%
 
 
 
+ggplot(temp,aes(x=moy_orig_alerte_pop))+ geom_histogram() + scale_x_continuous(trans='log2')
+
+test<-(ST_DET_COMM %>% select(- code_insee))
+
+
+
+
+testKm<-kmeans(test,nstart=20,centers=10)
+
+
+names(testKm)
+ggplot(test,aes(x=moy_surface_non_boisee_art,y=moy_surface_non_boisee_nat))+geom_point(col=testKm$cluster)
+
+
+nbg=20
+inter=1:nbg
+intra=1:nbg
+for(ii in 1:nbg){
+  tmp=kmeans(test,centers=ii,nstart=100)
+  inter[ii] <- tmp$betweenss
+  intra[ii] <- tmp$tot.withinss
+}
+inter <- inter/tmp$totss
+intra <- intra/tmp$totss
+plot(inter,type="b")
+lines(intra)
+
+gp4 <- kmeans(test,centers = 3, nstart=100)
+
+ggplot(test,
+       aes(x=moy_surface_non_boisee_art,y=moy_surface_non_boisee_nat)) +geom_point(col=gp4$cluster)
+
+ggplot(test,aes(x=moy_surface_non_boisee_art,y=moy_surface_non_boisee_nat))+geom_point(col=gp4$cluster)
+
+
+
+
+
+ggplot(data=incendies,aes(x=nature,fill=dir_ven),position="dodge")+geom_bar()
+
+
+dataINC<- incendies %>% filter(nature !="") %>% filter(departement== 83 | departement ==13 | departement == 06)
+                                 
+                               
+                               
+                               
+
+ggplot(data=dataINC,aes(x=annee,fill=nature),position="dodge")+geom_bar() +
+  coord_flip()
+
+
+ggplot(data = dataINC) +
+  geom_histogram(aes(x = surface_parcourue)) +
+  facet_grid(
+    rows = vars(annee), cols = vars(departement)
+  ) + scale_x_continuous(trans='log2')
+
+
+
+
+
+
+
