@@ -28,7 +28,7 @@ com_dataset = communes %>%
                     mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee))
 ```
 
-## Création d'une matrice janvier 2010 à décembre 2022
+## Création d'un dataframe du 01 janvier 2010 au 31 décembre 2022
 
 ```{r}
 #Année
@@ -68,7 +68,7 @@ inc_dataset = rename(incendies,
                    "surface_autre_terre_boisee" =  Surface.autres.terres.boisées..m2.,
                    "surface_non_boisee_nat" = Surfaces.non.boisées.naturelles..m2.,
                    "surface_non_boisee_art" = Surfaces.non.boisées.artificialisées..m2.,
-                   "surface_non_boisee" = Surfaces.non.boisées..m2.,
+                   "suface_non_boisee" = Surfaces.non.boisées..m2.,
                    "precision_surf" = Précision.des.surfaces,
                    "surface_feu_initiale" = Surface.de.feu.à.l.arrivée.des.secours...0.1.ha,
                    "voie_caross_proche" = Voie.carrossable.la.plus.proche,
@@ -96,7 +96,6 @@ inc_dataset = inc_dataset %>%
   filter(annee > 2009)
 ```  
 
-
 ## Création de la base de travail :
 
 ```{r}
@@ -118,11 +117,6 @@ base_dataset = crossing(date_dataset, com_dataset) %>%
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
   select(!ends_with("_2"),code_insee = code_insee_1, annee = annee_1, mois = mois_1)
 
-#Test de coherence : cela doit donner 24,465k observations
-test = base_dataset %>% 
-  filter(presence_feu == 1 ) %>% 
-  summarise(n())
-
 
 ## Version avec uniquement les villes présentes dans incendies : 
 # 7k communes * 13 années * 12 mois
@@ -136,21 +130,86 @@ base_dataset = crossing(date_dataset, insee_feu) %>%
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
   select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1)
 
-#Test de coherence : cela doit donner 24,465k observations
-test = base_dataset %>% 
-  filter(presence_feu == 1 ) %>% 
-  summarise(n())
-
 
 rm(list = setdiff(ls(), c("base_dataset","inc_dataset")))
 ```
-
-
 
 ## Exploration des données
 - Vérification des valeurs manquantes ;
 - Tableaux / plots ; 
 - Renommage des colonnes.
+
+```{r}
+ST_DET_COMM<-inc_dataset %>% 
+  select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
+         surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
+         surface_non_boisee_art,suface_non_boisee,nature) %>% 
+  #filter(as.integer(annee)<2020)                          %>%
+  select(- c(annee, surface_parcourue))                   %>%
+  mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
+  mutate(
+          nature_ind = ifelse(nature=="",1,0) ,
+          nature_acc = ifelse(nature=="Accidentelle",1,0),
+          nature_inv_part = ifelse(nature=="Involontaire (particulier)",1,0),
+          nature_inv_trav = ifelse(nature=="Involontaire (travaux)",1,0),
+          nature_nat   = ifelse(nature=="Naturelle",1,0),
+          nature_malv  = ifelse(nature=="Malveillance",1,0), 
+
+          orig_alerte_autr  = ifelse(origine_alerte=="Autre",1,0) ,
+          orig_alerte_ind   = ifelse(origine_alerte=="Indetermine",1,0) ,
+          orig_alerte_mae   = ifelse(origine_alerte=="Moyen aerien",1,0) ,
+          orig_alerte_pat   = ifelse(origine_alerte=="Patrouille",1,0) ,
+          orig_alerte_ppr   = ifelse(origine_alerte=="Pompiers pre-positionnes",1,0) ,
+          orig_alerte_pop   = ifelse(origine_alerte=="Population",1,0) ,
+          orig_alerte_vcam  = ifelse(origine_alerte=="Vigie-camera",1,0)
+  )                                                       %>% 
+  select(- c(nature,origine_alerte)) %>% 
+  group_by(code_insee) %>%
+  mutate ( 
+        moy_surface_foret  = round(mean(surface_foret),3),
+        moy_surface_maquis = round(mean(surface_maquis),3),
+        moy_surface_nat_autre_foret = round(mean(surface_nat_autre_foret),3),
+        moy_surface_agricole        = round(mean(surface_agricole),3),
+        moy_surface_autre_terre_boisee  = round(mean(surface_autre_terre_boisee),3),
+        moy_surface_non_boisee_nat      = round(mean(surface_non_boisee_nat),3),
+        moy_surface_non_boisee_art      = round(mean(surface_non_boisee_art),3),
+        moy_suface_non_boisee           = round(mean(suface_non_boisee),3),
+    
+        moy_nature_ind      = 	mean(nature_ind),
+        moy_nature_acc      = 	mean(nature_acc),
+        moy_nature_inv_part = 	mean(nature_inv_part),
+        moy_nature_inv_trav = 	mean(nature_inv_trav),
+        moy_nature_nat      = 	mean(nature_nat),
+        moy_nature_malv     = 	mean(nature_malv), 
+    
+        moy_orig_alerte_autr  = mean(orig_alerte_autr ),
+        moy_orig_alerte_ind   = mean(orig_alerte_ind  ),
+        moy_orig_alerte_mae   = mean(orig_alerte_mae  ),
+        moy_orig_alerte_pat   = mean(orig_alerte_pat  ),
+        moy_orig_alerte_ppr   = mean(orig_alerte_ppr  ),
+        moy_orig_alerte_pop   = mean(orig_alerte_pop  ),
+        moy_orig_alerte_vcam  = mean(orig_alerte_vcam )
+  )  %>%
+  
+  distinct(code_insee,
+           ###info surface par commune
+           moy_surface_foret,
+           moy_surface_maquis,
+           moy_surface_nat_autre_foret,                               
+           moy_surface_agricole,
+           moy_surface_autre_terre_boisee,
+           moy_surface_non_boisee_nat,moy_surface_non_boisee_art,moy_suface_non_boisee,
+           ###info nature incendie
+           moy_nature_ind,moy_nature_acc,moy_nature_inv_part,moy_nature_inv_trav,moy_nature_nat,
+           moy_nature_malv,
+           ###info origine incendie
+           moy_orig_alerte_autr, moy_orig_alerte_ind  ,moy_orig_alerte_mae  ,
+           moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam ) %>% 
+          select(-moy_surface_agricole) %>%
+    ungroup()
+
+```
+
 
 ```{r}
 is.na(inc_dataset)

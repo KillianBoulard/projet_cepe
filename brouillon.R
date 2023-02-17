@@ -140,3 +140,10 @@ m_1_incendies <- dplyr::left_join(clean_incendies, clean_incendies,
 summary(incendies)
 colnames(test_incendies)
 head(test_incendies)
+
+
+# test de cohérence :
+#Test de coherence : cela doit donner 24,465k observations
+test = base_dataset %>% 
+  filter(presence_feu == 1 ) %>% 
+  summarise(n())
