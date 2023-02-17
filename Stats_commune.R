@@ -184,7 +184,7 @@ ST_DET_COMM<-incendies %>% ##filter(code_insee=="01286") %>%
         moy_orig_alerte_pop   = mean(orig_alerte_pop  ),
         moy_orig_alerte_vcam  = mean(orig_alerte_vcam )
   )  %>%
-  
+   
   
   
   distinct(code_insee,
