@@ -26,6 +26,24 @@ com_dataset = communes %>%
                              superficie = Superficie,
                            gps = geo_point_2d) %>% 
                     mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee))
+
+
+com_dataset = communes %>%
+  distinct(code_insee = X.U.FEFF.Code.INSEE,
+           population = Population,
+           altitude_moy = Altitude.Moyenne,
+           superficie = Superficie,
+           gps = geo_point_2d) %>% 
+  mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
+  separate(col = "gps",
+           into = paste0("gps", 1:2), sep = ",",
+           extra = "merge") %>% rename(com_lat=gps1, com_long=gps2)
+
+library(geosphere)
+p1 <- c(6.35,45.6)
+p2 <- c(6.32,45.7)
+distGeo(p1,p2)    ## 11357.8
+distCosine(p1,p2) ## 11374.1
 ```
 
 ## Création d'un dataframe du 01 janvier 2010 au 31 décembre 2022
