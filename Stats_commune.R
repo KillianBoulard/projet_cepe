@@ -186,6 +186,7 @@ ST_DET_COMM<-incendies %>% ##filter(code_insee=="01286") %>%
   )  %>%
   
   
+  
   distinct(code_insee,
            ###info surface par commune
            moy_surface_foret,
