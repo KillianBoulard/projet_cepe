@@ -22,6 +22,8 @@ Préparer la présentation du sujet
 
 # Sources des données : 
 
+Base de données codes insee / postaux : https://drive.google.com/file/d/1jxPFgcFTPvpNFszKxF0qHVz-kwfEAgwl/view?usp=sharing
+
 Données métérologiques (depuis 2010) : 
 https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/table/?flg=fr&sort=date
 
