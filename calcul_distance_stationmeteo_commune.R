@@ -73,7 +73,7 @@ DIST_MIN_COMM_STATION<-crossing(com_dataset, station) %>%
     group_by(code_insee) %>%
     mutate(min_distance = distance == min(distance)) %>%
     ungroup() %>% filter(min_distance==TRUE) %>%
-    select(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
+    distinct(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
     
     
     
