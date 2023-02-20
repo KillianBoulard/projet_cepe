@@ -49,7 +49,7 @@ com_dataset <- communes %>%
            population = Population,
            altitude_moy = Altitude.Moyenne,
            superficie = Superficie,
-           gps = geo_point_2d) %>% 
+           gps = geo_point_2d) %>%
   mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
   separate(col = "gps",
            into = paste0("gps", 1:2), sep = ",",
@@ -66,7 +66,7 @@ com_dataset<-com_dataset %>% distinct(code_insee,latitude_commune,longitude_comm
 #########################################################################################
 
 
-DIST_MIN_COMM_STATION<-crossing(com_dataset, station) %>%
+DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
   mutate(commune_long_lat = map2(longitude_commune, latitude_commune, ~ c(.x, .y)),
     station_long_lat = map2(longitude_station, latitude_station, ~ c(.x, .y)),
     distance = unlist(map2(commune_long_lat, station_long_lat, ~ distGeo(.x, .y)))) %>%
