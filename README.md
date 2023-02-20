@@ -27,6 +27,23 @@ Base de données codes insee / postaux : https://drive.google.com/file/d/1jxPFgc
 Données métérologiques (depuis 2010) : 
 https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/table/?flg=fr&sort=date
 
+## unités des variables du fichier meteo 
+- pression en Pa //
+- vitesse du vent en m/s //
+- humidité en %  //
+- direction du vent en degré //
+- temperature en kelvin  //
+- visibilite en metres  //
+- nebulosité en %  //
+- hauteur de la base de nuages en metres  //
+- rafale en m/secondes  //
+- precipitation en mm  //
+
+
+
+
+
+
 données climat :
 https://www.infoclimat.fr/opendata/
 
