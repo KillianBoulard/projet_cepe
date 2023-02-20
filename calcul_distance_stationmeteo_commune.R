@@ -60,7 +60,7 @@ com_dataset <- communes %>%
 
 com_dataset<-com_dataset %>% distinct(code_insee,latitude_commune,longitude_commune)
 
-
+###
 #########################################################################################
 ### récuperation de la station la plus proche de la commune en calculant sa distance  ###
 #########################################################################################
