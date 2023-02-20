@@ -6,7 +6,16 @@ library(geosphere)
 library(tidyverse)
 library(purrr)
 
+
+#perso
+setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
+
+
+#taff
 setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
+
+
+
 
 #####################################
 ## #importation des données meteo ###
@@ -42,26 +51,25 @@ station<- meteo %>% distinct (id_station,latitude,longitude) %>%
   select(id_station,latitude_station,longitude_station) 
   
 
-communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
+communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";", encoding="UTF-8",
+                     col.names = c("code_insee","code_postal",
+                                   "commune","departement","region","statut","altitude_moyenne",
+                                   "superficie","population","geo_point_2d","geo_shape","ID_geofla",
+                                   "code_commune","code_canton","code_arr","code_departement","code_region"))
 
 ####################################################################
 ### mise en forme de la table des communes avec coordonnées geo  ###
 ####################################################################
-com_dataset <- communes %>%
-  distinct(code_insee = X.U.FEFF.Code.INSEE,
-           population = Population,
-           altitude_moy = Altitude.Moyenne,
-           superficie = Superficie,
-           gps = geo_point_2d) %>%
+geo_com_dataset <- communes %>%
+  distinct(code_insee ,geo_point_2d) %>%
   mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
-  separate(col = "gps",
-           into = paste0("gps", 1:2), sep = ",",
+  separate(col = "geo_point_2d",
+           into = paste0("geo_point_2d", 1:2), sep = ",",
            extra = "merge") %>% 
-  mutate (latitude_commune=as.numeric(gps1),
-          longitude_commune=as.numeric(gps2)) %>%
-  select(code_insee,latitude_commune,longitude_commune)
+  mutate (latitude_commune=as.numeric(geo_point_2d1),
+          longitude_commune=as.numeric(geo_point_2d2)) %>%
+  distinct(code_insee,latitude_commune,longitude_commune)
 
-com_dataset<-com_dataset %>% distinct(code_insee,latitude_commune,longitude_commune)
 
 ###
 #########################################################################################

@@ -82,7 +82,7 @@ station<- meteo %>% distinct (id_station,latitude,longitude) %>%
   
 
 
-communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
+communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";", encoding="UTF-8")
 
 ####################################################################
 ### mise en forme de la table des communes avec coordonnées geo  ###
