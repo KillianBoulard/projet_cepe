@@ -141,9 +141,7 @@ station<- meteo %>% distinct (id_station,latitude,longitude) %>%
   
 ```
 
-#########################################################################################
-### récuperation de la station la plus proche de la commune en calculant sa distance  ###
-#########################################################################################
+#récuperation de la station la plus proche de la commune en calculant sa distance
     
 ```{r}
 DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
