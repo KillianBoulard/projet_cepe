@@ -12,6 +12,10 @@ setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
 ## #importation des données meteo ###
 #####################################
 
+convert_temperature<-function(x) x-273.5
+
+
+convert_temperature(300)
 
 meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", 
                   col.names = c("id_station","date","pression_niv_mer","var_press_3h","type_tend_barom",
@@ -34,10 +38,49 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
                   header = T, sep=";",encoding='UTF-8') 
 
 
+meteo_echantillon<-meteo %>% filter(id_station==7481) %>% mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .))) %>% 
+  mutate(temp = convert_temperature(temp),
+         point_rosee = convert_temperature(point_rosee))
+
+table(meteo$nom)
+
+
+
+
+##################################################################################################
+meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", 
+                  col.names = c("id_station","date","pression_niv_mer","var_press_3h","type_tend_barom",
+                                "direction_vent_moy_10m","vitesse_vent_moy_10m","temp",
+                                "point_rosee","humidite","visib_hor","temps_present","temp_passe_1",
+                                "temp_passe_2","nebulosite_tot","nebulosite_nuag_etinf","hauteur_base_nuage_etinf","type_nuage_etinf",
+                                "type_nuage_etmoy","type_nuage_etsup","pression_station",
+                                "niveau_barom","geopotentiel","var_press_24h","temp_min_12h","temp_min_24h","temp_max_12h",
+                                "temp_max_24h","temp_min_sol_12h","methode_mesure_tempthmou","temp_therm_mouille","rafales_10min",
+                                "rafales_periode","periode_mes_rafales","etat_sol","hauteur_tot_che_neglau_sol","hauteur_neige_fr",
+                                "periode_mes_neigefr","precipitations_dern_heure","precipitations_3_dern_heure","precipitations_6_dern_heure",
+                                "precipitations_12_dern_heure","precipitations_24_dern_heure","phen_spe_1","phen_spe_2","phen_spe_3","phen_spe_4",
+                                "nebulosite_couche_nuage1","type_nuage_1","hauteur_base1","nebulosite_couche_nuage2","type_nuage_2",
+                                "hauteur_base2","nebulosite_couche_nuage3","type_nuage_3","hauteur_base3",
+                                "nebulosite_couche_nuage4","type_nuage_4","hauteur_base4","coordoonees","nom",
+                                "type_tendance_barom","temp_passe_1","temps_present","temperature","temp_min12h_C",
+                                "temp_min24h_C","temp_max12h_C","temp_max24h_C","temp_min_sol_12h_C","latitude",
+                                "longitude","altitude","nom_commune","code_commune","nom_epci",
+                                "code_epci","nom_dep","code_dep","nom_region","code_region","mois"),
+                  header = T, sep=";",encoding='UTF-8') 
+
+
+
+
+
+
 station<- meteo %>% distinct (id_station,latitude,longitude) %>% 
-                    mutate(latitude_station=latitude,longitude_station=longitude) %>%
-                    select(id_station,latitude_station,longitude_station)
+  group_by(id_station) %>%  
+  mutate(nb = 1:n()) %>% 
+  mutate(latitude_station=latitude,longitude_station=longitude) %>%
+  filter(nb==1) %>% 
+  select(id_station,latitude_station,longitude_station) 
   
+
 
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
 
@@ -49,7 +92,7 @@ com_dataset <- communes %>%
            population = Population,
            altitude_moy = Altitude.Moyenne,
            superficie = Superficie,
-           gps = geo_point_2d) %>% 
+           gps = geo_point_2d) %>%
   mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
   separate(col = "gps",
            into = paste0("gps", 1:2), sep = ",",
@@ -58,26 +101,34 @@ com_dataset <- communes %>%
           longitude_commune=as.numeric(gps2)) %>%
   select(code_insee,latitude_commune,longitude_commune)
 
-com_dataset<-com_dataset %>% distinct(code_insee,latitude_commune,longitude_commune)
+geo_om_dataset<-com_dataset %>% distinct(code_insee,latitude_commune,longitude_commune)
 
-
+###
 #########################################################################################
 ### récuperation de la station la plus proche de la commune en calculant sa distance  ###
 #########################################################################################
 
 
-DIST_MIN_COMM_STATION<-crossing(com_dataset, station) %>%
+DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
   mutate(commune_long_lat = map2(longitude_commune, latitude_commune, ~ c(.x, .y)),
-    station_long_lat = map2(longitude_station, latitude_station, ~ c(.x, .y)),
-    distance = unlist(map2(commune_long_lat, station_long_lat, ~ distGeo(.x, .y)))) %>%
-    group_by(code_insee) %>%
-    mutate(min_distance = distance == min(distance)) %>%
-    ungroup() %>% filter(min_distance==TRUE) %>%
-    select(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
-    
-DIST_MIN_COMM_STATION <- toto
-    
-    
-    
-    
+         station_long_lat = map2(longitude_station, latitude_station, ~ c(.x, .y)),
+         distance = unlist(map2(commune_long_lat, station_long_lat, ~ distGeo(.x, .y)))) %>%
+  group_by(code_insee) %>%
+  mutate(min_distance = distance == min(distance)) %>%
+  ungroup() %>% filter(min_distance==TRUE) %>%
+  distinct(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     

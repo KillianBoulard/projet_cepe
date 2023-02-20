@@ -12,8 +12,6 @@ temp<-incendies %>% ##filter(code_insee=="01286") %>%
     nature_nat   = ifelse(nature=="Naturelle",1,0),
     nature_malv  = ifelse(nature=="Malveillance",1,0), 
     
-     
-    
     orig_alerte_autr  = ifelse(origine_alerte=="Autre",1,0) ,
     orig_alerte_ind   = ifelse(origine_alerte=="Indetermine",1,0) ,
     orig_alerte_mae   = ifelse(origine_alerte=="Moyen aerien",1,0) ,

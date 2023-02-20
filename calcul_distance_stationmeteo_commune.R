@@ -35,8 +35,11 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
 
 
 station<- meteo %>% distinct (id_station,latitude,longitude) %>% 
-                    mutate(latitude_station=latitude,longitude_station=longitude) %>%
-                    select(id_station,latitude_station,longitude_station)
+  group_by(id_station) %>%  
+  mutate(nb = 1:n()) %>% 
+  mutate(latitude_station=latitude,longitude_station=longitude) %>%
+  filter(nb==1) %>% 
+  select(id_station,latitude_station,longitude_station) 
   
 
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
