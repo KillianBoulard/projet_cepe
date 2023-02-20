@@ -3,9 +3,14 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(geosphere)
-
+library(tidyverse)
+library(purrr)
 
 setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
+
+#####################################
+## #importation des données meteo ###
+#####################################
 
 
 meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", 
@@ -29,12 +34,17 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
                   header = T, sep=";",encoding='UTF-8') 
 
 
-station<- meteo %>% distinct (id_station,latitude,longitude)
+station<- meteo %>% distinct (id_station,latitude,longitude) %>% 
+                    mutate(latitude_station=latitude,longitude_station=longitude) %>%
+                    select(id_station,latitude_station,longitude_station)
   
 
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";",  encoding="UTF-8")
 
-com_dataset = communes %>%
+####################################################################
+### mise en forme de la table des communes avec coordonnées geo  ###
+####################################################################
+com_dataset <- communes %>%
   distinct(code_insee = X.U.FEFF.Code.INSEE,
            population = Population,
            altitude_moy = Altitude.Moyenne,
@@ -43,20 +53,31 @@ com_dataset = communes %>%
   mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
   separate(col = "gps",
            into = paste0("gps", 1:2), sep = ",",
-           extra = "merge") %>% rename(com_lat=gps1, com_long=gps2)
+           extra = "merge") %>% 
+  mutate (latitude_commune=as.numeric(gps1),
+          longitude_commune=as.numeric(gps2)) %>%
+  select(code_insee,latitude_commune,longitude_commune)
+
+com_dataset<-com_dataset %>% distinct(code_insee,latitude_commune,longitude_commune)
 
 
-nb<-dim(com_dataset)[1]
-nb2<-dim(station)[1]
-
-test <-data.frame()
-test2 <-data.frame()
-
-commune1<-com_dataset[1,]
+#########################################################################################
+### récuperation de la station la plus proche de la commune en calculant sa distance  ###
+#########################################################################################
 
 
-
-commune1$distance=distGeo(,p2)
-
-
-
+DIST_MIN_COMM_STATION<-crossing(com_dataset, station) %>%
+  mutate(commune_long_lat = map2(longitude_commune, latitude_commune, ~ c(.x, .y)),
+    station_long_lat = map2(longitude_station, latitude_station, ~ c(.x, .y)),
+    distance = unlist(map2(commune_long_lat, station_long_lat, ~ distGeo(.x, .y)))) %>%
+    group_by(code_insee) %>%
+    mutate(min_distance = distance == min(distance)) %>%
+    ungroup() %>% filter(min_distance==TRUE) %>%
+    select(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
+    
+DIST_MIN_COMM_STATION <- toto
+    
+    
+    
+    
+    
