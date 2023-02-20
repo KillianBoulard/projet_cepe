@@ -75,7 +75,6 @@ DIST_MIN_COMM_STATION<-crossing(com_dataset, station) %>%
     ungroup() %>% filter(min_distance==TRUE) %>%
     select(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
     
-DIST_MIN_COMM_STATION <- toto
     
     
     
