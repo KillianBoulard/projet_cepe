@@ -142,8 +142,18 @@ colnames(test_incendies)
 head(test_incendies)
 
 
+
 # test de cohérence :
 #Test de coherence : cela doit donner 24,465k observations
-test = base_dataset %>% 
-  filter(presence_feu == 1 ) %>% 
-  summarise(n())
+test = DIST_MIN_COMM_STATION %>% 
+  group_by(code_insee,id_station) %>% 
+  summarise(n = n())
+
+test = DIST_MIN_COMM_STATION %>% 
+  filter(code_insee == "07128")
+
+
+
+
+
+
