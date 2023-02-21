@@ -36,60 +36,6 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
 
 
 
-
-station<- meteo %>% distinct (id_station,latitude,longitude) %>% 
-  group_by(id_station) %>%  
-  mutate(nb = 1:n()) %>% 
-  mutate(latitude_station=latitude,longitude_station=longitude) %>%
-  filter(nb==1) %>% 
-  select(id_station,latitude_station,longitude_station) 
-
-
-
-communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";", encoding="UTF-8")
-
-####################################################################
-### mise en forme de la table des communes avec coordonnées geo  ###
-####################################################################
-com_dataset <- communes %>%
-  distinct(code_insee = X.U.FEFF.Code.INSEE,
-           population = Population,
-           altitude_moy = Altitude.Moyenne,
-           superficie = Superficie,
-           gps = geo_point_2d) %>%
-  mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
-  separate(col = "gps",
-           into = paste0("gps", 1:2), sep = ",",
-           extra = "merge") %>% 
-  mutate (latitude_commune=as.numeric(gps1),
-          longitude_commune=as.numeric(gps2)) %>%
-  select(code_insee,latitude_commune,longitude_commune)
-
-geo_om_dataset<-com_dataset %>% distinct(code_insee,latitude_commune,longitude_commune)
-
-###
-#########################################################################################
-### récuperation de la station la plus proche de la commune en calculant sa distance  ###
-#########################################################################################
-
-
-DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
-  mutate(commune_long_lat = map2(longitude_commune, latitude_commune, ~ c(.x, .y)),
-         station_long_lat = map2(longitude_station, latitude_station, ~ c(.x, .y)),
-         distance = unlist(map2(commune_long_lat, station_long_lat, ~ distGeo(.x, .y)))) %>%
-  group_by(code_insee) %>%
-  mutate(min_distance = distance == min(distance)) %>%
-  ungroup() %>% filter(min_distance==TRUE) %>%
-  distinct(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
-
-
-
-
-
-
-
-
-
 ############################################################################################################
 ######################## autre taff ########################################################################
 
@@ -97,8 +43,7 @@ DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
 convert_temp_KtoC<-function(x) x-273.15
 
 
-convert_temperature(277
-                    )
+convert_temperature(277)
 
 meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", 
                   col.names = c("id_station","date_mesure","pression_niveau_mer","var_pression_3h","type_tendance_barométrique","direction_vent_moyen_10mn",
@@ -133,7 +78,7 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
 # precipitation en mm
 
 
-
+## enlever certaines variables descriptives en caractere qui ne servent a rien a priori 
 METEO_QUANTI<-meteo %>%  
   select (- type_tendance_barométrique,-id_temps_present,-id_temps_passe_1,-id_temps_passe_2,
             -nom_station,- lib_type_tendance_barometrique, - lib_temps_passe1,-lib_temps_present,
