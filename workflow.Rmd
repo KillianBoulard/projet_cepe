@@ -379,11 +379,12 @@ synt_mois_comm_dataset <-inc_dataset %>%
 ```{r}
 convert_temp_KtoC<-function(x) x-273.15
 
-METEO_QUANTI < -meteo %>%  
+colSums(is.na(meteo))
+METEO_QUANTI <- meteo %>%  
   select (- type_tendance_barométrique,-id_temps_present,-id_temps_passe_1,-id_temps_passe_2,
             -nom_station,- lib_type_tendance_barometrique, - lib_temps_passe1,-lib_temps_present,
             -lib_commune,-lib_epci,-lib_commune,-lib_departement,-code_departement,-lib_region,
-            -code_region, - methode_mesure_temp_thmouille, -temperature_thmouille, -code_epci) %>% 
+            -code_region, - methode_mesure_temp_thmouille, -temperature_thmouille, -code_epci, -coordonnees, -longitude,-latitude) %>% 
   mutate(temperature = convert_temp_KtoC(temperature),
          point_rosee = convert_temp_KtoC(point_rosee),
          temp_min_12h = convert_temp_KtoC(temp_min_12h),
