@@ -4,10 +4,12 @@ output: html_notebook
 authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 ---
 
-## Déclaration des librairies
+# Etape 1 : Déclaration des librairies
 ```{r}
 library(tidymodels)
 library(tidyverse)
+library(geosphere)
+library(purrr)
 ```
 
 ```{r setup}
@@ -15,7 +17,9 @@ knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/format
 knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
 ```
 
-## Import des données communes
+# Etape 2 : Import des données
+
+### Etape 2.1 : Import des données communes
 
 ```{r}
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";", encoding="UTF-8",
@@ -23,49 +27,12 @@ communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = 
                                    "commune","departement","region","statut","altitude_moyenne",
                                    "superficie","population","geo_point_2d","geo_shape","ID_geofla",
                                    "code_commune","code_canton","code_arr","code_departement","code_region"))
-com_dataset = communes %>% 
-                    distinct(code_insee,
-                             population,
-                             altitude_moyenne,
-                             superficie,
-                           gps = geo_point_2d) %>% 
-                    mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee))
-
-geo_com_dataset <- communes %>%
-  distinct(code_insee ,geo_point_2d) %>%
-  mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
-  separate(col = "geo_point_2d",
-           into = paste0("geo_point_2d", 1:2), sep = ",",
-           extra = "merge") %>% 
-  mutate (latitude_commune=as.numeric(geo_point_2d1),
-          longitude_commune=as.numeric(geo_point_2d2)) %>%
-  distinct(code_insee,latitude_commune,longitude_commune)
-
 ```
 
-## Création d'une matrice janvier 2010 à décembre 2022
+### Etape 2.2 Import des données incendies
 
 ```{r}
-#Année
-annee = as.data.frame(matrix(2010:2022, nrow = 13, ncol = 1))
-annee=annee %>% 
-  rename("annee" = "V1") %>% 
-  mutate(annee = as.character(annee))
-#Mois
-mois = as.data.frame(matrix(01:12, nrow = 12, ncol = 1))
-mois=mois %>% 
-  rename("mois" = "V1") %>% 
-  mutate(mois = as.character(mois))
-
-date_dataset = crossing(annee, mois) %>% 
-   mutate(mois = if_else(nchar(mois) == 1,paste0("0",mois),mois))
-
-```
-
-## Import des données incendies
-
-```{r}
-inc_dataset<- read.csv(file="Incendies.csv",
+incendies <- read.csv(file="Incendies.csv",
                      col.names = c("annee","id","departement","code_insee",
                                    "nom_commune","date_alerte","origine_alerte","moyens_premiere_intervention",
                                    "surface_parcourue","surface_foret","surface_maquis",
@@ -78,15 +45,9 @@ inc_dataset<- read.csv(file="Incendies.csv",
                      header = T, 
                      sep=";",
                      encoding='UTF-8',skip = 6)
-
-inc_dataset = inc_dataset %>% 
- mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
-  mutate(code_insee = ifelse(code_insee == '13055',"13001",code_insee)) %>% 
-  mutate(code_insee = ifelse(code_insee == '83999',"83067",code_insee)) %>% 
-  filter(annee > 2009)
 ```  
 
-## Import des données méteo
+### Etape 2.3 Import des données méteo
 
 ```{r}
 meteo <- read.csv(file="donnees-synop-essentielles-omm.csv", 
@@ -107,10 +68,71 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
                   header = T, sep=";",encoding='UTF-8')
 ```
 
-## Traitement des données des stations
+# Etape 3 : Tables intermédiaires
+
+### Etape 3.1 : date_dataset : Dataframe comportant les années et mois de janvier 2010 à décembre 2022
 
 ```{r}
-station<- meteo %>% distinct (id_station,latitude,longitude) %>% 
+#Année
+annee = as.data.frame(matrix(2010:2022, nrow = 13, ncol = 1))
+annee=annee %>% 
+  rename("annee" = "V1") %>% 
+  mutate(annee = as.character(annee))
+#Mois
+mois = as.data.frame(matrix(01:12, nrow = 12, ncol = 1))
+mois=mois %>% 
+  rename("mois" = "V1") %>% 
+  mutate(mois = as.character(mois))
+
+date_dataset = crossing(annee, mois) %>% 
+   mutate(mois = if_else(nchar(mois) == 1,paste0("0",mois),mois))
+
+```
+
+### Etape 3.2 : com_dataset : Données des communes agrégées
+### Etape 3.2 : geo_com_dataset : Données qui vont permettre de calculer les distances des stations méteo
+
+```{r}
+com_dataset = communes %>% 
+                    distinct(code_insee,
+                             population,
+                             altitude_moyenne,
+                             superficie,
+                           gps = geo_point_2d) %>% 
+                    mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee))
+
+geo_com_dataset <- communes %>%
+  distinct(code_insee ,geo_point_2d) %>%
+  mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
+  separate(col = "geo_point_2d",
+           into = paste0("geo_point_2d", 1:2), sep = ",",
+           extra = "merge") %>% 
+  mutate (latitude_commune=as.numeric(geo_point_2d1),
+          longitude_commune=as.numeric(geo_point_2d2)) %>%
+  distinct(code_insee,latitude_commune,longitude_commune)
+
+```
+
+### Etape 3.3 : inc_dataset : suppresion des départements d'outre mer et quelques correctifs
+
+```{r}
+inc_dataset = incendies %>% 
+ mutate(code_insee = if_else(nchar(code_insee) == 4,paste0("0",code_insee),code_insee)) %>%
+  mutate(code_insee = ifelse(code_insee == '13055',"13001",code_insee)) %>% 
+  mutate(code_insee = ifelse(code_insee == '83999',"83067",code_insee)) %>%
+  mutate(
+    date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
+    annee = format(date_alerte,"%Y"),
+    mois = format(date_alerte,"%m"),
+    )
+  filter(annee > 2009) %>% 
+  filter(!departement %in% c('976', '974'))
+```
+
+### Etape 3.4 : station_dataset : traitement des données des stations
+
+```{r}
+station_dataset <- meteo %>% distinct(id_station,latitude,longitude) %>% 
   group_by(id_station) %>%  
   mutate(nb = 1:n()) %>% 
   mutate(latitude_station=latitude,longitude_station=longitude) %>%
@@ -119,10 +141,10 @@ station<- meteo %>% distinct (id_station,latitude,longitude) %>%
   
 ```
 
-
+### Etape 3.5 : DIST_MIN_COMM_STATION : récuperation de la station la plus proche de la commune en calculant sa distance
 
 ```{r}
-DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
+DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station_dataset) %>%
   mutate(commune_long_lat = map2(longitude_commune, latitude_commune, ~ c(.x, .y)),
     station_long_lat = map2(longitude_station, latitude_station, ~ c(.x, .y)),
     distance = unlist(map2(commune_long_lat, station_long_lat, ~ distGeo(.x, .y)))) %>%
@@ -132,35 +154,27 @@ DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
     distinct(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
 ```
 
-
-
-
-## Création de la base de travail :
+# Etape 4 : consolidation des tables intermédiaires
+* base_dataset : fichier initial comprenant : 
+- L'ensemble des communes métropolitaines de janvier 2010 à décembre 2021 agrégées par mois
 
 ```{r}
 start_dataset = inc_dataset %>%
-  mutate(
-    date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
-    annee = format(date_alerte,"%Y"),
-    mois = format(date_alerte,"%m"),
-    ) %>%
   group_by(
     annee, mois, code_insee) %>%
   distinct(
     annee, mois, code_insee)
 
-
 ## Version complète : 35K communes * 13 années * 12 mois
 base_dataset = crossing(date_dataset, com_dataset) %>% 
-  left_join(start_dataset, keep= T,suffix = c('_1', '_2'), by=c("annee","mois","code_insee")) %>%       
+  left_join(start_dataset, keep= T,suffix = c('_1', '_2'), by=c("annee","mois","code_insee")) %>%
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
   select(!ends_with("_2"),code_insee = code_insee_1, annee = annee_1, mois = mois_1)
 
-#Test de coherence : cela doit donner 24,465k observations
+#Test de coherence : cela doit donner 24,037k observations
 test = base_dataset %>% 
   filter(presence_feu == 1 ) %>% 
   summarise(n())
-
 
 ## Version avec uniquement les villes présentes dans incendies : 
 # 7k communes * 13 années * 12 mois
@@ -172,312 +186,181 @@ base_dataset = crossing(date_dataset, insee_feu) %>%
   left_join(start_dataset, keep= T,suffix = c('_1', '_2'), 
           by=c("annee","mois","code_insee")) %>%       
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
-  select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1)
+  select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1) %>% 
+  left_join(DIST_MIN_COMM_STATION, by="code_insee") %>% 
+  select(-latitude_commune,-longitude_commune,-latitude_station,-longitude_station,-distance, -gps)
+
+base_dataset_test = base_dataset %>% left_join(DIST_MIN_COMM_STATION, by="code_insee")
+
 
 #Test de coherence : cela doit donner 24,465k observations
 test = base_dataset %>% 
   filter(presence_feu == 1 ) %>% 
   summarise(n())
 
-
 rm(list = setdiff(ls(), c("base_dataset","inc_dataset")))
 ```
 
-## Exploration des données
-- Vérification des valeurs manquantes ;
-- Tableaux / plots ; 
-- Renommage des colonnes.
+# Etape 5 : Data processing
+
+### Etape 5.1 : Synthèse générale par code insee
 
 ```{r}
-is.na(inc_dataset)
-colSums(is.na(inc_dataset))
-apply(is.na(inc_dataset), MARGIN = 2, sum)
-dim(inc_dataset)
-```
-
-## Data preprocessing Part I
-
-```{r}
-inc_dataset = inc_dataset %>%
-  filter(!is.na(id_D)) %>%
-  mutate(target = surface_parcourue) %>%
-  mutate_at(c('origine_alerte', 'nature', 'dir_vent'), as.factor) %>% #as.ch
-  select(-c(nb_bat_tot_detruit, nb_bat_part_detruit,
-            nb_deces, surface_agricole)) %>%
-  mutate(nbda = if_else(is.na(nbda), 0, as.numeric(nbda))) %>%
-  filter(duree>1 & modeSortie !=9)
-
-dataset
-```
-
-## Resample library : training set, validation
-
-```{r}
-set.seed(42)
-dataset_split = initial_split(dataset, prop = 0.8, strata = target)
-training = training(dataset_split)
-test_set = testing(dataset_split)
-
-training
-
-set.seed(42)
-train_split = initial_split(training, prop = 0.8, strata = target)
-train_set = training(train_split)
-eval_set = testing(train_split)
-train_set
-
-cat(dim(train_set),'/',dim(eval_set),'/',dim(test_set))
-```
-
-## 2 Recipes library : create a collection of recipes
-### 2.1 Basic recipe
-```{r}
-rec_basic = recipe(data = train_set, target~.) %>%
-  step_impute_mode(sexe) %>%
-  step_impute_mean(age) %>%
-  step_normalize(age) %>% #Centre et réduit, step_scale = juste réduire
-  step_other(ghm2, threshold = 0.05) %>%
-  step_dummy(ghm2) #Encodage 0 ou 1
-
-rec_basic
-prep(rec_basic)
-
-juice(prep(rec_basic)) #Design matrix
-formula(prep(rec_basic))
-```
-
-Version plus généralisable
-
-```{r}
-basic_rec = recipe(data= train_set, target~.) %>%
-  step_impute_mode(all_nominal_predictors()) %>%
-  step_impute_mean(all_numeric_predictors()) %>%
-  step_normalize(all_numeric_predictors()) %>%
-  step_other(ghm2, threshold = 0.02) %>%
-  step_other(dp, threshold = 0.05) %>%
-  step_dummy(all_nominal_predictors()) %>%
-  step_zv(all_predictors()) #suppression des catégorie identiques (toujours egale 0) notamment a cause des facteurs
-
-juice(prep(basic_rec))
-```
-
-### 2.2 Interaction recipe
-
-```{r}
-rec_interaction = basic_rec %>% 
-                  step_interact(~age : starts_with('dp'))
-
-juice(prep(rec_interaction))
-```
-
-### 2.3 Spline recipe
-
-```{r}
-rec_spline = 
-  # basic_rec %>% 
-  rec_interaction %>% 
-  step_ns(age, duree, deg_free = 3) #On peut aussi mettre tune()
-juice(prep(rec_spline))
-```
+#correction des champs texte et transformation en vecteurs si nécessaire ##
+inc_dataset$origine_alerte <- gsub('IndÃ©terminÃ©', 'Indetermine', inc_dataset$origine_alerte)
+inc_dataset$origine_alerte <- gsub('é', 'e', inc_dataset$origine_alerte)
+inc_dataset$precision_surf <- gsub('EstimÃ©es', 'Estimees', inc_dataset$precision_surf)
+inc_dataset$precision_surf <- gsub('é', 'e', inc_dataset$precision_surf)
+inc_dataset$origine_alerte <- gsub('Pompiers prÃ©-positionnÃ©s', 'Pompiers pre-pos', inc_dataset$origine_alerte)
+inc_dataset$origine_alerte <- gsub('Vigie-camÃ©ra', 'Vigie-cameras', inc_dataset$origine_alerte)
+inc_dataset$origine_alerte <- gsub('é', 'e', inc_dataset$origine_alerte)
+inc_dataset$precision_surf <- gsub('MesurÃ©es', 'Mesuree', inc_dataset$precision_surf )
+inc_dataset$precision_surf <- gsub('é', 'e', inc_dataset$precision_surf)
+inc_dataset$origine_alerte <-as.factor(inc_dataset$origine_alerte)
+inc_dataset$precision_surf <-as.factor(inc_dataset$precision_surf)
+inc_dataset$origine_alerte <-as.factor(inc_dataset$origine_alerte)
+inc_dataset$precision_surf <-as.factor(inc_dataset$precision_surf)
+inc_dataset$nature <-as.factor(inc_dataset$nature)
+inc_dataset$departement<-as.factor(inc_dataset$departement)
+inc_dataset$surface_agricole<-as.integer(inc_dataset$surface_agricole)
 
 
+synt_gen_comm_dataset <-inc_dataset %>%
+  select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
+         surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
+         surface_non_boisee_art,suface_non_boisee,nature) %>% 
+  select(- c(annee, surface_parcourue))                   %>%
+  mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
+  mutate(
+          nature_ind = ifelse(nature=="",1,0) ,
+          nature_acc = ifelse(nature=="Accidentelle",1,0),
+          nature_inv_part = ifelse(nature=="Involontaire (particulier)",1,0),
+          nature_inv_trav = ifelse(nature=="Involontaire (travaux)",1,0),
+          nature_nat   = ifelse(nature=="Naturelle",1,0),
+          nature_malv  = ifelse(nature=="Malveillance",1,0), 
 
-## 3. Parsnip library : creating model and fitting
-### 3.1 logistical model and workflow
-
-model is 
-* a model 
-* a engine (package)
-* a mode (classification / regression)
-
-```{r}
-log_mod = logistic_reg() %>%
-  set_engine('glm')
-  set_mode('classification')
-```
-
-wf is
-* declarer un workflow
-* ajouter un recipe
-* ajouter un modèle
-
-```{r}
-log_wf = workflow() %>%
-  add_recipe(rec_basic) %>%
-  add_model(log_mod)
-
-log_wf
-
-log_fit = fit(log_wf, train_set)
-              
-predict(log_fit, eval_set)
-predict(log_fit, eval_set, type = 'prob')
-
-
-log_pred = eval_set %>%
-  select(target) %>%
-  bind_cols(
-    predict(log_fit, eval_set),
-    predict(log_fit, eval_set, type = 'prob')
-  )
-
-log_pred
-```
-
-### 3.2 RandomForest model and workflow
-```{r}
-rf_mod = rand_forest() %>% 
-  set_engine('ranger') %>% 
-  set_mode('classification')
-```
-
-
-```{r}
-rf_wf = workflow() %>% 
-  add_recipe(basic_rec) %>% 
-  add_model(rf_mod)
-
-rf_fit = fit(rf_wf, train_set)
-
-rf_fit %>% 
-  predict(eval_set, type = 'prob')
-
-rf_fit %>% 
-  predict(eval_set)
-
-rf_pred = eval_set %>% 
-  select(target) %>% 
-  bind_cols(
-    rf_fit %>% 
-  predict(eval_set, type = 'prob'),
-    rf_fit %>% 
-  predict(eval_set)
-  )
-
-rf_pred
-
-```
-
-### 3.3 Xgboost
-
-```{r}
-xg_mod = boost_tree(trees = tune(), min_n = tune(), tree_depth = tune(), learn_rate = tune(),
-                     loss_reduction = tune()) %>% 
-  set_engine('xgboost') %>% 
-  set_mode('classification')
-```
-
-```{r}
-rf_wf = workflow() %>% 
-  add_recipe(basic_rec) %>% 
-  add_model(rf_mod)
-
-rf_fit = fit(rf_wf, train_set)
-
-rf_fit %>% 
-  predict(eval_set, type = 'prob')
-
-rf_fit %>% 
-  predict(eval_set)
-
-rf_pred = eval_set %>% 
-  select(target) %>% 
-  bind_cols(
-    rf_fit %>% 
-  predict(eval_set, type = 'prob'),
-    rf_fit %>% 
-  predict(eval_set)
-  )
-
-rf_pred
-```
-
-## 4. Yardstick library : Evaluer les performances des modèles
-###4.1 Evaluer log
-
-```{r}
-log_pred
-
-accuracy(log_pred, target, .pred_class)
-
-log_pred %>% 
-  group_by(target, .pred_class) %>% 
-  summarise(n=n())
-  
-roc_auc(log_pred, target, .pred_0) #mesure comment l'aglo séparer les classes 1 et 0
-roc_auc(log_pred, target, .pred_1, event_level = 'second') #ou comme ça
-```
-
-###4.2 Evaluer RF
-
-```{r}
-rf_pred
-accuracy(rf_pred, target, .pred_class)
-roc_auc(rf_pred, target, .pred_0) #mesure comment l'aglo séparer les classes 1 et 0
-```
-
-### Workflowset
-
-```{r}
-wf_set = 
-workflow_set(
-  preproc = list(
-    basic = basic_rec,
-    inter = rec_interaction,
-    spline = rec_spline
-  ),
-  models = list(
-    log = log_mod,
-    rf = rf_mod,
-    xg = xg_mod
-  )
-)
-```
-
-###validation croisée
-
-```{r}
-set.seed(42)
-folds = vfold_cv(training ,v=5)
-
-keep_pred = control_grid(save_pred = T, save_workflow = T)
-
-set.seed(42)
-res_wf_set =
-wf_set %>%
-  workflow_map(
-    resamples = folds,
-    metrics = metric_set(accuracy, roc_auc), #ex : accuracy, roc_auc, f_meas, specifity...
-    control = keep_pred,
-    verbose = T, #Pendant le training permet d'avoir un suivi
-    grid = 20 #Par rapport au paramètres définis dans XG, il va tester X combinaisons
-  )
+          orig_alerte_autr  = ifelse(origine_alerte=="Autre",1,0) ,
+          orig_alerte_ind   = ifelse(origine_alerte=="Indetermine",1,0) ,
+          orig_alerte_mae   = ifelse(origine_alerte=="Moyen aerien",1,0) ,
+          orig_alerte_pat   = ifelse(origine_alerte=="Patrouille",1,0) ,
+          orig_alerte_ppr   = ifelse(origine_alerte=="Pompiers pre-positionnes",1,0) ,
+          orig_alerte_pop   = ifelse(origine_alerte=="Population",1,0) ,
+          orig_alerte_vcam  = ifelse(origine_alerte=="Vigie-camera",1,0)
+  )                                                       %>% 
+  select(- c(nature,origine_alerte)) %>% 
+  group_by(code_insee) %>%
+  mutate ( 
+        moy_surface_foret  = round(mean(surface_foret),3),
+        moy_surface_maquis = round(mean(surface_maquis),3),
+        moy_surface_nat_autre_foret = round(mean(surface_nat_autre_foret),3),
+        moy_surface_agricole        = round(mean(surface_agricole),3),
+        moy_surface_autre_terre_boisee  = round(mean(surface_autre_terre_boisee),3),
+        moy_surface_non_boisee_nat      = round(mean(surface_non_boisee_nat),3),
+        moy_surface_non_boisee_art      = round(mean(surface_non_boisee_art),3),
+        moy_suface_non_boisee           = round(mean(suface_non_boisee),3),
     
-rank_results(res_wf_set, rank_metric='roc_auc')
-  
+        moy_nature_ind      = 	mean(nature_ind),
+        moy_nature_acc      = 	mean(nature_acc),
+        moy_nature_inv_part = 	mean(nature_inv_part),
+        moy_nature_inv_trav = 	mean(nature_inv_trav),
+        moy_nature_nat      = 	mean(nature_nat),
+        moy_nature_malv     = 	mean(nature_malv), 
+    
+        moy_orig_alerte_autr  = mean(orig_alerte_autr ),
+        moy_orig_alerte_ind   = mean(orig_alerte_ind  ),
+        moy_orig_alerte_mae   = mean(orig_alerte_mae  ),
+        moy_orig_alerte_pat   = mean(orig_alerte_pat  ),
+        moy_orig_alerte_ppr   = mean(orig_alerte_ppr  ),
+        moy_orig_alerte_pop   = mean(orig_alerte_pop  ),
+        moy_orig_alerte_vcam  = mean(orig_alerte_vcam )
+  )  %>%
+
+  distinct(code_insee,
+           ###info surface par commune
+           moy_surface_foret,
+           moy_surface_maquis,
+           moy_surface_nat_autre_foret,                               
+           moy_surface_agricole,
+           moy_surface_autre_terre_boisee,
+           moy_surface_non_boisee_nat,moy_surface_non_boisee_art,moy_suface_non_boisee,
+           ###info nature incendie
+           moy_nature_ind,moy_nature_acc,moy_nature_inv_part,moy_nature_inv_trav,moy_nature_nat,
+           moy_nature_malv,
+           ###info origine incendie
+           moy_orig_alerte_autr, moy_orig_alerte_ind  ,moy_orig_alerte_mae  ,
+           moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam ) %>% 
+           select(-moy_surface_agricole) %>%
+           ungroup()
 ```
- 
+
+### Etape 5.1 : Synthèse générale par code insee / par mois
+
 ```{r}
-best_result = 
-res_wf_set %>% 
-  extract_workflow_set_result('inter_xg') %>% 
-  select_best(metric = 'roc_auc')
+synt_mois_comm_dataset <-inc_dataset %>%
+  select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
+         surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
+         surface_non_boisee_art,suface_non_boisee,nature) %>% 
+  select(- c(annee, surface_parcourue))                   %>%
+  mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
+  mutate(
+          nature_ind = ifelse(nature=="",1,0) ,
+          nature_acc = ifelse(nature=="Accidentelle",1,0),
+          nature_inv_part = ifelse(nature=="Involontaire (particulier)",1,0),
+          nature_inv_trav = ifelse(nature=="Involontaire (travaux)",1,0),
+          nature_nat   = ifelse(nature=="Naturelle",1,0),
+          nature_malv  = ifelse(nature=="Malveillance",1,0), 
+
+          orig_alerte_autr  = ifelse(origine_alerte=="Autre",1,0) ,
+          orig_alerte_ind   = ifelse(origine_alerte=="Indetermine",1,0) ,
+          orig_alerte_mae   = ifelse(origine_alerte=="Moyen aerien",1,0) ,
+          orig_alerte_pat   = ifelse(origine_alerte=="Patrouille",1,0) ,
+          orig_alerte_ppr   = ifelse(origine_alerte=="Pompiers pre-positionnes",1,0) ,
+          orig_alerte_pop   = ifelse(origine_alerte=="Population",1,0) ,
+          orig_alerte_vcam  = ifelse(origine_alerte=="Vigie-camera",1,0)
+  )                                                       %>% 
+  select(- c(nature,origine_alerte)) %>% 
+  group_by(code_insee, mois) %>%
+  mutate ( 
+        moy_surface_foret  = round(mean(surface_foret),3),
+        moy_surface_maquis = round(mean(surface_maquis),3),
+        moy_surface_nat_autre_foret = round(mean(surface_nat_autre_foret),3),
+        moy_surface_agricole        = round(mean(surface_agricole),3),
+        moy_surface_autre_terre_boisee  = round(mean(surface_autre_terre_boisee),3),
+        moy_surface_non_boisee_nat      = round(mean(surface_non_boisee_nat),3),
+        moy_surface_non_boisee_art      = round(mean(surface_non_boisee_art),3),
+        moy_suface_non_boisee           = round(mean(suface_non_boisee),3),
+    
+        moy_nature_ind      = 	mean(nature_ind),
+        moy_nature_acc      = 	mean(nature_acc),
+        moy_nature_inv_part = 	mean(nature_inv_part),
+        moy_nature_inv_trav = 	mean(nature_inv_trav),
+        moy_nature_nat      = 	mean(nature_nat),
+        moy_nature_malv     = 	mean(nature_malv), 
+    
+        moy_orig_alerte_autr  = mean(orig_alerte_autr ),
+        moy_orig_alerte_ind   = mean(orig_alerte_ind  ),
+        moy_orig_alerte_mae   = mean(orig_alerte_mae  ),
+        moy_orig_alerte_pat   = mean(orig_alerte_pat  ),
+        moy_orig_alerte_ppr   = mean(orig_alerte_ppr  ),
+        moy_orig_alerte_pop   = mean(orig_alerte_pop  ),
+        moy_orig_alerte_vcam  = mean(orig_alerte_vcam )
+  )  %>%
+
+  distinct(code_insee,
+           ###info surface par commune
+           moy_surface_foret,
+           moy_surface_maquis,
+           moy_surface_nat_autre_foret,                               
+           moy_surface_agricole,
+           moy_surface_autre_terre_boisee,
+           moy_surface_non_boisee_nat,moy_surface_non_boisee_art,moy_suface_non_boisee,
+           ###info nature incendie
+           moy_nature_ind,moy_nature_acc,moy_nature_inv_part,moy_nature_inv_trav,moy_nature_nat,
+           moy_nature_malv,
+           ###info origine incendie
+           moy_orig_alerte_autr, moy_orig_alerte_ind  ,moy_orig_alerte_mae  ,
+           moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam ) %>% 
+           select(-moy_surface_agricole) %>%
+           ungroup()
 ```
 
-## 8 Best model, last fit and final prediction
-
-```{r}
-best_res_fit = 
-res_wf_set %>% 
-  extract_workflow('inter_xg') %>% 
-  finalize_workflow(best_result) %>% 
-  last_fit(split = dataset_split) #Il reconnait que c'est les données de test
-
-best_res_fit %>%  collect_metrics()
-best_res_fit %>%  collect_predictions()
-
-```
- 
- 
- 
- ## En résumer, il faut surtout faire la partie 1, 2 et 4
