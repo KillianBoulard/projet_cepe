@@ -124,7 +124,7 @@ inc_dataset = incendies %>%
     date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
     annee = format(date_alerte,"%Y"),
     mois = format(date_alerte,"%m"),
-    )
+    ) %>% 
   filter(annee > 2009) %>% 
   filter(!departement %in% c('976', '974'))
 ```
@@ -190,10 +190,7 @@ base_dataset = crossing(date_dataset, insee_feu) %>%
   left_join(DIST_MIN_COMM_STATION, by="code_insee") %>% 
   select(-latitude_commune,-longitude_commune,-latitude_station,-longitude_station,-distance, -gps)
 
-base_dataset_test = base_dataset %>% left_join(DIST_MIN_COMM_STATION, by="code_insee")
-
-
-#Test de coherence : cela doit donner 24,465k observations
+#Test de coherence : cela doit donner 24,037k observations
 test = base_dataset %>% 
   filter(presence_feu == 1 ) %>% 
   summarise(n())
@@ -299,7 +296,7 @@ synt_gen_comm_dataset <-inc_dataset %>%
 synt_mois_comm_dataset <-inc_dataset %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
          surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
-         surface_non_boisee_art,suface_non_boisee,nature) %>% 
+         surface_non_boisee_art,suface_non_boisee,nature,mois) %>% 
   select(- c(annee, surface_parcourue))                   %>%
   mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
   mutate(
