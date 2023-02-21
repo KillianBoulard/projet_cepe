@@ -207,7 +207,7 @@ rm(list = setdiff(ls(), c("base_dataset","inc_dataset")))
 
 # Etape 5 : Data processing
 
-### Etape 5.1 : Synthèse générale par code insee
+### Etape 5.1 : Synthèse générale du fichier incendie par code insee
 
 ```{r}
 #correction des champs texte et transformation en vecteurs si nécessaire ##
@@ -303,7 +303,7 @@ synt_gen_comm_dataset <-inc_dataset %>%
            ungroup()
 ```
 
-### Etape 5.2 : Synthèse par code insee / année / mois
+### Etape 5.2 : Synthèse du fichier incendie par code insee / année / mois
 
 ```{r}
 synt_mois_comm_dataset <-inc_dataset %>%
@@ -372,5 +372,11 @@ synt_mois_comm_dataset <-inc_dataset %>%
            moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam ) %>% 
            select(-moy_surface_agricole) %>%
            ungroup()
+```
+
+### Etape 5.3 : synthèse générale du fichier météo par station
+
+```{r}
+
 ```
 
