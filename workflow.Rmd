@@ -377,6 +377,22 @@ synt_mois_comm_dataset <-inc_dataset %>%
 ### Etape 5.3 : synthèse générale du fichier météo par station
 
 ```{r}
+convert_temp_KtoC<-function(x) x-273.15
 
+METEO_QUANTI < -meteo %>%  
+  select (- type_tendance_barométrique,-id_temps_present,-id_temps_passe_1,-id_temps_passe_2,
+            -nom_station,- lib_type_tendance_barometrique, - lib_temps_passe1,-lib_temps_present,
+            -lib_commune,-lib_epci,-lib_commune,-lib_departement,-code_departement,-lib_region,
+            -code_region, - methode_mesure_temp_thmouille, -temperature_thmouille, -code_epci) %>% 
+  mutate(temperature = convert_temp_KtoC(temperature),
+         point_rosee = convert_temp_KtoC(point_rosee),
+         temp_min_12h = convert_temp_KtoC(temp_min_12h),
+         temp_min_24h = convert_temp_KtoC(temp_min_24h),
+         temp_max_12h = convert_temp_KtoC(temp_max_12h),
+         temp_max_24h = convert_temp_KtoC(temp_max_24h)
+         ) %>% 
+ mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))  
+
+test<-METEO_QUANTI[1:10000,]
 ```
 
