@@ -124,6 +124,10 @@ inc_dataset = incendies %>%
     date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
     annee = format(date_alerte,"%Y"),
     mois = format(date_alerte,"%m"),
+    annee_m_1 = format(date_m_1, "%Y"),
+    mois_m_1 = format(date_m_1,"%m"),
+    annee_m_12 = format(date_m_12, "%Y"),
+    mois_m_12 = format(date_m_12,"%m")
     ) %>% 
   filter(annee > 2009) %>% 
   filter(!departement %in% c('976', '974'))
