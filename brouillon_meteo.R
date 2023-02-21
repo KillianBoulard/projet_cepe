@@ -5,6 +5,8 @@ library(tidyr)
 library(geosphere)
 library(tidyverse)
 library(purrr)
+library(FactoMineR)
+library(corrplot)
 
 setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
 
@@ -73,18 +75,24 @@ METEO_QUANTI<-meteo %>%
  mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))  
 
 
+echant_aleatoire_meteo<-tas <- METEO_QUANTI[sample(nrow(METEO_QUANTI), 10000, replace = FALSE), ] %>%
+  select(-id_station, - date_mesure,-code_commune,-mois,-coordonnees,-longitude,-latitude,-geopotentiel)
 
 
+mcor <- (cor(echant_aleatoire_meteo))
+mcor
+corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
 
 test<-METEO_QUANTI[1:10000,]
 
 
+res.pca <- PCA(echant_aleatoire_meteo, graph = TRUE)
 
 
+fviz_pca_var(res.pca, col.var = "black")
 
 
+plot(res.pca)
 
-
-
-
+print(res.pca)
     
