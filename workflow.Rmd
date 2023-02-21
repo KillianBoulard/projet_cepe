@@ -124,6 +124,8 @@ inc_dataset = incendies %>%
     date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
     annee = format(date_alerte,"%Y"),
     mois = format(date_alerte,"%m"),
+    date_m_1 = date_alerte %m+% months(-1),
+    date_m_12 = date_alerte %m+% months(-12),
     annee_m_1 = format(date_m_1, "%Y"),
     mois_m_1 = format(date_m_1,"%m"),
     annee_m_12 = format(date_m_12, "%Y"),
