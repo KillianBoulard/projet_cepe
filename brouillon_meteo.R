@@ -8,6 +8,7 @@ library(purrr)
 library(FactoMineR)
 library(corrplot)
 library(missMDA)
+library(psych)
 
 
 setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
@@ -36,7 +37,7 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
 
 
 # variables liées à la temperature
-
+prop_na <-meteo %>% summarize_all(funs(sum(is.na(.)) / length(.)))
 
 
 ############################################################################################################
@@ -76,7 +77,16 @@ METEO_QUANTI<-meteo %>%
           -code_commune,-mois,-code_departement, -ph_spe_1,-ph_spe_2,-ph_spe_3,-ph_spe_4,
           -type_nuage_etage_inf,-type_nuage_etage_moy,-type_nuage_etage_sup,
           -type_nuage_1,-type_nuage_2,-type_nuage_3,-type_nuage_4,-longitude,-latitude,
-          -geopotentiel, -direction_vent_moyen_10mn
+          -geopotentiel, -direction_vent_moyen_10mn,
+          # on enleve les vars ou plus de 35% de na
+          -nebulosite_totale,-nebulosite_nuage_etage_inf,-hauteur_base_nuage_etage_inf,
+          -niveau_barometrique,-var_pression_24h,-rafales_10dermin,-etat_sol,
+          -hauteur_couche_neigl,-hauteur_neige_fraiche,-periode_mesure_neige_fraiche,
+          -precipitation_24dh,-nebulosite_couche_nuageuse_1,-hauteur_base_1,
+          -nebulosite_couche_nuageuse_2,-hauteur_base_2,-nebulosite_couche_nuageuse_3,
+          -hauteur_base_3,-nebulosite_couche_nuageuse_4,-hauteur_base_4,
+          -temperature_min_12h_C,-temperature_min_24h_C,-temperature_max_12h_C,
+          -temperature_max_24h_C,-temperature_min_sol_12h_C,
           ) %>% 
   mutate(heure_mesure = as.factor(substr(date_mesure,12,19)),
          date_mesure  = as.Date(date_mesure,"%Y-%m-%d"),
@@ -87,22 +97,27 @@ METEO_QUANTI<-meteo %>%
          #temp_max_12h = convert_temp_KtoC(temp_max_12h),
          #temp_max_24h = convert_temp_KtoC(temp_max_24h)
          ) %>% 
+  #on remplace par les moyennes les na restants
   mutate(across(where(is.numeric), ~replace_na(., mean(., na.rm=TRUE))),
          id_station = as.integer(id_station))
   
  #mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))  
 
 
-table(METEO_QUANTI$heure_mesure)
+  table(METEO_QUANTI$heure_mesure)
 
+##### proportion de na 
+ prop_na <- METEO_QUANTI %>% summarise_all(list(na = ~sum(is.na(.))/length(.) *100)) 
 
-
+ 
+ 
+ 
+ 
 ########################################### tentative de PCA ###########
 
 
 
-echant_aleatoire_meteo1<- METEO_QUANTI[sample(nrow(METEO_QUANTI), 5000, replace = FALSE), ]
-
+echant_aleatoire_meteo<- METEO_QUANTI[sample(nrow(METEO_QUANTI), 200, replace = FALSE), ]
 
 echant_aleatoire_meteo2<- as.data.frame(echant_aleatoire_meteo,row.names = echant_aleatoire_meteo$id_station)
 
@@ -114,11 +129,6 @@ res.pca <- PCA(echant_aleatoire_meteo2, graph = TRUE)
 ### imputation des valeures manquantes avec une PCA.
 
 
-
-
-
-
-
 mcor <- (cor(echant_aleatoire_meteo2))
 
 mcor
@@ -126,6 +136,10 @@ df<-as.data.frame((mcor))
 
 corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
 
+corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
+
+
+corrplot(mcor)
 test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
 
 
