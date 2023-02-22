@@ -126,8 +126,8 @@ echant_aleatoire_meteo2<- echant_aleatoire_meteo2 %>% select(-id_station,-date_m
 res.pca <- PCA(echant_aleatoire_meteo2, graph = TRUE)
 
 ########################################################################### ###########
-### imputation des valeures manquantes avec une PCA.
 
+### matrice de corrélation des données 
 
 mcor <- (cor(echant_aleatoire_meteo2))
 
