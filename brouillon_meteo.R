@@ -7,6 +7,7 @@ library(tidyverse)
 library(purrr)
 library(FactoMineR)
 library(corrplot)
+library(missMDA)
 
 
 setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
@@ -61,55 +62,70 @@ convert_temperature(277)
 # rafale en m/secondes
 # precipitation en mm
 
+table(meteo$code_departement)
 
-## enlever certaines variables descriptives en caractere qui ne servent a rien a priori 
+## enlever certaines variables descriptives en caracteres qui ne servent a rien a priori 
 METEO_QUANTI<-meteo %>%  
+  filter(substr(code_departement,1,2) !="97" & substr(code_departement,1,2) !="98") %>% 
   select (- type_tendance_barométrique,-id_temps_present,-id_temps_passe_1,-id_temps_passe_2,
             -nom_station,- lib_type_tendance_barometrique, - lib_temps_passe1,-lib_temps_present,
-            -lib_commune,-lib_epci,-lib_commune,-lib_departement,-code_departement,-lib_region,
+            -lib_commune,-lib_epci,-lib_commune,-lib_departement,-lib_region,
             -code_region, - methode_mesure_temp_thmouille, -temperature_thmouille, -code_epci,
-          - temp_min_12h,- temp_min_24h,- temp_max_12h,-temp_max_24h,- temperature_C) %>% 
-  mutate(date_mesure =as.Date(date_mesure,"%Y-%m-%d"),
-         temperature = convert_temp_KtoC(temperature),
-         point_rosee = convert_temp_KtoC(point_rosee),
-         temp_min_12h = convert_temp_KtoC(temp_min_12h),
-         temp_min_24h = convert_temp_KtoC(temp_min_24h),
-         temp_max_12h = convert_temp_KtoC(temp_max_12h),
-         temp_max_24h = convert_temp_KtoC(temp_max_24h)) %>% 
- mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))  
-
-
-
-temperature<- METEO_QUANTI  %>% select(
-  temperature,point_rosee,temp_min_12h,temp_min_24h,temp_max_12h,temp_max_24h,
-  temperature_C,temperature_min_12h_C,temperature_min_24h_C,temperature_max_12h_C,
-  temperature_max_24h_C,temperature_min_sol_12h_C)
-
-
-echant_aleatoire_meteo<-tas <- temperature[sample(nrow(METEO_QUANTI), 80000, replace = FALSE), ]
+          - temp_min_12h,- temp_min_24h,- temp_max_12h,-temp_max_24h,
+          - temperature_C,-coordonnees, -temp_min_sol_12h,
+          -code_commune,-mois,-code_departement, -ph_spe_1,-ph_spe_2,-ph_spe_3,-ph_spe_4,
+          -type_nuage_etage_inf,-type_nuage_etage_moy,-type_nuage_etage_sup,
+          -type_nuage_1,-type_nuage_2,-type_nuage_3,-type_nuage_4,-longitude,-latitude,
+          -geopotentiel, -direction_vent_moyen_10mn
+          ) %>% 
+  mutate(heure_mesure = as.factor(substr(date_mesure,12,19)),
+         date_mesure  = as.Date(date_mesure,"%Y-%m-%d"),
+         temperature  = convert_temp_KtoC(temperature),
+         point_rosee  = convert_temp_KtoC(point_rosee),
+         #supression des variables en doublon apres ACP
+         #temp_min_24h = convert_temp_KtoC(temp_min_24h), 
+         #temp_max_12h = convert_temp_KtoC(temp_max_12h),
+         #temp_max_24h = convert_temp_KtoC(temp_max_24h)
+         ) %>% 
+  mutate(across(where(is.numeric), ~replace_na(., mean(., na.rm=TRUE))),
+         id_station = as.integer(id_station))
   
+ #mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))  
+
+
+table(METEO_QUANTI$heure_mesure)
 
 
 
-mcor <- (cor(echant_aleatoire_meteo))
+########################################### tentative de PCA ###########
+
+
+
+echant_aleatoire_meteo1<- METEO_QUANTI[sample(nrow(METEO_QUANTI), 5000, replace = FALSE), ]
+
+
+echant_aleatoire_meteo2<- as.data.frame(echant_aleatoire_meteo,row.names = echant_aleatoire_meteo$id_station)
+
+echant_aleatoire_meteo2<- echant_aleatoire_meteo2 %>% select(-id_station,-date_mesure,-heure_mesure)
+
+res.pca <- PCA(echant_aleatoire_meteo2, graph = TRUE)
+
+########################################################################### ###########
+### imputation des valeures manquantes avec une PCA.
+
+
+
+
+
+
+
+mcor <- (cor(echant_aleatoire_meteo2))
+
 mcor
+df<-as.data.frame((mcor))
+
 corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
 
-test<-METEO_QUANTI[1:10000,]
+test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
 
 
-res.pca <- PCA(echant_aleatoire_meteo, graph = TRUE)
-
-res.pca$var
-
-
-
-
-
-fviz_pca_var(res.pca, col.var = "black")
-
-
-plot(res.pca)
-
-print(res.pca)
-    
