@@ -452,7 +452,7 @@ transpose = METEO_QUANTI %>%
                     periode_mesure_rafale, precipiation_derh, precipitation_3dh, precipitation_6dh,
                     precipitation_12dh),
     values_fn = mean
-  ) 
+    ) 
 
 
 test = METEO_QUANTI %>% 
