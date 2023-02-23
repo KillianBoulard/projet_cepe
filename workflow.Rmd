@@ -205,7 +205,6 @@ ST_DET_COMM <-inc_dataset %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
          surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
          surface_non_boisee_art,suface_non_boisee,nature) %>% 
-  #filter(as.integer(annee)<2020)                          %>%
   select(- c(annee, surface_parcourue))                   %>%
   mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
   mutate(
