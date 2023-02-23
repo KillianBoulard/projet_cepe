@@ -70,7 +70,7 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
                                 "lib_temps_present","temperature_C","temperature_min_12h_C","temperature_min_24h_C","temperature_max_12h_C",
                                 "temperature_max_24h_C","temperature_min_sol_12h_C","latitude","longitude","altitude","lib_commune","code_commune",
                                 "lib_epci","code_epci","lib_departement","code_departement","lib_region","code_region","mois"),
-                  header = T, sep=";",encoding='UTF-8')
+                  header = T, sep=";",encoding='UTF-8') 
 ```
 
 # Etape 3 : Tables intermédiaires
@@ -382,6 +382,8 @@ synt_mois_comm_dataset <-inc_dataset %>%
 
 ```{r}
 prop_na <-meteo %>% summarize_all(funs(sum(is.na(.)) / length(.)))
+prop_na <-transpose %>% summarize_all(funs(sum(is.na(.)) / length(.)))
+
 
 convert_temp_KtoC<-function(x) x-273.15
 
@@ -400,16 +402,15 @@ convert_temp_KtoC<-function(x) x-273.15
 table(meteo$code_departement)
 
 ## enlever certaines variables descriptives en caracteres qui ne servent a rien a priori 
-filter(!departement %in% c('976', '974'))
-METEO_QUANTI<-meteo %>%  
+METEO_QUANTI <- meteo %>%  
   filter(substr(code_departement,1,2) !="97" & substr(code_departement,1,2) !="98") %>% 
-  select (- type_tendance_barométrique,-id_temps_present,-id_temps_passe_1,-id_temps_passe_2,
+  select (-altitude, - type_tendance_barométrique,-id_temps_present,-id_temps_passe_1,-id_temps_passe_2,
             -nom_station,- lib_type_tendance_barometrique, - lib_temps_passe1,-lib_temps_present,
             -lib_commune,-lib_epci,-lib_commune,-lib_departement,-lib_region,
-            -code_region, - methode_mesure_temp_thmouille, -temperature_thmouille, -code_epci,
+            -code_region,-code_departement, - methode_mesure_temp_thmouille, -temperature_thmouille, -code_epci,
           - temp_min_12h,- temp_min_24h,- temp_max_12h,-temp_max_24h,
           - temperature_C,-coordonnees, -temp_min_sol_12h,
-          -code_commune,-mois,-code_departement, -ph_spe_1,-ph_spe_2,-ph_spe_3,-ph_spe_4,
+          -code_commune,-mois, -ph_spe_1,-ph_spe_2,-ph_spe_3,-ph_spe_4,
           -type_nuage_etage_inf,-type_nuage_etage_moy,-type_nuage_etage_sup,
           -type_nuage_1,-type_nuage_2,-type_nuage_3,-type_nuage_4,-longitude,-latitude,
           -geopotentiel, -direction_vent_moyen_10mn,
@@ -425,16 +426,46 @@ METEO_QUANTI<-meteo %>%
           ) %>% 
   mutate(heure_mesure = as.factor(substr(date_mesure,12,19)),
          date_mesure  = as.Date(date_mesure,"%Y-%m-%d"),
+         mois_mesure  = format(date_mesure,"%m"),
+         annee_mesure  = format(date_mesure,"%Y"),
          temperature  = convert_temp_KtoC(temperature),
-         point_rosee  = convert_temp_KtoC(point_rosee)
+         point_rosee  = convert_temp_KtoC(point_rosee),
+         pression_niveau_mer = as.numeric(pression_niveau_mer),
+         humidite = as.double(humidite),
+         heure_mesure = parse_date_time(heure_mesure,"HMS"),
+         heure_mesure = hour(heure_mesure),
+         id_station = as.factor(id_station)
          ) %>% 
+   filter(heure_mesure == c("8","14","17","23")) %>% 
   #on remplace par les moyennes les na restants
-  mutate(across(c(where(is.numeric),-id_station, -pression_niveau_mer), ~replace_na(., mean(., na.rm=TRUE))))
-  
-  
-  
- #mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))  
+  mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE)))
 
+
+transpose = METEO_QUANTI %>%
+  group_by(id_station, annee_mesure, mois_mesure) %>%
+  select(-date_mesure) %>% 
+  pivot_wider(
+    #id_cols = c(id_station, annee_mesure, mois_mesure),
+    names_from = heure_mesure,
+    values_from = c(pression_niveau_mer, var_pression_3h, vitesse_vent_moyen_10m, temperature, 
+                    point_rosee, humidite, visibilite_horizontale, pression_station,rafales_periode ,
+                    periode_mesure_rafale, precipiation_derh, precipitation_3dh, precipitation_6dh,
+                    precipitation_12dh),
+    values_fn = mean
+  ) 
+
+
+test = METEO_QUANTI %>% 
+  distinct(id_station, mois_mesure, annee_mesure) %>% 
+  summarise(n = n())
+
+
+test = METEO_QUANTI %>% 
+  group_by(heure_mesure) %>% 
+  summarise(nb = n()) %>% 
+  select(heure_mesure, nb) %>% 
+  ungroup()
+  
 
   table(METEO_QUANTI$heure_mesure)
 
