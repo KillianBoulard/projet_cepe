@@ -191,7 +191,7 @@ test = base_dataset %>%
 
 ```{r}
 is.na(inc_dataset)
-colSums(is.na(inc_dataset))
+colSums(is.na(meteo))
 apply(is.na(inc_dataset), MARGIN = 2, sum)
 dim(inc_dataset)
 ```
