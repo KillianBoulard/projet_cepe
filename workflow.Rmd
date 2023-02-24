@@ -429,8 +429,7 @@ METEO_QUANTI <- meteo %>%
          heure_mesure = hour(heure_mesure),
          id_station = as.factor(id_station)
          ) %>% 
-  #filter(heure_mesure == c("8","14","17","23")) %>% 
-  filter(heure_mesure == c("14","23")) %>% 
+  filter(heure_mesure == c("14","23")) %>% #"8","14","17","23" / A définir
   #on remplace par les moyennes les na restants
   mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE)))
 
@@ -463,20 +462,20 @@ transpose_by_station_annee_mois = METEO_QUANTI %>%
     values_fn = mean) %>% 
   ungroup()
 
-# Si possible traitement des NA par la moyenne des mois / an
+# Si possible traitement des NA par la moyenne de la station sur le meme mois
 transpose_by_station_annee_mois = transpose_by_station_annee_mois %>% 
   group_by(id_station, mois_mesure) %>% 
   mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
   ungroup()
 
-# Traitement des NA résiduels par la moyenne de la colonne 
+# Traitement des NA résiduels par la moyenne de la station
 transpose_by_station_annee_mois = transpose_by_station_annee_mois %>% 
   group_by(id_station) %>% 
   mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
   ungroup()
 ```
 
-
+### Etape 5.3 : préparation du dataset final (base_dataset complété des données incendies et méteo)
 
 ```{r}
 
