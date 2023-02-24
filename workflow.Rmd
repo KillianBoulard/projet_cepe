@@ -15,6 +15,7 @@ library(FactoMineR)
 library(corrplot)
 library(missMDA)
 library(psych)
+library("writexl")
 ```
 
 ```{r setup}
@@ -305,11 +306,8 @@ synt_gen_comm_dataset <-inc_dataset %>%
            moy_orig_alerte_pat_g,  moy_orig_alerte_ppr_g , moy_orig_alerte_pop_g , moy_orig_alerte_vcam_g ) %>% 
            select(-moy_surface_agricole_g) %>%
            ungroup()
-```
 
-### Etape 5.2 : Synthèse du fichier incendie par code insee / année / mois
 
-```{r}
 synt_mois_comm_dataset <-inc_dataset %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
          surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
@@ -378,28 +376,23 @@ synt_mois_comm_dataset <-inc_dataset %>%
            ungroup()
 ```
 
-### Etape 5.3 : synthèse générale du fichier météo par station
+### Etape 5.2 : traitement du fichier incendie
+### unités du fichier meteo :
+#### pression en Pa
+#### vitesse du vent en m/s
+#### humidité en %
+#### direction du vent en degré
+#### temperature en kelvin
+#### visibilite en metres
+#### nebulosité en %
+#### hauteur de la base de nuages en metres
+#### rafale en m/secondes
+#### precipitation en mm
 
 ```{r}
-prop_na <-meteo %>% summarize_all(funs(sum(is.na(.)) / length(.)))
-prop_na <-transpose %>% summarize_all(funs(sum(is.na(.)) / length(.)))
-
+#prop_na <-meteo %>% summarize_all(funs(sum(is.na(.)) / length(.)))
 
 convert_temp_KtoC<-function(x) x-273.15
-
-####### unités du fichier meteo 
-# pression en Pa
-# vitesse du vent en m/s
-# humidité en %
-# direction du vent en degré
-# temperature en kelvin
-# visibilite en metres
-# nebulosité en %
-# hauteur de la base de nuages en metres
-# rafale en m/secondes
-# precipitation en mm
-
-table(meteo$code_departement)
 
 ## enlever certaines variables descriptives en caracteres qui ne servent a rien a priori 
 METEO_QUANTI <- meteo %>%  
@@ -436,40 +429,56 @@ METEO_QUANTI <- meteo %>%
          heure_mesure = hour(heure_mesure),
          id_station = as.factor(id_station)
          ) %>% 
-   filter(heure_mesure == c("8","14","17","23")) %>% 
+  #filter(heure_mesure == c("8","14","17","23")) %>% 
+  filter(heure_mesure == c("14","23")) %>% 
   #on remplace par les moyennes les na restants
   mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE)))
 
-
-transpose = METEO_QUANTI %>%
-  group_by(id_station, annee_mesure, mois_mesure) %>%
+# Transpose des variables par heures sur l'id station
+transpose_by_station = METEO_QUANTI %>%
+  group_by(id_station) %>%
   select(-date_mesure) %>% 
   pivot_wider(
-    #id_cols = c(id_station, annee_mesure, mois_mesure),
+    id_cols = c(id_station),
     names_from = heure_mesure,
     values_from = c(pression_niveau_mer, var_pression_3h, vitesse_vent_moyen_10m, temperature, 
                     point_rosee, humidite, visibilite_horizontale, pression_station,rafales_periode ,
                     periode_mesure_rafale, precipiation_derh, precipitation_3dh, precipitation_6dh,
                     precipitation_12dh),
     values_fn = mean
-    ) 
-
-
-test = METEO_QUANTI %>% 
-  distinct(id_station, mois_mesure, annee_mesure) %>% 
-  summarise(n = n())
-
-
-test = METEO_QUANTI %>% 
-  group_by(heure_mesure) %>% 
-  summarise(nb = n()) %>% 
-  select(heure_mesure, nb) %>% 
+    ) %>% 
   ungroup()
-  
 
-  table(METEO_QUANTI$heure_mesure)
+# Transpose des variables par heures sur l'id station / l'année et le mois
+transpose_by_station_annee_mois = METEO_QUANTI %>%
+  group_by(id_station, annee_mesure, mois_mesure) %>%
+  select(-date_mesure) %>% 
+  pivot_wider(
+    id_cols = c(id_station, annee_mesure, mois_mesure),
+    names_from = heure_mesure,
+    values_from = c(pression_niveau_mer, var_pression_3h, vitesse_vent_moyen_10m, temperature, 
+                    point_rosee, humidite, visibilite_horizontale, pression_station,rafales_periode ,
+                    periode_mesure_rafale, precipiation_derh, precipitation_3dh, precipitation_6dh,
+                    precipitation_12dh),
+    values_fn = mean) %>% 
+  ungroup()
 
-##### proportion de na 
- prop_na <- METEO_QUANTI %>% summarise_all(list(na = ~sum(is.na(.))/length(.) *100)) 
+# Si possible traitement des NA par la moyenne des mois / an
+transpose_by_station_annee_mois = transpose_by_station_annee_mois %>% 
+  group_by(id_station, mois_mesure) %>% 
+  mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
+  ungroup()
+
+# Traitement des NA résiduels par la moyenne de la colonne 
+transpose_by_station_annee_mois = transpose_by_station_annee_mois %>% 
+  group_by(id_station) %>% 
+  mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
+  ungroup()
+```
+
+
+
+```{r}
+
 ```
 
