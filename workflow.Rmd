@@ -80,13 +80,11 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
 
 ```{r}
 #Année
-annee = as.data.frame(matrix(2010:2022, nrow = 13, ncol = 1))
-annee=annee %>% 
+annee = as.data.frame(matrix(2010:2022, nrow = 13, ncol = 1)) %>% 
   rename("annee" = "V1") %>% 
   mutate(annee = as.character(annee))
-#Mois
-mois = as.data.frame(matrix(01:12, nrow = 12, ncol = 1))
-mois=mois %>% 
+
+mois = as.data.frame(matrix(01:12, nrow = 12, ncol = 1)) %>% 
   rename("mois" = "V1") %>% 
   mutate(mois = as.character(mois))
 
@@ -200,7 +198,19 @@ base_dataset = crossing(date_dataset, insee_feu) %>%
   mutate(presence_feu = if_else(is.na(code_insee_2), 0, 1)) %>% 
   select(!ends_with("_2"), code_insee = code_insee_1, annee = annee_1, mois = mois_1) %>% 
   left_join(DIST_MIN_COMM_STATION, by="code_insee") %>% 
-  select(-latitude_commune,-longitude_commune,-latitude_station,-longitude_station,-distance, -gps)
+  select(-latitude_commune,-longitude_commune,-latitude_station,-longitude_station,-distance, -gps) %>% 
+  mutate(
+    annee = as.numeric(annee),
+    mois = as.numeric(mois),
+    date_trt = as.Date(paste(annee,mois, 01), "%Y %m %d"),
+    date_m_1 = date_trt %m+% months(-1),
+    date_m_12 = date_trt %m+% months(-12),
+    annee_m_1 = format(date_m_1, "%Y"),
+    mois_m_1 = format(date_m_1,"%m"),
+    annee_m_12 = format(date_m_12, "%Y"),
+    mois_m_12 = format(date_m_12,"%m")
+    ) %>% 
+  select(-c(date_m_1, date_m_12))
 
 #Test de coherence : cela doit donner 24,037k observations
 test = base_dataset %>% 
@@ -478,6 +488,7 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
 ### Etape 5.3 : préparation du dataset final (base_dataset complété des données incendies et méteo)
 
 ```{r}
+#Travail sur échantillon pour des raisons de temps de calcul
 
 ```
 
