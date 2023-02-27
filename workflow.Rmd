@@ -456,7 +456,8 @@ transpose_by_station = METEO_QUANTI %>%
                     precipitation_12dh),
     values_fn = mean
     ) %>% 
-  ungroup() 
+  ungroup() %>% 
+  mutate(id_station = as.numeric(levels(id_station))[id_station])
 
 # Transpose des variables par heures sur l'id station / l'année et le mois
 transpose_by_station_annee_mois = METEO_QUANTI %>%
@@ -470,8 +471,8 @@ transpose_by_station_annee_mois = METEO_QUANTI %>%
                     periode_mesure_rafale, precipiation_derh, precipitation_3dh, precipitation_6dh,
                     precipitation_12dh),
     values_fn = mean) %>% 
-  ungroup()  %>% 
-  mutate(id_station = as.integer(id_station))
+  ungroup() %>% 
+  mutate(id_station = as.numeric(levels(id_station))[id_station])
 
 # Si possible traitement des NA par la moyenne de la station sur le meme mois
 transpose_by_station_annee_mois = transpose_by_station_annee_mois %>% 
@@ -490,20 +491,15 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
 
 ```{r}
 #Travail sur échantillon pour des raisons de temps de calcul 
-x<- sample(1:nrow(base_dataset), 100000)
+x <- sample(1:nrow(base_dataset), 100000)
 base_dataset_test = base_dataset[x, ]
 
-test = base_dataset_test %>% 
-    left_join(synt_gen_comm_dataset, keep= T,suffix = c('_1', '_2'), 
+base_dataset_test = base_dataset_test %>% 
+    left_join(synt_gen_comm_dataset, keep= F, suffix = c('_1', '_2'), 
           by=c("code_insee")) %>% 
       left_join(transpose_by_station, keep= F, 
           by=c("id_station"))
 
+```
 
-test = base_dataset_test %>% 
-      left_join(transpose_by_station)
-```
-```{r}
-str(transpose_by_station[1,])
-```
 
