@@ -91,6 +91,8 @@ mois = as.data.frame(matrix(01:12, nrow = 12, ncol = 1)) %>%
 date_dataset = crossing(annee, mois) %>% 
    mutate(mois = if_else(nchar(mois) == 1,paste0("0",mois),mois))
 
+rm(list = setdiff(ls(), c("date_dataset","meteo","incendies","communes")))
+
 ```
 
 ### Etape 3.2 : com_dataset : Données des communes agrégées
@@ -494,6 +496,7 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
 x <- sample(1:nrow(base_dataset), 100000)
 base_dataset_test = base_dataset[x, ]
 
+#Ajout des données générales sur les incendies ainsi que la météo
 base_dataset_test = base_dataset_test %>% 
     left_join(synt_gen_comm_dataset, keep= F, suffix = c('_1', '_2'), 
           by=c("code_insee")) %>% 
