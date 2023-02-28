@@ -5,7 +5,7 @@ authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 ---
 
 # Etape 1 : Déclaration des librairies
-```{r}
+```{r warning=FALSE}
 library(tidymodels)
 library(tidyverse)
 library(geosphere)
@@ -27,7 +27,7 @@ knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formati
 
 ### Etape 2.1 : Import des données communes
 
-```{r}
+```{r warning=FALSE}
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";", encoding="UTF-8",
                      col.names = c("code_insee","code_postal",
                                    "commune","departement","region","statut","altitude_moyenne",
@@ -387,7 +387,7 @@ synt_mois_comm_dataset <-inc_dataset %>%
            ungroup()
 ```
 
-### Etape 5.2 : traitement du fichier incendie
+### Etape 5.2 : traitement du fichier météo
 ### unités du fichier meteo :
 #### pression en Pa
 #### vitesse du vent en m/s
@@ -525,9 +525,13 @@ base_dataset_full = base_dataset_full %>%
 
 base_dataset_full = base_dataset_full %>% 
   select(-date_trt, -annee_m_1, -mois_m_1, -annee_m_12, -mois_m_12, -annee_num, -mois_num)
-  
-base_dataset_full %>% 
-  filter(presence_feu ==1)
+
+
+x <- sample(1:nrow(base_dataset_full), 10000)
+test = base_dataset_full[x, ]
+
+write_xlsx(test,"C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets/test.xlsx")
+
 ```
 
 
