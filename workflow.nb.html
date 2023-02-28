@@ -1752,17 +1752,94 @@ pre code {
 <h1>Etape 1 : Déclaration des librairies</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5bW9kZWxzKVxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KGdlb3NwaGVyZSlcbmxpYnJhcnkocHVycnIpXG5saWJyYXJ5KGx1YnJpZGF0ZSlcbmxpYnJhcnkoRmFjdG9NaW5lUilcbmxpYnJhcnkoY29ycnBsb3QpXG5saWJyYXJ5KG1pc3NNREEpXG5saWJyYXJ5KHBzeWNoKVxubGlicmFyeShcIndyaXRleGxcIilcbmBgYCJ9 -->
-<pre class="r"><code>library(tidymodels)
-library(tidyverse)
-library(geosphere)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5bW9kZWxzKVxuYGBgIn0= -->
+<pre class="r"><code>library(tidymodels)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiLS0gQXR0YWNoaW5nIHBhY2thZ2VzIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHRpZHltb2RlbHMgMS4wLjAgLS1cbnYgYnJvb20gICAgICAgIDEuMC4zICAgICAgdiByZWNpcGVzICAgICAgMS4wLjMgXG52IGRpYWxzICAgICAgICAxLjEuMCAgICAgIHYgcnNhbXBsZSAgICAgIDEuMS4xIFxudiBkcGx5ciAgICAgICAgMS4wLjEwICAgICB2IHRpYmJsZSAgICAgICAzLjEuOCBcbnYgZ2dwbG90MiAgICAgIDMuNC4wICAgICAgdiB0aWR5ciAgICAgICAgMS4yLjEgXG52IGluZmVyICAgICAgICAxLjAuNCAgICAgIHYgdHVuZSAgICAgICAgIDEuMC4xIFxudiBtb2RlbGRhdGEgICAgMS4xLjAgICAgICB2IHdvcmtmbG93cyAgICAxLjEuMiBcbnYgcGFyc25pcCAgICAgIDEuMC4zICAgICAgdiB3b3JrZmxvd3NldHMgMS4wLjAgXG52IHB1cnJyICAgICAgICAxLjAuMSAgICAgIHYgeWFyZHN0aWNrICAgIDEuMS4wIFxuLS0gQ29uZmxpY3RzIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHRpZHltb2RlbHNfY29uZmxpY3RzKCkgLS1cbnggcHVycnI6OmRpc2NhcmQoKSBtYXNrcyBzY2FsZXM6OmRpc2NhcmQoKVxueCBkcGx5cjo6ZmlsdGVyKCkgIG1hc2tzIHN0YXRzOjpmaWx0ZXIoKVxueCBkcGx5cjo6bGFnKCkgICAgIG1hc2tzIHN0YXRzOjpsYWcoKVxueCByZWNpcGVzOjpzdGVwKCkgIG1hc2tzIHN0YXRzOjpzdGVwKClcbiogRGlnIGRlZXBlciBpbnRvIHRpZHkgbW9kZWxpbmcgd2l0aCBSIGF0IGh0dHBzOi8vd3d3LnRtd3Iub3JnXG4ifQ== -->
+<pre><code>-- Attaching packages ----------------------------- tidymodels 1.0.0 --
+v broom        1.0.3      v recipes      1.0.3 
+v dials        1.1.0      v rsample      1.1.1 
+v dplyr        1.0.10     v tibble       3.1.8 
+v ggplot2      3.4.0      v tidyr        1.2.1 
+v infer        1.0.4      v tune         1.0.1 
+v modeldata    1.1.0      v workflows    1.1.2 
+v parsnip      1.0.3      v workflowsets 1.0.0 
+v purrr        1.0.1      v yardstick    1.1.0 
+-- Conflicts -------------------------------- tidymodels_conflicts() --
+x purrr::discard() masks scales::discard()
+x dplyr::filter()  masks stats::filter()
+x dplyr::lag()     masks stats::lag()
+x recipes::step()  masks stats::step()
+* Dig deeper into tidy modeling with R at https://www.tmwr.org</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5gYGAifQ== -->
+<pre class="r"><code>library(tidyverse)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2RzIG92ZXJ3cml0dGVuIGJ5ICdkYnBseXInOlxuICBtZXRob2QgICAgICAgICBmcm9tXG4gIHByaW50LnRibF9sYXp5ICAgICBcbiAgcHJpbnQudGJsX3NxbCAgICAgIFxuLS0gQXR0YWNoaW5nIHBhY2thZ2VzIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSB0aWR5dmVyc2UgMS4zLjIgLS12IHJlYWRyICAgMi4xLjMgICAgIHYgZm9yY2F0cyAwLjUuMlxudiBzdHJpbmdyIDEuNC4xICAgICAtLSBDb25mbGljdHMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHRpZHl2ZXJzZV9jb25mbGljdHMoKSAtLVxueCByZWFkcjo6Y29sX2ZhY3RvcigpIG1hc2tzIHNjYWxlczo6Y29sX2ZhY3RvcigpXG54IHB1cnJyOjpkaXNjYXJkKCkgICAgbWFza3Mgc2NhbGVzOjpkaXNjYXJkKClcbnggZHBseXI6OmZpbHRlcigpICAgICBtYXNrcyBzdGF0czo6ZmlsdGVyKClcbnggc3RyaW5ncjo6Zml4ZWQoKSAgICBtYXNrcyByZWNpcGVzOjpmaXhlZCgpXG54IGRwbHlyOjpsYWcoKSAgICAgICAgbWFza3Mgc3RhdHM6OmxhZygpXG54IHJlYWRyOjpzcGVjKCkgICAgICAgbWFza3MgeWFyZHN0aWNrOjpzcGVjKClcbiJ9 -->
+<pre><code>Registered S3 methods overwritten by &#39;dbplyr&#39;:
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+-- Attaching packages ------------------------------ tidyverse 1.3.2 --v readr   2.1.3     v forcats 0.5.2
+v stringr 1.4.1     -- Conflicts --------------------------------- tidyverse_conflicts() --
+x readr::col_factor() masks scales::col_factor()
+x purrr::discard()    masks scales::discard()
+x dplyr::filter()     masks stats::filter()
+x stringr::fixed()    masks recipes::fixed()
+x dplyr::lag()        masks stats::lag()
+x readr::spec()       masks yardstick::spec()</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZW9zcGhlcmUpXG5saWJyYXJ5KHB1cnJyKVxubGlicmFyeShsdWJyaWRhdGUpXG5gYGAifQ== -->
+<pre class="r"><code>library(geosphere)
 library(purrr)
-library(lubridate)
-library(FactoMineR)
-library(corrplot)
-library(missMDA)
-library(psych)
-library(&quot;writexl&quot;)</code></pre>
+library(lubridate)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiB0aW1lY2hhbmdlXG5cbkF0dGFjaGluZyBwYWNrYWdlOiA8OTE+bHVicmlkYXRlPDkyPlxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIDw5MT5wYWNrYWdlOmJhc2U8OTI+OlxuXG4gICAgZGF0ZSwgaW50ZXJzZWN0LCBzZXRkaWZmLCB1bmlvblxuIn0= -->
+<pre><code>Loading required package: timechange
+
+Attaching package: &lt;91&gt;lubridate&lt;92&gt;
+
+The following objects are masked from &lt;91&gt;package:base&lt;92&gt;:
+
+    date, intersect, setdiff, union</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShGYWN0b01pbmVSKVxuYGBgIn0= -->
+<pre class="r"><code>library(FactoMineR)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2RzIG92ZXJ3cml0dGVuIGJ5ICdodG1sdG9vbHMnOlxuICBtZXRob2QgICAgICAgICAgICAgICBmcm9tICAgICAgICAgXG4gIHByaW50Lmh0bWwgICAgICAgICAgIHRvb2xzOnJzdHVkaW9cbiAgcHJpbnQuc2hpbnkudGFnICAgICAgdG9vbHM6cnN0dWRpb1xuICBwcmludC5zaGlueS50YWcubGlzdCB0b29sczpyc3R1ZGlvXG5SZWdpc3RlcmVkIFMzIG1ldGhvZCBvdmVyd3JpdHRlbiBieSAnaHRtbHdpZGdldHMnOlxuICBtZXRob2QgICAgICAgICAgIGZyb20gICAgICAgICBcbiAgcHJpbnQuaHRtbHdpZGdldCB0b29sczpyc3R1ZGlvXG4ifQ== -->
+<pre><code>Registered S3 methods overwritten by &#39;htmltools&#39;:
+  method               from         
+  print.html           tools:rstudio
+  print.shiny.tag      tools:rstudio
+  print.shiny.tag.list tools:rstudio
+Registered S3 method overwritten by &#39;htmlwidgets&#39;:
+  method           from         
+  print.htmlwidget tools:rstudio</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShjb3JycGxvdClcbmBgYCJ9 -->
+<pre class="r"><code>library(corrplot)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiY29ycnBsb3QgMC45MiBsb2FkZWRcbiJ9 -->
+<pre><code>corrplot 0.92 loaded</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShtaXNzTURBKVxubGlicmFyeShwc3ljaClcbmBgYCJ9 -->
+<pre class="r"><code>library(missMDA)
+library(psych)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTogPDkxPnBzeWNoPDkyPlxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIDw5MT5wYWNrYWdlOmdncGxvdDI8OTI+OlxuXG4gICAgJSslLCBhbHBoYVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIDw5MT5wYWNrYWdlOnNjYWxlczw5Mj46XG5cbiAgICBhbHBoYSwgcmVzY2FsZVxuIn0= -->
+<pre><code>
+Attaching package: &lt;91&gt;psych&lt;92&gt;
+
+The following objects are masked from &lt;91&gt;package:ggplot2&lt;92&gt;:
+
+    %+%, alpha
+
+The following objects are masked from &lt;91&gt;package:scales&lt;92&gt;:
+
+    alpha, rescale</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShcIndyaXRleGxcIilcbmBgYCJ9 -->
+<pre class="r"><code>library(&quot;writexl&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1787,6 +1864,13 @@ R graphics engine version 15 is not supported by this version of RStudio. The Pl
 <h3>Etape 2.1 : Import des données communes</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29tbXVuZXMgPC0gcmVhZC5jc3YoZmlsZT1cImNvcnJlc3BvbmRhbmNlLWNvZGUtaW5zZWUtY29kZS1wb3N0YWwuY3N2XCIsIGhlYWRlciA9IFQsIHNlcD1cIjtcIiwgZW5jb2Rpbmc9XCJVVEYtOFwiLFxuICAgICAgICAgICAgICAgICAgICAgY29sLm5hbWVzID0gYyhcImNvZGVfaW5zZWVcIixcImNvZGVfcG9zdGFsXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwiY29tbXVuZVwiLFwiZGVwYXJ0ZW1lbnRcIixcInJlZ2lvblwiLFwic3RhdHV0XCIsXCJhbHRpdHVkZV9tb3llbm5lXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwic3VwZXJmaWNpZVwiLFwicG9wdWxhdGlvblwiLFwiZ2VvX3BvaW50XzJkXCIsXCJnZW9fc2hhcGVcIixcIklEX2dlb2ZsYVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcImNvZGVfY29tbXVuZVwiLFwiY29kZV9jYW50b25cIixcImNvZGVfYXJyXCIsXCJjb2RlX2RlcGFydGVtZW50XCIsXCJjb2RlX3JlZ2lvblwiKSlcbmBgYCJ9 -->
+<pre class="r"><code>communes &lt;- read.csv(file=&quot;correspondance-code-insee-code-postal.csv&quot;, header = T, sep=&quot;;&quot;, encoding=&quot;UTF-8&quot;,
+                     col.names = c(&quot;code_insee&quot;,&quot;code_postal&quot;,
+                                   &quot;commune&quot;,&quot;departement&quot;,&quot;region&quot;,&quot;statut&quot;,&quot;altitude_moyenne&quot;,
+                                   &quot;superficie&quot;,&quot;population&quot;,&quot;geo_point_2d&quot;,&quot;geo_shape&quot;,&quot;ID_geofla&quot;,
+                                   &quot;code_commune&quot;,&quot;code_canton&quot;,&quot;code_arr&quot;,&quot;code_departement&quot;,&quot;code_region&quot;))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1794,6 +1878,21 @@ R graphics engine version 15 is not supported by this version of RStudio. The Pl
 <h3>Etape 2.2 Import des données incendies</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaW5jZW5kaWVzIDwtIHJlYWQuY3N2KGZpbGU9XCJJbmNlbmRpZXMuY3N2XCIsXG4gICAgICAgICAgICAgICAgICAgICBjb2wubmFtZXMgPSBjKFwiYW5uZWVcIixcImlkXCIsXCJkZXBhcnRlbWVudFwiLFwiY29kZV9pbnNlZVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIm5vbV9jb21tdW5lXCIsXCJkYXRlX2FsZXJ0ZVwiLFwib3JpZ2luZV9hbGVydGVcIixcIm1veWVuc19wcmVtaWVyZV9pbnRlcnZlbnRpb25cIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJzdXJmYWNlX3BhcmNvdXJ1ZVwiLFwic3VyZmFjZV9mb3JldFwiLFwic3VyZmFjZV9tYXF1aXNcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJzdXJmYWNlX25hdF9hdXRyZV9mb3JldFwiLFwic3VyZmFjZV9hZ3JpY29sZVwiLFwic3VyZmFjZV9hdXRyZV90ZXJyZV9ib2lzZWVcIixcInN1cmZhY2Vfbm9uX2JvaXNlZV9uYXRcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJzdXJmYWNlX25vbl9ib2lzZWVfYXJ0XCIsXCJzdWZhY2Vfbm9uX2JvaXNlZVwiLFwicHJlY2lzaW9uX3N1cmZcIixcInN1cmZhY2VfZmV1X2luaXRpYWxlXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwidm9pZV9jYXJvc3NfcHJvY2hlXCIsXCJhY3RfaGFiX3Byb2NoZVwiLFwidHlwZV9wZXVwbFwiLFwiY29ubmFpc3NhbmNlXCIsXCJzb3VyY2VfZW5xdWV0ZVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIm5hdHVyZVwiLFwiaW50ZXJ2X2VxdWlwZVwiLFwiZGVjZXNfYmF0X3RvdWNoZXNcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJuYl9kZWNlc1wiLFwibmJfYmF0X3RvdF9kZXRydWl0XCIsXCJuYl9iYXRfcGFydF9kZXRydWl0XCIsXCJoeWdyb21ldHJpZVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcInZfbW95ZW5uX3ZlbnRcIixcImRpcl92ZW5cIixcInRlbXBlcmF0dXJlXCIsXCJwcmVjaXNpb25fZG9ubmVlXCIsXCJwcmVzZW5jZV9jb250b3VyX3ZhbGlkZVwiKSxcbiAgICAgICAgICAgICAgICAgICAgIGhlYWRlciA9IFQsIFxuICAgICAgICAgICAgICAgICAgICAgc2VwPVwiO1wiLFxuICAgICAgICAgICAgICAgICAgICAgZW5jb2Rpbmc9J1VURi04Jyxza2lwID0gNilcbmBgYCJ9 -->
+<pre class="r"><code>incendies &lt;- read.csv(file=&quot;Incendies.csv&quot;,
+                     col.names = c(&quot;annee&quot;,&quot;id&quot;,&quot;departement&quot;,&quot;code_insee&quot;,
+                                   &quot;nom_commune&quot;,&quot;date_alerte&quot;,&quot;origine_alerte&quot;,&quot;moyens_premiere_intervention&quot;,
+                                   &quot;surface_parcourue&quot;,&quot;surface_foret&quot;,&quot;surface_maquis&quot;,
+                                   &quot;surface_nat_autre_foret&quot;,&quot;surface_agricole&quot;,&quot;surface_autre_terre_boisee&quot;,&quot;surface_non_boisee_nat&quot;,
+                                   &quot;surface_non_boisee_art&quot;,&quot;suface_non_boisee&quot;,&quot;precision_surf&quot;,&quot;surface_feu_initiale&quot;,
+                                   &quot;voie_caross_proche&quot;,&quot;act_hab_proche&quot;,&quot;type_peupl&quot;,&quot;connaissance&quot;,&quot;source_enquete&quot;,
+                                   &quot;nature&quot;,&quot;interv_equipe&quot;,&quot;deces_bat_touches&quot;,
+                                   &quot;nb_deces&quot;,&quot;nb_bat_tot_detruit&quot;,&quot;nb_bat_part_detruit&quot;,&quot;hygrometrie&quot;,
+                                   &quot;v_moyenn_vent&quot;,&quot;dir_ven&quot;,&quot;temperature&quot;,&quot;precision_donnee&quot;,&quot;presence_contour_valide&quot;),
+                     header = T, 
+                     sep=&quot;;&quot;,
+                     encoding=&#39;UTF-8&#39;,skip = 6)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1801,6 +1900,24 @@ R graphics engine version 15 is not supported by this version of RStudio. The Pl
 <h3>Etape 2.3 Import des données méteo</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWV0ZW8gPC0gcmVhZC5jc3YoZmlsZT1cImRvbm5lZXMtc3lub3AtZXNzZW50aWVsbGVzLW9tbS5jc3ZcIiwgXG4gICAgICAgICAgICAgICAgICBjb2wubmFtZXMgPSBjKFwiaWRfc3RhdGlvblwiLFwiZGF0ZV9tZXN1cmVcIixcInByZXNzaW9uX25pdmVhdV9tZXJcIixcInZhcl9wcmVzc2lvbl8zaFwiLFwidHlwZV90ZW5kYW5jZV9iYXJvbcOpdHJpcXVlXCIsXCJkaXJlY3Rpb25fdmVudF9tb3llbl8xMG1uXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwidml0ZXNzZV92ZW50X21veWVuXzEwbVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcInRlbXBlcmF0dXJlXCIsXCJwb2ludF9yb3NlZVwiLFwiaHVtaWRpdGVcIixcInZpc2liaWxpdGVfaG9yaXpvbnRhbGVcIixcImlkX3RlbXBzX3ByZXNlbnRcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJpZF90ZW1wc19wYXNzZV8xXCIsXCJpZF90ZW1wc19wYXNzZV8yXCIsXCJuZWJ1bG9zaXRlX3RvdGFsZVwiLFwibmVidWxvc2l0ZV9udWFnZV9ldGFnZV9pbmZcIixcImhhdXRldXJfYmFzZV9udWFnZV9ldGFnZV9pbmZcIixcInR5cGVfbnVhZ2VfZXRhZ2VfaW5mXCIsXCJ0eXBlX251YWdlX2V0YWdlX21veVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcInR5cGVfbnVhZ2VfZXRhZ2Vfc3VwXCIsXCJwcmVzc2lvbl9zdGF0aW9uXCIsXCJuaXZlYXVfYmFyb21ldHJpcXVlXCIsXCJnZW9wb3RlbnRpZWxcIixcInZhcl9wcmVzc2lvbl8yNGhcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJ0ZW1wX21pbl8xMmhcIixcInRlbXBfbWluXzI0aFwiLFwidGVtcF9tYXhfMTJoXCIsXCJ0ZW1wX21heF8yNGhcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJ0ZW1wX21pbl9zb2xfMTJoXCIsXCJtZXRob2RlX21lc3VyZV90ZW1wX3RobW91aWxsZVwiLFwidGVtcGVyYXR1cmVfdGhtb3VpbGxlXCIsXCJyYWZhbGVzXzEwZGVybWluXCIsXCJyYWZhbGVzX3BlcmlvZGVcIixcInBlcmlvZGVfbWVzdXJlX3JhZmFsZVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcImV0YXRfc29sXCIsXCJoYXV0ZXVyX2NvdWNoZV9uZWlnbFwiLFwiaGF1dGV1cl9uZWlnZV9mcmFpY2hlXCIsXCJwZXJpb2RlX21lc3VyZV9uZWlnZV9mcmFpY2hlXCIsXCJwcmVjaXBpYXRpb25fZGVyaFwiLFwicHJlY2lwaXRhdGlvbl8zZGhcIixcInByZWNpcGl0YXRpb25fNmRoXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwicHJlY2lwaXRhdGlvbl8xMmRoXCIsXCJwcmVjaXBpdGF0aW9uXzI0ZGhcIixcInBoX3NwZV8xXCIsXCJwaF9zcGVfMlwiLFwicGhfc3BlXzNcIixcInBoX3NwZV80XCIsXCJuZWJ1bG9zaXRlX2NvdWNoZV9udWFnZXVzZV8xXCIsXCJ0eXBlX251YWdlXzFcIixcImhhdXRldXJfYmFzZV8xXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwibmVidWxvc2l0ZV9jb3VjaGVfbnVhZ2V1c2VfMlwiLFwidHlwZV9udWFnZV8yXCIsXCJoYXV0ZXVyX2Jhc2VfMlwiLFwibmVidWxvc2l0ZV9jb3VjaGVfbnVhZ2V1c2VfM1wiLFwidHlwZV9udWFnZV8zXCIsXCJoYXV0ZXVyX2Jhc2VfM1wiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIm5lYnVsb3NpdGVfY291Y2hlX251YWdldXNlXzRcIixcInR5cGVfbnVhZ2VfNFwiLFwiaGF1dGV1cl9iYXNlXzRcIixcImNvb3Jkb25uZWVzXCIsXCJub21fc3RhdGlvblwiLFwibGliX3R5cGVfdGVuZGFuY2VfYmFyb21ldHJpcXVlXCIsXCJsaWJfdGVtcHNfcGFzc2UxXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwibGliX3RlbXBzX3ByZXNlbnRcIixcInRlbXBlcmF0dXJlX0NcIixcInRlbXBlcmF0dXJlX21pbl8xMmhfQ1wiLFwidGVtcGVyYXR1cmVfbWluXzI0aF9DXCIsXCJ0ZW1wZXJhdHVyZV9tYXhfMTJoX0NcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJ0ZW1wZXJhdHVyZV9tYXhfMjRoX0NcIixcInRlbXBlcmF0dXJlX21pbl9zb2xfMTJoX0NcIixcImxhdGl0dWRlXCIsXCJsb25naXR1ZGVcIixcImFsdGl0dWRlXCIsXCJsaWJfY29tbXVuZVwiLFwiY29kZV9jb21tdW5lXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwibGliX2VwY2lcIixcImNvZGVfZXBjaVwiLFwibGliX2RlcGFydGVtZW50XCIsXCJjb2RlX2RlcGFydGVtZW50XCIsXCJsaWJfcmVnaW9uXCIsXCJjb2RlX3JlZ2lvblwiLFwibW9pc1wiKSxcbiAgICAgICAgICAgICAgICAgIGhlYWRlciA9IFQsIHNlcD1cIjtcIixlbmNvZGluZz0nVVRGLTgnKSBcbmBgYCJ9 -->
+<pre class="r"><code>meteo &lt;- read.csv(file=&quot;donnees-synop-essentielles-omm.csv&quot;, 
+                  col.names = c(&quot;id_station&quot;,&quot;date_mesure&quot;,&quot;pression_niveau_mer&quot;,&quot;var_pression_3h&quot;,&quot;type_tendance_barométrique&quot;,&quot;direction_vent_moyen_10mn&quot;,
+                                &quot;vitesse_vent_moyen_10m&quot;,
+                                &quot;temperature&quot;,&quot;point_rosee&quot;,&quot;humidite&quot;,&quot;visibilite_horizontale&quot;,&quot;id_temps_present&quot;,
+                                &quot;id_temps_passe_1&quot;,&quot;id_temps_passe_2&quot;,&quot;nebulosite_totale&quot;,&quot;nebulosite_nuage_etage_inf&quot;,&quot;hauteur_base_nuage_etage_inf&quot;,&quot;type_nuage_etage_inf&quot;,&quot;type_nuage_etage_moy&quot;,
+                                &quot;type_nuage_etage_sup&quot;,&quot;pression_station&quot;,&quot;niveau_barometrique&quot;,&quot;geopotentiel&quot;,&quot;var_pression_24h&quot;,
+                                &quot;temp_min_12h&quot;,&quot;temp_min_24h&quot;,&quot;temp_max_12h&quot;,&quot;temp_max_24h&quot;,
+                                &quot;temp_min_sol_12h&quot;,&quot;methode_mesure_temp_thmouille&quot;,&quot;temperature_thmouille&quot;,&quot;rafales_10dermin&quot;,&quot;rafales_periode&quot;,&quot;periode_mesure_rafale&quot;,
+                                &quot;etat_sol&quot;,&quot;hauteur_couche_neigl&quot;,&quot;hauteur_neige_fraiche&quot;,&quot;periode_mesure_neige_fraiche&quot;,&quot;precipiation_derh&quot;,&quot;precipitation_3dh&quot;,&quot;precipitation_6dh&quot;,
+                                &quot;precipitation_12dh&quot;,&quot;precipitation_24dh&quot;,&quot;ph_spe_1&quot;,&quot;ph_spe_2&quot;,&quot;ph_spe_3&quot;,&quot;ph_spe_4&quot;,&quot;nebulosite_couche_nuageuse_1&quot;,&quot;type_nuage_1&quot;,&quot;hauteur_base_1&quot;,
+                                &quot;nebulosite_couche_nuageuse_2&quot;,&quot;type_nuage_2&quot;,&quot;hauteur_base_2&quot;,&quot;nebulosite_couche_nuageuse_3&quot;,&quot;type_nuage_3&quot;,&quot;hauteur_base_3&quot;,
+                                &quot;nebulosite_couche_nuageuse_4&quot;,&quot;type_nuage_4&quot;,&quot;hauteur_base_4&quot;,&quot;coordonnees&quot;,&quot;nom_station&quot;,&quot;lib_type_tendance_barometrique&quot;,&quot;lib_temps_passe1&quot;,
+                                &quot;lib_temps_present&quot;,&quot;temperature_C&quot;,&quot;temperature_min_12h_C&quot;,&quot;temperature_min_24h_C&quot;,&quot;temperature_max_12h_C&quot;,
+                                &quot;temperature_max_24h_C&quot;,&quot;temperature_min_sol_12h_C&quot;,&quot;latitude&quot;,&quot;longitude&quot;,&quot;altitude&quot;,&quot;lib_commune&quot;,&quot;code_commune&quot;,
+                                &quot;lib_epci&quot;,&quot;code_epci&quot;,&quot;lib_departement&quot;,&quot;code_departement&quot;,&quot;lib_region&quot;,&quot;code_region&quot;,&quot;mois&quot;),
+                  header = T, sep=&quot;;&quot;,encoding=&#39;UTF-8&#39;) </code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
