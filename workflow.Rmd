@@ -533,7 +533,7 @@ colSums(is.na(base_dataset_full))
 ## Etape 6 : Techniques de clustering / corélations des variables
 
 ```{r}
-########################################### tentative de PCA ###########
+########################################### tentative de PCA #########################
 x <- sample(1:nrow(base_dataset_full), 100000)
 test_acp = base_dataset_full[x, ]
 test_acp <- test_acp %>% select(-annee,-mois,-code_insee)
