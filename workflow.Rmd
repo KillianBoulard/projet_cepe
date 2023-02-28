@@ -202,8 +202,8 @@ base_dataset = crossing(date_dataset, insee_feu) %>%
   left_join(DIST_MIN_COMM_STATION, by="code_insee") %>% 
   select(-latitude_commune,-longitude_commune,-latitude_station,-longitude_station,-distance, -gps) %>% 
   mutate(
-    annee = as.numeric(annee),
-    mois = as.numeric(mois),
+    annee_num = as.numeric(annee),
+    mois_num = as.numeric(mois),
     date_trt = as.Date(paste(annee,mois, 01), "%Y %m %d"),
     date_m_1 = date_trt %m+% months(-1),
     date_m_12 = date_trt %m+% months(-12),
@@ -271,54 +271,53 @@ synt_gen_comm_dataset <-inc_dataset %>%
   select(- c(nature,origine_alerte)) %>% 
   group_by(code_insee) %>%
   mutate ( 
-        moy_surface_foret_g  = round(mean(surface_foret),3),
-        moy_surface_maquis_g = round(mean(surface_maquis),3),
-        moy_surface_nat_autre_foret_g = round(mean(surface_nat_autre_foret),3),
-        moy_surface_agricole_g        = round(mean(surface_agricole),3),
-        moy_surface_autre_terre_boisee_g  = round(mean(surface_autre_terre_boisee),3),
-        moy_surface_non_boisee_nat_g      = round(mean(surface_non_boisee_nat),3),
-        moy_surface_non_boisee_art_g      = round(mean(surface_non_boisee_art),3),
-        moy_suface_non_boisee_g           = round(mean(suface_non_boisee),3),
+        moy_surface_foret  = round(mean(surface_foret),3),
+        moy_surface_maquis = round(mean(surface_maquis),3),
+        moy_surface_nat_autre_foret = round(mean(surface_nat_autre_foret),3),
+        moy_surface_agricole        = round(mean(surface_agricole),3),
+        moy_surface_autre_terre_boisee  = round(mean(surface_autre_terre_boisee),3),
+        moy_surface_non_boisee_nat      = round(mean(surface_non_boisee_nat),3),
+        moy_surface_non_boisee_art      = round(mean(surface_non_boisee_art),3),
+        moy_suface_non_boisee           = round(mean(suface_non_boisee),3),
     
-        moy_nature_ind_g      = 	mean(nature_ind),
-        moy_nature_acc_g      = 	mean(nature_acc),
-        moy_nature_inv_part_g = 	mean(nature_inv_part),
-        moy_nature_inv_trav_g = 	mean(nature_inv_trav),
-        moy_nature_nat_g      = 	mean(nature_nat),
-        moy_nature_malv_g     = 	mean(nature_malv), 
+        moy_nature_ind      = 	mean(nature_ind),
+        moy_nature_acc      = 	mean(nature_acc),
+        moy_nature_inv_part = 	mean(nature_inv_part),
+        moy_nature_inv_trav = 	mean(nature_inv_trav),
+        moy_nature_nat      = 	mean(nature_nat),
+        moy_nature_malv     = 	mean(nature_malv), 
     
-        moy_orig_alerte_autr_g  = mean(orig_alerte_autr ),
-        moy_orig_alerte_ind_g   = mean(orig_alerte_ind  ),
-        moy_orig_alerte_mae_g   = mean(orig_alerte_mae  ),
-        moy_orig_alerte_pat_g   = mean(orig_alerte_pat  ),
-        moy_orig_alerte_ppr_g   = mean(orig_alerte_ppr  ),
-        moy_orig_alerte_pop_g   = mean(orig_alerte_pop  ),
-        moy_orig_alerte_vcam_g  = mean(orig_alerte_vcam )
+        moy_orig_alerte_autr  = mean(orig_alerte_autr ),
+        moy_orig_alerte_ind   = mean(orig_alerte_ind  ),
+        moy_orig_alerte_mae   = mean(orig_alerte_mae  ),
+        moy_orig_alerte_pat   = mean(orig_alerte_pat  ),
+        moy_orig_alerte_ppr   = mean(orig_alerte_ppr  ),
+        moy_orig_alerte_pop   = mean(orig_alerte_pop  ),
+        moy_orig_alerte_vcam  = mean(orig_alerte_vcam )
   )  %>%
 
   distinct(code_insee,
            ###info surface par commune
-           moy_surface_foret_g,
-           moy_surface_maquis_g,
-           moy_surface_nat_autre_foret_g,                               
-           moy_surface_agricole_g,
-           moy_surface_autre_terre_boisee_g,
-           moy_surface_non_boisee_nat_g,
-           moy_surface_non_boisee_art_g,
-           moy_suface_non_boisee_g,
+           moy_surface_foret,
+           moy_surface_maquis,
+           moy_surface_nat_autre_foret,                               
+           moy_surface_agricole,
+           moy_surface_autre_terre_boisee,
+           moy_surface_non_boisee_nat,
+           moy_surface_non_boisee_art,
+           moy_suface_non_boisee,
            ###info nature incendie
-           moy_nature_ind_g,
-           moy_nature_acc_g,
-           moy_nature_inv_part_g,
-           moy_nature_inv_trav_g,
-           moy_nature_nat_g,
-           moy_nature_malv_g,
+           moy_nature_ind,
+           moy_nature_acc,
+           moy_nature_inv_part,
+           moy_nature_inv_trav,
+           moy_nature_nat,
+           moy_nature_malv,
            ###info origine incendie
-           moy_orig_alerte_autr_g, moy_orig_alerte_ind_g  ,moy_orig_alerte_mae_g  ,
-           moy_orig_alerte_pat_g,  moy_orig_alerte_ppr_g , moy_orig_alerte_pop_g , moy_orig_alerte_vcam_g ) %>% 
-           select(-moy_surface_agricole_g) %>%
+           moy_orig_alerte_autr, moy_orig_alerte_ind  ,moy_orig_alerte_mae  ,
+           moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam ) %>% 
+           select(-moy_surface_agricole) %>%
            ungroup()
-
 
 synt_mois_comm_dataset <-inc_dataset %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
@@ -496,12 +495,37 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
 x <- sample(1:nrow(base_dataset), 100000)
 base_dataset_test = base_dataset[x, ]
 
-#Ajout des données générales sur les incendies ainsi que la météo
-base_dataset_test = base_dataset_test %>% 
-    left_join(synt_gen_comm_dataset, keep= F, suffix = c('_1', '_2'), 
+#Ajout des données générales et mensuelles sur les incendies 
+base_dataset_full = base_dataset_test %>% 
+    left_join(synt_gen_comm_dataset,
           by=c("code_insee")) %>% 
-      left_join(transpose_by_station, keep= F, 
-          by=c("id_station"))
+      left_join(synt_mois_comm_dataset, keep= F, suffix = c('_g', '_m'), 
+          by=c("code_insee","annee","mois"))
+
+#Ajout des données générales et mensuelles sur la météo 
+base_dataset_full = base_dataset_full %>% 
+      left_join(transpose_by_station,
+          by=c("id_station")) %>% 
+        left_join(transpose_by_station_annee_mois, keep= F, suffix = c('_g', '_m'), 
+          by=c("id_station","annee" = "annee_mesure","mois" = "mois_mesure"))
+
+#Ajout des données du mois précédent
+base_dataset_full = base_dataset_full %>% 
+      left_join(synt_mois_comm_dataset,
+          by=c("code_insee" = "code_insee", "annee_m_1" = "annee", "mois_m_1" = "mois")) %>% 
+      left_join(synt_mois_comm_dataset, keep= F, suffix = c('_m_1', '_m_12'), 
+          by=c("code_insee" = "code_insee", "annee_m_12" = "annee", "mois_m_12" = "mois"))
+
+#Ajout des données du même mois de l'année précédente
+base_dataset_full = base_dataset_full %>% 
+      left_join(transpose_by_station_annee_mois,
+          by=c("id_station" = "id_station", "annee_m_1" = "annee_mesure", "mois_m_1" = "mois_mesure")) %>% 
+      left_join(transpose_by_station_annee_mois, keep= F, suffix = c('_m_1', '_m_12'), 
+          by=c("id_station" = "id_station", "annee_m_12" = "annee_mesure", "mois_m_12" = "mois_mesure"))
+
+base_dataset_full = base_dataset_full %>% 
+  select(-date_trt, -annee_m_1, -mois_m_1, -annee_m_12, -mois_m_12, -annee_num, -mois_num)
+  
 
 ```
 
