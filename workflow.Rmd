@@ -492,8 +492,8 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
 
 ```{r}
 #Travail sur échantillon pour des raisons de temps de calcul 
-x <- sample(1:nrow(base_dataset), 100000)
-base_dataset_test = base_dataset[x, ]
+#x <- sample(1:nrow(base_dataset), 100000)
+#base_dataset_test = base_dataset[x, ]
 
 #Ajout des données générales et mensuelles sur les incendies 
 base_dataset_full = base_dataset %>% 
@@ -527,11 +527,13 @@ base_dataset_full = base_dataset_full %>%
   select(-date_trt, -annee_m_1, -mois_m_1, -annee_m_12, -mois_m_12, -annee_num, -mois_num)
 
 
-x <- sample(1:nrow(base_dataset_full), 10000)
-test = base_dataset_full[x, ]
-
-write_xlsx(test,"C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets/test.xlsx")
-
+colSums(is.na(base_dataset_full))
 ```
 
+## Etape 6 : Techniques de clustering / corélations des variables
+
+
+```{r}
+
+```
 
