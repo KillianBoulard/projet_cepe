@@ -496,7 +496,7 @@ x <- sample(1:nrow(base_dataset), 100000)
 base_dataset_test = base_dataset[x, ]
 
 #Ajout des données générales et mensuelles sur les incendies 
-base_dataset_full = base_dataset_test %>% 
+base_dataset_full = base_dataset %>% 
     left_join(synt_gen_comm_dataset,
           by=c("code_insee")) %>% 
       left_join(synt_mois_comm_dataset, keep= F, suffix = c('_g', '_m'), 
@@ -526,7 +526,8 @@ base_dataset_full = base_dataset_full %>%
 base_dataset_full = base_dataset_full %>% 
   select(-date_trt, -annee_m_1, -mois_m_1, -annee_m_12, -mois_m_12, -annee_num, -mois_num)
   
-
+base_dataset_full %>% 
+  filter(presence_feu ==1)
 ```
 
 
