@@ -27,7 +27,7 @@ knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formati
 
 ### Etape 2.1 : Import des données communes
 
-```{r warning=FALSE}
+```{r}
 communes <- read.csv(file="correspondance-code-insee-code-postal.csv", header = T, sep=";", encoding="UTF-8",
                      col.names = c("code_insee","code_postal",
                                    "commune","departement","region","statut","altitude_moyenne",
