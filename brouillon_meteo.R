@@ -11,6 +11,7 @@ library(missMDA)
 library(psych)
 
 
+
 setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
 
 #####################################
