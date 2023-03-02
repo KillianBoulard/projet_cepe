@@ -9,6 +9,7 @@ library(FactoMineR)
 library(corrplot)
 library(missMDA)
 library(psych)
+library(WriteXLS)
 
 
 
@@ -142,5 +143,28 @@ corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
 
 corrplot(mcor)
 test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
+
+
+
+
+my_data <- readRDS("base_dataset_full.rds")
+
+
+test13028<- my_data %>% filter(code_insee=="13028")
+
+WriteXLS(test01073, "C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/
+           tests_unitaires/test01073.xlsx")
+
+
+write.csv(x = test01073, file = "monFichier.csv")
+
+write.csv2(test13028, file="C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/tests_unitaires/test13028.csv")
+
+
+
+
+
+
+
 
 
