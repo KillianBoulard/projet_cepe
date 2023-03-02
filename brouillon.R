@@ -482,4 +482,20 @@ best_res_fit %>%  collect_predictions()
 
 
 ## En résumer, il faut surtout faire la partie 1, 2 et 4
+01017
 
+
+toto = base_dataset_full %>% 
+  filter(mois == "05" & annee == "2015") %>% 
+  filter(code_insee =="01017")
+
+
+toti = inc_dataset %>% 
+  filter(code_insee =="01017")
+
+
+test = inc_dataset %>% 
+  group_by(annee,mois,code_insee)%>% 
+  mutate(med=n())
+
+test = inc_dataset %>% group_by(annee, mois, code_insee) %>% mutate(count = n()) 

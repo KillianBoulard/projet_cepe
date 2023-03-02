@@ -493,6 +493,7 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
 ```{r}
 #Travail sur échantillon pour des raisons de temps de calcul 
 #x <- sample(1:nrow(base_dataset), 100000)
+#base_dataset_full = base_dataset_full[x,]
 #base_dataset_test = base_dataset[x, ]
 
 #Ajout des données générales et mensuelles sur les incendies 
@@ -528,6 +529,7 @@ base_dataset_full = base_dataset_full %>%
 
 
 colSums(is.na(base_dataset_full))
+saveRDS(base_dataset_full, file = "base_dataset_full.rds")
 ```
 
 ## Etape 6 : Techniques de clustering / corélations des variables
