@@ -11,6 +11,7 @@ library(purrr)
 setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
 
 
+
 #taff
 setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
 
