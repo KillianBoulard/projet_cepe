@@ -494,6 +494,10 @@ toti = inc_dataset %>%
   filter(code_insee =="01017")
 
 
+toti = base_dataset_test %>% 
+  filter(presence_feu_m_1 =="1")
+
+
 test = inc_dataset %>% 
   group_by(annee,mois,code_insee)%>% 
   mutate(med=n())

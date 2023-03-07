@@ -43,7 +43,7 @@ incendies <- read.csv(file="Incendies.csv",
                                    "nom_commune","date_alerte","origine_alerte","moyens_premiere_intervention",
                                    "surface_parcourue","surface_foret","surface_maquis",
                                    "surface_nat_autre_foret","surface_agricole","surface_autre_terre_boisee","surface_non_boisee_nat",
-                                   "surface_non_boisee_art","suface_non_boisee","precision_surf","surface_feu_initiale",
+                                   "surface_non_boisee_art","surface_non_boisee","precision_surf","surface_feu_initiale",
                                    "voie_caross_proche","act_hab_proche","type_peupl","connaissance","source_enquete",
                                    "nature","interv_equipe","deces_bat_touches",
                                    "nb_deces","nb_bat_tot_detruit","nb_bat_part_detruit","hygrometrie",
@@ -51,6 +51,7 @@ incendies <- read.csv(file="Incendies.csv",
                      header = T, 
                      sep=";",
                      encoding='UTF-8',skip = 6)
+
 ```  
 
 ### Etape 2.3 Import des données méteo
@@ -249,8 +250,8 @@ inc_dataset$surface_agricole<-as.integer(inc_dataset$surface_agricole)
 synt_gen_comm_dataset <-inc_dataset %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
          surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
-         surface_non_boisee_art,suface_non_boisee,nature) %>% 
-  select(- c(annee, surface_parcourue))                   %>%
+         surface_non_boisee_art,surface_non_boisee,nature) %>% 
+  select(- c(annee))                   %>%
   mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
   mutate(
           nature_ind = ifelse(nature=="",1,0) ,
@@ -270,7 +271,8 @@ synt_gen_comm_dataset <-inc_dataset %>%
   )                                                       %>% 
   select(- c(nature,origine_alerte)) %>% 
   group_by(code_insee) %>%
-  mutate ( 
+  mutate (
+        moy_surface_parcourue = round(mean(surface_parcourue),3),
         moy_surface_foret  = round(mean(surface_foret),3),
         moy_surface_maquis = round(mean(surface_maquis),3),
         moy_surface_nat_autre_foret = round(mean(surface_nat_autre_foret),3),
@@ -278,7 +280,7 @@ synt_gen_comm_dataset <-inc_dataset %>%
         moy_surface_autre_terre_boisee  = round(mean(surface_autre_terre_boisee),3),
         moy_surface_non_boisee_nat      = round(mean(surface_non_boisee_nat),3),
         moy_surface_non_boisee_art      = round(mean(surface_non_boisee_art),3),
-        moy_suface_non_boisee           = round(mean(suface_non_boisee),3),
+        moy_surface_non_boisee           = round(mean(surface_non_boisee),3),
     
         moy_nature_ind      = 	mean(nature_ind),
         moy_nature_acc      = 	mean(nature_acc),
@@ -298,6 +300,7 @@ synt_gen_comm_dataset <-inc_dataset %>%
 
   distinct(code_insee,
            ###info surface par commune
+           moy_surface_parcourue,
            moy_surface_foret,
            moy_surface_maquis,
            moy_surface_nat_autre_foret,                               
@@ -305,7 +308,7 @@ synt_gen_comm_dataset <-inc_dataset %>%
            moy_surface_autre_terre_boisee,
            moy_surface_non_boisee_nat,
            moy_surface_non_boisee_art,
-           moy_suface_non_boisee,
+           moy_surface_non_boisee,
            ###info nature incendie
            moy_nature_ind,
            moy_nature_acc,
@@ -322,8 +325,7 @@ synt_gen_comm_dataset <-inc_dataset %>%
 synt_mois_comm_dataset <-inc_dataset %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
          surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
-         surface_non_boisee_art,suface_non_boisee,nature, mois) %>% 
-  select(- c(surface_parcourue))                   %>%
+         surface_non_boisee_art,surface_non_boisee,nature, mois)                  %>%
   mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
   mutate(
           nature_ind = ifelse(nature=="",1,0) ,
@@ -344,6 +346,7 @@ synt_mois_comm_dataset <-inc_dataset %>%
   select(- c(nature,origine_alerte)) %>% 
   group_by(code_insee, annee, mois) %>%
   mutate ( 
+        moy_surface_parcourue = round(mean(surface_parcourue),3),
         moy_surface_foret  = round(mean(surface_foret),3),
         moy_surface_maquis = round(mean(surface_maquis),3),
         moy_surface_nat_autre_foret = round(mean(surface_nat_autre_foret),3),
@@ -351,7 +354,7 @@ synt_mois_comm_dataset <-inc_dataset %>%
         moy_surface_autre_terre_boisee  = round(mean(surface_autre_terre_boisee),3),
         moy_surface_non_boisee_nat      = round(mean(surface_non_boisee_nat),3),
         moy_surface_non_boisee_art      = round(mean(surface_non_boisee_art),3),
-        moy_suface_non_boisee           = round(mean(suface_non_boisee),3),
+        moy_surface_non_boisee           = round(mean(surface_non_boisee),3),
     
         moy_nature_ind      = 	mean(nature_ind),
         moy_nature_acc      = 	mean(nature_acc),
@@ -371,12 +374,13 @@ synt_mois_comm_dataset <-inc_dataset %>%
 
   distinct(code_insee,
            ###info surface par commune
+           moy_surface_parcourue,
            moy_surface_foret,
            moy_surface_maquis,
            moy_surface_nat_autre_foret,                               
            moy_surface_agricole,
            moy_surface_autre_terre_boisee,
-           moy_surface_non_boisee_nat,moy_surface_non_boisee_art,moy_suface_non_boisee,
+           moy_surface_non_boisee_nat,moy_surface_non_boisee_art,moy_surface_non_boisee,
            ###info nature incendie
            moy_nature_ind,moy_nature_acc,moy_nature_inv_part,moy_nature_inv_trav,moy_nature_nat,
            moy_nature_malv,
@@ -491,11 +495,6 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
 ### Etape 5.3 : préparation du dataset final (base_dataset complété des données incendies et méteo)
 
 ```{r}
-#Travail sur échantillon pour des raisons de temps de calcul 
-#x <- sample(1:nrow(base_dataset), 100000)
-#base_dataset_full = base_dataset_full[x,]
-#base_dataset_test = base_dataset[x, ]
-
 #Ajout des données générales et mensuelles sur les incendies 
 base_dataset_full = base_dataset %>% 
     left_join(synt_gen_comm_dataset,
@@ -510,14 +509,17 @@ base_dataset_full = base_dataset_full %>%
         left_join(transpose_by_station_annee_mois, keep= F, suffix = c('_g', '_m'), 
           by=c("id_station","annee" = "annee_mesure","mois" = "mois_mesure"))
 
-#Ajout des données du mois précédent
+#Ajout des données du mois précédent et -12 sur les feu
 base_dataset_full = base_dataset_full %>% 
       left_join(synt_mois_comm_dataset,
           by=c("code_insee" = "code_insee", "annee_m_1" = "annee", "mois_m_1" = "mois")) %>% 
       left_join(synt_mois_comm_dataset, keep= F, suffix = c('_m_1', '_m_12'), 
-          by=c("code_insee" = "code_insee", "annee_m_12" = "annee", "mois_m_12" = "mois"))
+          by=c("code_insee" = "code_insee", "annee_m_12" = "annee", "mois_m_12" = "mois")) %>%
+  mutate(
+    presence_feu_m_1 = if_else(is.na(moy_surface_parcourue_m_1), 0, 1),
+    presence_feu_m_12 = if_else(is.na(moy_surface_parcourue_m_12), 0, 1)) 
 
-#Ajout des données du même mois de l'année précédente
+#Ajout des données du mois précédent et -12 sur la météo
 base_dataset_full = base_dataset_full %>% 
       left_join(transpose_by_station_annee_mois,
           by=c("id_station" = "id_station", "annee_m_1" = "annee_mesure", "mois_m_1" = "mois_mesure")) %>% 
@@ -528,8 +530,18 @@ base_dataset_full = base_dataset_full %>%
   select(-date_trt, -annee_m_1, -mois_m_1, -annee_m_12, -mois_m_12, -annee_num, -mois_num)
 
 
-colSums(is.na(base_dataset_full))
-saveRDS(base_dataset_full, file = "base_dataset_full.rds")
+#Lorsqu'il n'y a pas de feu, on remplace les NA par 0
+base_dataset_full = base_dataset_full %>%
+  mutate_at(vars(
+           starts_with(c("moy_surface","moy_nature", "moy_orig_alerte"))),  ~replace_na(., 0))
+
+
+#Travail sur échantillon pour des raisons de temps de calcul 
+x <- sample(1:nrow(base_dataset_full), 10000)
+base_dataset_test = base_dataset_full[x, ]
+
+colSums(is.na(base_dataset_test))
+prop_na <-base_dataset_full %>% summarize_all(funs(sum(is.na(.)) / length(.)))
 ```
 
 ## Etape 6 : Techniques de clustering / corélations des variables
@@ -552,7 +564,6 @@ corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
 
 corrplot(mcor)
 test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
-
 
 cor(base_dataset_full, method = c("pearson", "kendall", "spearman"))
  sapply(base_dataset_full,class)
