@@ -540,6 +540,8 @@ base_dataset_full = base_dataset_full %>%
 x <- sample(1:nrow(base_dataset_full), 10000)
 base_dataset_test = base_dataset_full[x, ]
 
+
+
 colSums(is.na(base_dataset_test))
 prop_na <-base_dataset_full %>% summarize_all(funs(sum(is.na(.)) / length(.)))
 ```
