@@ -536,15 +536,92 @@ base_dataset_full = base_dataset_full %>%
            starts_with(c("moy_surface","moy_nature", "moy_orig_alerte"))),  ~replace_na(., 0))
 
 
+test = base_dataset_full %>%
+  head(1000) %>% 
+  mutate_at(vars(
+           starts_with(c("moy_surface","moy_nature", "moy_orig_alerte"))),  ~replace_na(., 0))
+
 #Travail sur échantillon pour des raisons de temps de calcul 
-x <- sample(1:nrow(base_dataset_full), 10000)
-base_dataset_test = base_dataset_full[x, ]
+#x <- sample(1:nrow(base_dataset_full), 10000)
+#base_dataset_test = base_dataset_full[x, ]
 
 
-
-colSums(is.na(base_dataset_test))
-prop_na <-base_dataset_full %>% summarize_all(funs(sum(is.na(.)) / length(.)))
+#colSums(is.na(base_dataset_test))
+#prop_na <-base_dataset_full %>% summarize_all(funs(sum(is.na(.)) / length(.)))
 ```
+
+  #var1 = colnames(test)[i]
+  #test = test %>%
+  #mutate(!!var1 := coalesce(.[[i]], .[[ii]]))
+
+```{r}
+test = base_dataset_full %>%
+  head(15)
+
+test = test %>%
+  mutate(pression_niveau_mer_23_m_1 = coalesce(pression_niveau_mer_23_m_1, pression_niveau_mer_23_g))
+
+#Déclaration de l'index de début et de fin
+index1 = as.numeric(match("pression_niveau_mer_23_g", names(test)))
+index2 = as.numeric(match("precipitation_12dh_14_g", names(test)))
+
+indexv1 = as.numeric(match("pression_niveau_mer_23_m_1", names(test)))
+indexv2 = as.numeric(match("precipitation_12dh_14_m_1", names(test)))
+
+indexv3 = as.numeric(match("pression_niveau_mer_23_m_12", names(test)))
+indexv4 = as.numeric(match("precipitation_12dh_14_m_12", names(test)))
+
+indexv5 = as.numeric(match("pression_niveau_mer_23_m", names(test)))
+indexv6 = as.numeric(match("precipitation_12dh_14_m", names(test)))
+
+i = 1
+ii = index1-1
+var = indexv1 -1
+  
+#Pour les données météo manquantes : application de la donnée générale moyenne sur la station
+ for (i in 1:84){
+   
+    if (ii >= index2){
+      ii = index1
+    }else{
+      ii = ii+1
+    }
+   
+   if (var == indexv2) { 
+    var = indexv3
+    } else if (var == indexv4) {
+    var = indexv5
+    } else {
+    var = var+1
+    varname = colnames(test)[var]
+}
+   print(paste(varname, colnames(test)[ii]))
+   
+    #test = test %>%
+    #mutate(!!varname := coalesce(.[[var]], .[[ii]]))
+    
+   i = i+1
+ }
+
+
+    test = test %>%
+    mutate(!!var := coalesce(.[[var]], .[[ii]]))
+
+  var1 = colnames(test)[i]
+  test = test %>%
+  mutate(!!var1 := coalesce(.[[i]], .[[ii]]))
+
+```
+
+
+```{r}
+test = test %>%
+  mutate(pression_niveau_mer_23_m_12_A = coalesce(pression_niveau_mer_23_m_12, pression_niveau_mer_23_g))
+
+```
+
+
+
 
 ## Etape 6 : Techniques de clustering / corélations des variables
 
