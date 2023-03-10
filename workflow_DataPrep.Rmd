@@ -562,32 +562,36 @@ indexv4 = as.numeric(match("precipitation_12dh_14_m_12", names(test)))
 indexv5 = as.numeric(match("pression_niveau_mer_23_m", names(test)))
 indexv6 = as.numeric(match("precipitation_12dh_14_m", names(test)))
 
-i = 1
 ii = index1 
 var = indexv1 
   
 #Pour les données météo manquantes : application de la donnée générale moyenne sur la station
  for (i in 1:84){
    varname = colnames(base_dataset_full)[var]
-   
     base_dataset_full = base_dataset_full %>%
     mutate(!!varname := coalesce(.[[var]], .[[ii]]))   
-
+    
     if (ii >= index2){
       ii = index1
     }else{
-      ii = ii+1
-    }
-   
+      ii = ii+1}
+    
    if (var == indexv2) { 
     var = indexv3
     } else if (var == indexv4) {
     var = indexv5
     } else {
-    var = var+1
-    }
- }
+    var = var+1}
+  }
 ```
 
+### Etape 5.4 : Selection des données finales
+
+```{r}
+test = base_dataset_full %>% 
+  select(-c(ends_with("_m")))
+
+
+```
 
 
