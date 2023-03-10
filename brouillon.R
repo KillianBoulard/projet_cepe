@@ -505,5 +505,65 @@ test = inc_dataset %>%
 test = inc_dataset %>% group_by(annee, mois, code_insee) %>% mutate(count = n()) 
 
 
-colSums(is.na(test))
-prop_na <-test %>% summarize_all(funs(sum(is.na(.)) / length(.)))
+colSums(is.na(base_dataset_full))
+prop_na <-base_dataset_full %>% summarize_all(funs(sum(is.na(.)) / length(.)))
+
+
+
+test = base_dataset_full %>%
+  head(15)
+
+test = test %>%
+  mutate(pression_niveau_mer_23_m_1 = coalesce(pression_niveau_mer_23_m_1, pression_niveau_mer_23_g))
+
+#Déclaration de l'index de début et de fin
+index1 = as.numeric(match("pression_niveau_mer_23_g", names(test)))
+index2 = as.numeric(match("precipitation_12dh_14_g", names(test)))
+
+indexv1 = as.numeric(match("pression_niveau_mer_23_m_1", names(test)))
+indexv2 = as.numeric(match("precipitation_12dh_14_m_1", names(test)))
+
+indexv3 = as.numeric(match("pression_niveau_mer_23_m_12", names(test)))
+indexv4 = as.numeric(match("precipitation_12dh_14_m_12", names(test)))
+
+indexv5 = as.numeric(match("pression_niveau_mer_23_m", names(test)))
+indexv6 = as.numeric(match("precipitation_12dh_14_m", names(test)))
+
+i = 1
+ii = index1 
+var = indexv1 
+
+#Pour les données météo manquantes : application de la donnée générale moyenne sur la station
+for (i in 1:84){
+  varname = colnames(test)[var]
+  
+  test = test %>%
+    mutate(!!varname := coalesce(.[[var]], .[[ii]]))   
+  
+  if (ii >= index2){
+    ii = index1
+  }else{
+    ii = ii+1
+  }
+  
+  if (var == indexv2) { 
+    var = indexv3
+  } else if (var == indexv4) {
+    var = indexv5
+  } else {
+    var = var+1
+  }
+}
+
+test = test %>%
+  mutate(!!var := coalesce(.[[var]], .[[ii]]))
+
+var1 = colnames(test)[i]
+test = test %>%
+  mutate(!!var1 := coalesce(.[[i]], .[[ii]]))
+
+test = test %>%
+  mutate(pression_niveau_mer_23_m_12_A = coalesce(pression_niveau_mer_23_m_12, pression_niveau_mer_23_g))
+
+#print(paste(varname, colnames(test)[ii]))
+#print(paste(colnames(test)[var], colnames(test)[ii]))
