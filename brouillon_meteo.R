@@ -10,6 +10,9 @@ library(corrplot)
 library(missMDA)
 library(psych)
 library(WriteXLS)
+library(factoextra)
+library(NbClust)
+
 
 
 
@@ -41,7 +44,6 @@ meteo <- read.csv(file="donnees-synop-essentielles-omm.csv",
 # variables liées à la temperature
 prop_na <-meteo %>% summarize_all(funs(sum(is.na(.)) / length(.)))
 
-
 ############################################################################################################
 ######################## autre taff ########################################################################
 
@@ -49,7 +51,7 @@ prop_na <-meteo %>% summarize_all(funs(sum(is.na(.)) / length(.)))
 convert_temp_KtoC<-function(x) x-273.15
 
 
-convert_temperature(277)
+convert_temp_KtoC(277)
 
 
 
@@ -105,25 +107,16 @@ METEO_QUANTI<-meteo %>%
   
  #mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))  
 
-
   table(METEO_QUANTI$heure_mesure)
 
 ##### proportion de na 
  prop_na <- METEO_QUANTI %>% summarise_all(list(na = ~sum(is.na(.))/length(.) *100)) 
 
  
- 
- 
- 
 ########################################### tentative de PCA ###########
-
-
-
-echant_aleatoire_meteo<- METEO_QUANTI[sample(nrow(METEO_QUANTI), 200, replace = FALSE), ]
-
-echant_aleatoire_meteo2<- as.data.frame(echant_aleatoire_meteo,row.names = echant_aleatoire_meteo$id_station)
-
-echant_aleatoire_meteo2<- echant_aleatoire_meteo2 %>% select(-id_station,-date_mesure,-heure_mesure)
+echant_aleatoire_meteo  <- METEO_QUANTI[sample(nrow(METEO_QUANTI), 200, replace = FALSE), ]
+echant_aleatoire_meteo2 <- as.data.frame(echant_aleatoire_meteo,row.names = echant_aleatoire_meteo$id_station)
+echant_aleatoire_meteo2 <- echant_aleatoire_meteo2 %>% select(-id_station,-date_mesure,-heure_mesure)
 
 res.pca <- PCA(echant_aleatoire_meteo2, graph = TRUE)
 
@@ -160,6 +153,71 @@ write.csv(x = test01073, file = "monFichier.csv")
 
 write.csv2(test13028, file="C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/tests_unitaires/test13028.csv")
 
+
+
+#### data visualisation données meteo
+
+testvismeteo_mois_annee<-METEO_QUANTI %>% select(id_station,date_mesure,temperature,humidite) %>%
+                               mutate(annee =format(date_mesure, format = "%Y"),
+                                      mois  =format(date_mesure, format = "%m")
+                                      ) %>%
+                               group_by(id_station,annee,mois) %>%
+                               mutate(mean_temp=mean(temperature),
+                                      mean_humidite=mean(humidite)) %>%
+                              distinct(id_station,annee,mois,mean_temp,mean_humidite)
+  
+testvismeteo_annee<-METEO_QUANTI %>% select(id_station,date_mesure,temperature,humidite) %>%
+  mutate(annee =format(date_mesure, format = "%Y"),
+         mois  =format(date_mesure, format = "%m")
+  ) %>%
+  group_by(id_station,annee) %>%
+  mutate(mean_temp=mean(temperature),
+         mean_humidite=mean(humidite)) %>%
+  distinct(id_station,annee,mean_temp,mean_humidite)
+
+write.csv2(x = testvismeteo_annee, file = "testvismeteo_annee.csv")
+
+
+testvismeteo_station <-METEO_QUANTI %>% select(id_station,date_mesure,temperature,humidite) %>%
+  mutate(annee =format(date_mesure, format = "%Y"),
+         mois  =format(date_mesure, format = "%m")
+  ) %>%
+  group_by(id_station) %>%
+  mutate(mean_temp=mean(temperature),
+         mean_humidite=mean(humidite)) %>%
+  distinct(id_station,mean_temp,mean_humidite)
+
+
+
+
+kmeans_basic <- kmeans(testvismeteo_mois_annee, centers = 6,nstart = 500)
+
+kmeans_basic$cluster
+
+
+
+plot(testvismeteo_mois_annee[,4:5], col=kmeans_basic$cluster)
+
+
+
+
+
+
+
+fviz_cluster(kmeans_basic, testvismeteo_annee[,-1]) 
+
+
+# Elbow method
+fviz_nbclust(testvismeteo_station, kmeans, method = "wss") +
+  geom_vline(xintercept = 4, linetype = 2)+
+  labs(subtitle = "Elbow method") 
+
+
+
+ggplot(data = kmeans_basic, aes(y = Cluster)) +
+  geom_bar(aes(fill = Region)) +
+  ggtitle("Count of Clusters by Region") +
+  theme(plot.title = element_text(hjust = 0.5))
 
 
 
