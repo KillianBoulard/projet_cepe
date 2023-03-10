@@ -68,12 +68,9 @@ geo_com_dataset <- communes %>%
           longitude_commune=as.numeric(geo_point_2d2)) %>%
   distinct(code_insee,latitude_commune,longitude_commune)
 
-
-###
 #########################################################################################
 ### récuperation de la station la plus proche de la commune en calculant sa distance  ###
 #########################################################################################
-
 
 DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
   mutate(commune_long_lat = map2(longitude_commune, latitude_commune, ~ c(.x, .y)),
@@ -83,7 +80,7 @@ DIST_MIN_COMM_STATION<-crossing(geo_com_dataset, station) %>%
     mutate(min_distance = distance == min(distance)) %>%
     ungroup() %>% filter(min_distance==TRUE) %>%
     distinct(code_insee,latitude_commune,longitude_commune,id_station,latitude_station,longitude_station,distance)
-aa    
+
     
     
     
