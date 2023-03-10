@@ -1,5 +1,5 @@
 ---
-title: "wofklow_DataVisualisation"
+title: "workflow_DataVisualisation"
 output: html_document
 ---
 
@@ -7,22 +7,27 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r}
+## Etape 1 : Techniques de clustering / corélations des variables
+########################################### tentative de PCA #########################
+x <- sample(1:nrow(base_dataset_full), 100000)
+test_acp = base_dataset_full[x, ]
+test_acp <- test_acp %>% select(-annee,-mois,-code_insee)
+test_acp = scale(test_acp)
+res.pca <- PCA(test_acp, graph = TRUE)
+######################################################################################
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### matrice de corrélation des données 
+mcor <- (cor(test_acp))
+mcor
+df<-as.data.frame((mcor))
+corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
+corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+corrplot(mcor)
+test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
 
-```{r cars}
-summary(cars)
+cor(base_dataset_full, method = c("pearson", "kendall", "spearman"))
+ sapply(base_dataset_full,class)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

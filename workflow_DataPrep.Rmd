@@ -591,28 +591,3 @@ var = indexv1
 
 
 
-## Etape 6 : Techniques de clustering / corélations des variables
-
-```{r}
-########################################### tentative de PCA #########################
-x <- sample(1:nrow(base_dataset_full), 100000)
-test_acp = base_dataset_full[x, ]
-test_acp <- test_acp %>% select(-annee,-mois,-code_insee)
-test_acp = scale(test_acp)
-res.pca <- PCA(test_acp, graph = TRUE)
-######################################################################################
-
-### matrice de corrélation des données 
-mcor <- (cor(test_acp))
-mcor
-df<-as.data.frame((mcor))
-corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
-corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
-
-corrplot(mcor)
-test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
-
-cor(base_dataset_full, method = c("pearson", "kendall", "spearman"))
- sapply(base_dataset_full,class)
-```
-
