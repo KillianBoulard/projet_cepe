@@ -1,3 +1,7 @@
+
+
+
+
 temp<-incendies %>% ##filter(code_insee=="01286") %>% 
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
          surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,

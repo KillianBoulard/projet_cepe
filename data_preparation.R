@@ -1,11 +1,3 @@
-library(csvread)
-library(ggplot2)
-library(dplyr)
-# Charger
-# library(wesanderson)
-# library(explore)
-library(rpart)
-library(ggthemes)
 
 #travail
 setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
