@@ -584,7 +584,7 @@ var = indexv1
     var = var+1}
   }
 ```
-.
+
 ### Etape 5.4 : Selection des données finales
 
 ```{r}
