@@ -136,6 +136,12 @@ ggplot(data = dataINC) +
 
 
 
+test_fi_final<- read.csv(file="echant.csv",
+                     header = T, 
+                     sep=";",
+                     encoding='UTF-8')
+
+
 
 
 
