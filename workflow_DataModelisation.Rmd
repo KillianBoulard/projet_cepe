@@ -32,10 +32,8 @@ corrplot(mcor, type="upper", order="hclust", tl.col="black", tl.srt=45)
 ```
 
 ```{r}
-
 target_test_set <- c("2021", "2022")
 target_train_set <- c("2011", "2012","2013","2014","2015","2016","2017","2018","2019","2020")
-
 
 set.seed(42)
 
@@ -45,6 +43,10 @@ training_set = dataset %>%
 test_set = dataset %>% 
   filter(annee %in% target_test_set) %>% 
   select(-c(Y))
+
+write.csv(training_set, "C:/Users/VOYK743/Downloads/training_set.csv", row.names=TRUE)
+write.csv(test_set, "C:/Users/VOYK743/Downloads/training_set.csv", row.names=TRUE)
+
 
 #Travail sur échantillon pour des raisons de temps de calcul 
 x <- sample(1:nrow(training_set), 10000)

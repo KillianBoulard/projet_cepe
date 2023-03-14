@@ -216,12 +216,16 @@ base_dataset = crossing(date_dataset, insee_feu) %>%
     ) %>% 
   select(-c(date_m_1, date_m_12))
 
+incendies_infos = inc_dataset  %>% 
+  inner_join(com_dataset, keep= T,suffix = c('_1', '_2'), by="code_insee") %>% 
+  separate(col=gps, into=c("long", "lat"), sep=",")
+
 #Test de coherence : cela doit donner 24,037k observations
 test = base_dataset %>% 
   filter(presence_feu == 1 ) %>% 
   summarise(n())
 
-rm(list = setdiff(ls(), c("base_dataset","inc_dataset", "meteo")))
+rm(list = setdiff(ls(), c("base_dataset", "inc_dataset", "meteo", "incendies_infos", "station_dataset")))
 ```
 
 # Etape 5 : Data processing
@@ -491,6 +495,10 @@ transpose_by_station_annee_mois = transpose_by_station_annee_mois %>%
   group_by(id_station) %>% 
   mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
   ungroup()
+
+
+stations_infos = transpose_by_station %>% 
+  inner_join(station_dataset, keep= F,suffix = c('_1', '_2'), by="id_station")
 ```
 
 ### Etape 5.3 : préparation du dataset final (base_dataset complété des données incendies et méteo)
@@ -536,7 +544,6 @@ base_dataset_full = base_dataset_full %>%
   mutate_at(vars(
            starts_with(c("moy_surface","moy_nature", "moy_orig_alerte"))),  ~replace_na(., 0))
 
-
 test = base_dataset_full %>%
   head(1000) %>% 
   mutate_at(vars(
@@ -545,7 +552,6 @@ test = base_dataset_full %>%
 #Travail sur échantillon pour des raisons de temps de calcul 
 #x <- sample(1:nrow(base_dataset_full), 10000)
 #base_dataset_test = base_dataset_full[x, ]
-
 
 #colSums(is.na(base_dataset_test))
 #prop_na <-base_dataset_full %>% summarize_all(funs(sum(is.na(.)) / length(.)))
@@ -596,9 +602,11 @@ dataset = base_dataset_full %>%
   mutate(across(where(is.character), factor)) %>% 
   mutate(Y = as.factor(Y))
 
+rm(list = setdiff(ls(), c("dataset", "incendies_infos", "station_dataset")))
+
 #write.csv2(dataset, file="C:/Users/VOYK743/Downloads/dataset.csv")
 #write_xlsx(dataset,"C:/Users/VOYK743/Downloads/dataset.xlsx")
-#write.xlsx(dataset, 'C:/Users/VOYK743/Downloads/dataset.xlsx')
+#write.xlsx(LB, 'C:/Users/VOYK743/Downloads/LB.xlsx')
 ```
 
 
