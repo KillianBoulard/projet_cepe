@@ -32,30 +32,41 @@ corrplot(mcor, type="upper", order="hclust", tl.col="black", tl.srt=45)
 ```
 
 ```{r}
+
+target_test_set <- c("2021", "2022")
+target_train_set <- c("2011", "2012","2013","2014","2015","2016","2017","2018","2019","2020")
+
+
 set.seed(42)
 
 training_set = dataset %>% 
-  filter(annee != c("2021","2022"))
+  filter(annee %in% target_train_set)
 
-
-test = dataset %>% 
-  filter(annee == c("2021","2022")) %>% 
+test_set = dataset %>% 
+  filter(annee %in% target_test_set) %>% 
   select(-c(Y))
 
 #Travail sur échantillon pour des raisons de temps de calcul 
-x <- sample(1:nrow(training_set), 100)
-training_set_echant = training_set[x, ]
+x <- sample(1:nrow(training_set), 10000)
+training_set = training_set[x, ]
+
+x <- sample(1:nrow(test_set), 10000)
+test_set = test_set[x, ]
 
 
 preProcess <- c("center","scale")
 trControl <- trainControl(method = "repeatedcv",number = 2,repeats = 2)
 
-model <- train(Y ~ ., method='knn', data = training_set_echant, metric='Accuracy',preProcess = preProcess, trControl=trControl)
+model <- train(Y ~ ., method='knn', data = training_set, metric='Accuracy',preProcess = preProcess, trControl=trControl)
+
+test_set$pred <- predict(model, test_set)
+
+test_set$factor_pred <- as.factor(test_set$pred)
+test_set$factor_truth <- as.factor(test_set$output)
+precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
+recall <- sensitivity(test_set$factor_truth, test_set$factor_pred)
 
 
-
-
-training
 
 set.seed(42)
 train_split = initial_split(training, prop = 0.8, strata = target)

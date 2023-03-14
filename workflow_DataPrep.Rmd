@@ -597,6 +597,8 @@ dataset = base_dataset_full %>%
   mutate(Y = as.factor(Y))
 
 #write.csv2(dataset, file="C:/Users/VOYK743/Downloads/dataset.csv")
+#write_xlsx(dataset,"C:/Users/VOYK743/Downloads/dataset.xlsx")
+#write.xlsx(dataset, 'C:/Users/VOYK743/Downloads/dataset.xlsx')
 ```
 
 
