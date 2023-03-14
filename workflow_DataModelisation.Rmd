@@ -35,18 +35,24 @@ corrplot(mcor, type="upper", order="hclust", tl.col="black", tl.srt=45)
 set.seed(42)
 
 training_set = dataset %>% 
-  filter(annee == c("2021","2022"))
+  filter(annee != c("2021","2022"))
 
 
 test = dataset %>% 
-  filter(annee != c("2021","2022")) %>% 
+  filter(annee == c("2021","2022")) %>% 
   select(-c(Y))
+
+#Travail sur échantillon pour des raisons de temps de calcul 
+x <- sample(1:nrow(training_set), 100)
+training_set_echant = training_set[x, ]
 
 
 preProcess <- c("center","scale")
-trControl <- trainControl(method = "repeatedcv",number = 10,repeats = 10)
+trControl <- trainControl(method = "repeatedcv",number = 2,repeats = 2)
 
-model <- train(Y ~ ., method='knn', data = training_set, metric='Accuracy',preProcess = preProcess, trControl=trControl)
+model <- train(Y ~ ., method='knn', data = training_set_echant, metric='Accuracy',preProcess = preProcess, trControl=trControl)
+
+
 
 
 training

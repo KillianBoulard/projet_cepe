@@ -16,6 +16,7 @@ library(corrplot)
 library(missMDA)
 library(psych)
 library("writexl")
+library(caret)
 ```
 
 ```{r setup}
@@ -594,6 +595,8 @@ dataset = base_dataset_full %>%
   rename(Y = presence_feu) %>% 
   mutate(across(where(is.character), factor)) %>% 
   mutate(Y = as.factor(Y))
+
+#write.csv2(dataset, file="C:/Users/VOYK743/Downloads/dataset.csv")
 ```
 
 
