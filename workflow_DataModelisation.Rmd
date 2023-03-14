@@ -1,13 +1,87 @@
 ---
-title: "workflow_DataModelisation"
-output: html_document
+title: "Projet climat LBP"
+output: html_notebook
+authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# Etape 1 : Déclaration des librairies
+```{r warning=FALSE}
+library(tidymodels)
+library(tidyverse)
+library(geosphere)
+library(purrr)
+library(lubridate)
+library(FactoMineR)
+library(corrplot)
+library(missMDA)
+library(psych)
+library("writexl")
+library(caret)
+```
+
+```{r setup}
+knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
+knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
+```
+
+# Etape 1 : Corélation des variables
+
+```{r}
+mcor <- cor(dataset)
+corrplot(mcor, type="upper", order="hclust", tl.col="black", tl.srt=45)
 ```
 
 ```{r}
+set.seed(42)
 
+training_set = dataset %>% 
+  filter(annee == c("2021","2022"))
+
+
+test = dataset %>% 
+  filter(annee != c("2021","2022")) %>% 
+  select(-c(Y))
+
+
+preProcess <- c("center","scale")
+trControl <- trainControl(method = "repeatedcv",number = 10,repeats = 10)
+
+model <- train(Y ~ ., method='knn', data = training_set, metric='Accuracy',preProcess = preProcess, trControl=trControl)
+
+
+training
+
+set.seed(42)
+train_split = initial_split(training, prop = 0.8, strata = target)
+train_set = training(train_split)
+eval_set = testing(train_split)
+train_set
+
+cat(dim(train_set),'/',dim(eval_set),'/',dim(test_set))
+```
+
+
+```{r}
+## Etape 1 : Techniques de clustering / corélations des variables
+########################################### tentative de PCA #########################
+x <- sample(1:nrow(base_dataset_full), 100000)
+test_acp = base_dataset_full[x, ]
+test_acp <- test_acp %>% select(-annee,-mois,-code_insee)
+test_acp = scale(test_acp)
+res.pca <- PCA(test_acp, graph = TRUE)
+######################################################################################
+
+### matrice de corrélation des données 
+mcor <- (cor(test_acp))
+mcor
+df<-as.data.frame((mcor))
+corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
+corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
+
+corrplot(mcor)
+test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
+
+cor(base_dataset_full, method = c("pearson", "kendall", "spearman"))
+ sapply(base_dataset_full,class)
 ```
 

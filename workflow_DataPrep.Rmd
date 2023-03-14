@@ -592,7 +592,8 @@ dataset = base_dataset_full %>%
   select(-c(ends_with("_m"),
             (starts_with("periode_mesure_rafale")))) %>% 
   rename(Y = presence_feu) %>% 
-  mutate(across(where(is.character), factor))
+  mutate(across(where(is.character), factor)) %>% 
+  mutate(Y = as.factor(Y))
 ```
 
 
