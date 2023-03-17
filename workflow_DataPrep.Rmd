@@ -129,7 +129,7 @@ inc_dataset = incendies %>%
   mutate(code_insee = ifelse(code_insee == '13055',"13001",code_insee)) %>% 
   mutate(code_insee = ifelse(code_insee == '83999',"83067",code_insee)) %>%
   mutate(
-    date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),
+    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),
     annee = format(date_alerte,"%Y"),
     mois = format(date_alerte,"%m"),
     date_m_1 = date_alerte %m+% months(-1),
@@ -607,6 +607,11 @@ rm(list = setdiff(ls(), c("dataset", "incendies_infos", "station_dataset")))
 #write.csv2(dataset, file="C:/Users/VOYK743/Downloads/dataset.csv")
 #write_xlsx(dataset,"C:/Users/VOYK743/Downloads/dataset.xlsx")
 #write.xlsx(LB, 'C:/Users/VOYK743/Downloads/LB.xlsx')
+saveRDS(dataset, file = "dataset.rds")
+write.csv(dataset, row.names=T)
+write.csv2(dataset, row.names=T)
+
+
 ```
 
 
