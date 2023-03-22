@@ -149,11 +149,10 @@ test = station %>%
   group_by(id_station) %>% 
   summarise(nrow = n())
 
-test = station %>% 
-  group_by(id_station) %>% 
-  select(id_station, latitude_station,longitude_station) %>% 
-  mutate(count = n())
-
+test = dataset %>% 
+  filter(Y == 1)
+  
+table(test$mois)
 
 test = DIST_MIN_COMM_STATION %>% 
   filter(code_insee == "07128")
@@ -165,7 +164,50 @@ test <- meteo %>%
     select(id_station,as.numeric(latitude), as.numeric(longitude))
 
 
+  library(splitstackshape)
+  set.seed(1)
+  out <- stratified(dataset, c("annee", "mois"), 30)
+  head(out)
 
+  
+  table(out$age, out$lc)
+
+  dataset_non_feu = dataset %>% 
+    filter(Y ==0)
+  
+  dataset_feu = dataset %>% 
+    filter(Y ==1)
+  
+  table(dataset_non_feu$annee)
+  table(dataset_feu$annee)
+  
+  strat_non_feu <- dataset %>%
+    filter(Y == 0) %>% 
+    group_by(annee) %>%
+    sample_frac(size=.0833)
+  
+  test = out2 %>% 
+    filter(Y == 1)
+  
+  table(out2$Y)
+
+  test2 = dataset 
+    
+  
+  
+  #### A faire : 
+  
+#  - codes insee => GPS pour la modélisation
+#  - amander les données générales sur l'antériorité
+ #==> table finalisée
+# ==> sampling (env 2k lignes avec une proportion de 20%)
+#poids de 9 classe 1 
+#==> graphiques echelle nationale / dep
+#==> modélisation
+    
+tablet = synt_gen_comm_dataset %>% 
+    filter(code_insee == "01017")
+  
 test = meteo %>% 
   distinct(id_station,latitude, longitude) %>% 
   mutate(latitude = as.numeric(latitude), as.numeric(longitude)) %>% 
