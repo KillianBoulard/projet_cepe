@@ -1786,6 +1786,13 @@ knitr::opts_knit$set(root.dir = &quot;C:/Users/VOYK743/Desktop/Fichiers Perso/Fo
 <h3>Etape 2.1 : Import des données communes</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29tbXVuZXMgPC0gcmVhZC5jc3YoZmlsZT1cImNvcnJlc3BvbmRhbmNlLWNvZGUtaW5zZWUtY29kZS1wb3N0YWwuY3N2XCIsIGhlYWRlciA9IFQsIHNlcD1cIjtcIiwgZW5jb2Rpbmc9XCJVVEYtOFwiLFxuICAgICAgICAgICAgICAgICAgICAgY29sLm5hbWVzID0gYyhcImNvZGVfaW5zZWVcIixcImNvZGVfcG9zdGFsXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwiY29tbXVuZVwiLFwiZGVwYXJ0ZW1lbnRcIixcInJlZ2lvblwiLFwic3RhdHV0XCIsXCJhbHRpdHVkZV9tb3llbm5lXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwic3VwZXJmaWNpZVwiLFwicG9wdWxhdGlvblwiLFwiZ2VvX3BvaW50XzJkXCIsXCJnZW9fc2hhcGVcIixcIklEX2dlb2ZsYVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcImNvZGVfY29tbXVuZVwiLFwiY29kZV9jYW50b25cIixcImNvZGVfYXJyXCIsXCJjb2RlX2RlcGFydGVtZW50XCIsXCJjb2RlX3JlZ2lvblwiKSlcbmBgYCJ9 -->
+<pre class="r"><code>communes &lt;- read.csv(file=&quot;correspondance-code-insee-code-postal.csv&quot;, header = T, sep=&quot;;&quot;, encoding=&quot;UTF-8&quot;,
+                     col.names = c(&quot;code_insee&quot;,&quot;code_postal&quot;,
+                                   &quot;commune&quot;,&quot;departement&quot;,&quot;region&quot;,&quot;statut&quot;,&quot;altitude_moyenne&quot;,
+                                   &quot;superficie&quot;,&quot;population&quot;,&quot;geo_point_2d&quot;,&quot;geo_shape&quot;,&quot;ID_geofla&quot;,
+                                   &quot;code_commune&quot;,&quot;code_canton&quot;,&quot;code_arr&quot;,&quot;code_departement&quot;,&quot;code_region&quot;))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2438,24 +2445,18 @@ var = indexv1
 <h3>Etape 5.4 : Selection des données finales</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YXNldCA9IGJhc2VfZGF0YXNldF9mdWxsICU+JSBcbiAgc2VsZWN0KC1jKGVuZHNfd2l0aChcIl9tXCIpLFxuICAgICAgICAgICAgKHN0YXJ0c193aXRoKFwicGVyaW9kZV9tZXN1cmVfcmFmYWxlXCIpKSkpICU+JSBcbiAgcmVuYW1lKFkgPSBwcmVzZW5jZV9mZXUpICU+JSBcbiAgbXV0YXRlKGFjcm9zcyh3aGVyZShpcy5jaGFyYWN0ZXIpLCBmYWN0b3IpKSAlPiUgXG4gIG11dGF0ZShZID0gYXMuZmFjdG9yKFkpKVxuXG5ybShsaXN0ID0gc2V0ZGlmZihscygpLCBjKFwiZGF0YXNldFwiLCBcImluY2VuZGllc19pbmZvc1wiLCBcInN0YXRpb25fZGF0YXNldFwiKSkpXG5cbiN3cml0ZS5jc3YyKGRhdGFzZXQsIGZpbGU9XCJDOi9Vc2Vycy9WT1lLNzQzL0Rvd25sb2Fkcy9kYXRhc2V0LmNzdlwiKVxuI3dyaXRlX3hsc3goZGF0YXNldCxcIkM6L1VzZXJzL1ZPWUs3NDMvRG93bmxvYWRzL2RhdGFzZXQueGxzeFwiKVxuI3dyaXRlLnhsc3goTEIsICdDOi9Vc2Vycy9WT1lLNzQzL0Rvd25sb2Fkcy9MQi54bHN4JylcbiNzYXZlUkRTKGRhdGFzZXQsIGZpbGUgPSBcImRhdGFzZXQucmRzXCIpXG4jd3JpdGUuY3N2KGRhdGFzZXQsIHJvdy5uYW1lcz1UKVxuI3dyaXRlLmNzdjIoZGF0YXNldCwgcm93Lm5hbWVzPVQpXG5cblxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YXNldCA9IGJhc2VfZGF0YXNldF9mdWxsICU+JSBcbiAgc2VsZWN0KC1jKGVuZHNfd2l0aChcIl9tXCIpLFxuICAgICAgICAgICAgKHN0YXJ0c193aXRoKFwicGVyaW9kZV9tZXN1cmVfcmFmYWxlXCIpKSkpICU+JSBcbiAgcmVuYW1lKFkgPSBwcmVzZW5jZV9mZXUpICU+JSBcbiAgbXV0YXRlKGFjcm9zcyh3aGVyZShpcy5jaGFyYWN0ZXIpLCBmYWN0b3IpKSAlPiUgXG4gIG11dGF0ZShZID0gYXMuZmFjdG9yKFkpKVxuYGBgIn0= -->
 <pre class="r"><code>dataset = base_dataset_full %&gt;% 
   select(-c(ends_with(&quot;_m&quot;),
             (starts_with(&quot;periode_mesure_rafale&quot;)))) %&gt;% 
   rename(Y = presence_feu) %&gt;% 
   mutate(across(where(is.character), factor)) %&gt;% 
-  mutate(Y = as.factor(Y))
-
-rm(list = setdiff(ls(), c(&quot;dataset&quot;, &quot;incendies_infos&quot;, &quot;station_dataset&quot;)))
-
-#write.csv2(dataset, file=&quot;C:/Users/VOYK743/Downloads/dataset.csv&quot;)
-#write_xlsx(dataset,&quot;C:/Users/VOYK743/Downloads/dataset.xlsx&quot;)
-#write.xlsx(LB, &#39;C:/Users/VOYK743/Downloads/LB.xlsx&#39;)
-#saveRDS(dataset, file = &quot;dataset.rds&quot;)
-#write.csv(dataset, row.names=T)
-#write.csv2(dataset, row.names=T)
-</code></pre>
+  mutate(Y = as.factor(Y))</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gc2VsZWN0KC4sIC1jKGVuZHNfd2l0aChcIl9tXCIpLCAoc3RhcnRzX3dpdGgoXCJwZXJpb2RlX21lc3VyZV9yYWZhbGVcIikpKSkgOiBcbiAgb2JqZWN0ICdiYXNlX2RhdGFzZXRfZnVsbCcgbm90IGZvdW5kXG4ifQ== -->
+<pre><code>Error in select(., -c(ends_with(&quot;_m&quot;), (starts_with(&quot;periode_mesure_rafale&quot;)))) : 
+  object &#39;base_dataset_full&#39; not found</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
