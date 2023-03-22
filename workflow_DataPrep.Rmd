@@ -312,6 +312,7 @@ arrange(annee,mois) %>%
   distinct(code_insee,
            annee,
            mois,
+           moy_surface_parcourue_rol,
            ###info surface par commune
            moy_surface_parcourue,
            moy_surface_foret,
