@@ -607,9 +607,9 @@ rm(list = setdiff(ls(), c("dataset", "incendies_infos", "station_dataset")))
 #write.csv2(dataset, file="C:/Users/VOYK743/Downloads/dataset.csv")
 #write_xlsx(dataset,"C:/Users/VOYK743/Downloads/dataset.xlsx")
 #write.xlsx(LB, 'C:/Users/VOYK743/Downloads/LB.xlsx')
-saveRDS(dataset, file = "dataset.rds")
-write.csv(dataset, row.names=T)
-write.csv2(dataset, row.names=T)
+#saveRDS(dataset, file = "dataset.rds")
+#write.csv(dataset, row.names=T)
+#write.csv2(dataset, row.names=T)
 
 
 ```
