@@ -1,0 +1,72 @@
+# Transpose des variables par heures sur l'id station
+transpose_by_station = METEO_QUANTI %>%
+  group_by(id_station, annee_mesure, mois_mesure) %>%
+  select(-date_mesure) %>% 
+  pivot_wider(
+    id_cols = c(id_station, annee_mesure, mois_mesure),
+    names_from = heure_mesure,
+    values_from = c(pression_niveau_mer, var_pression_3h, vitesse_vent_moyen_10m, temperature, 
+                    point_rosee, humidite, visibilite_horizontale, pression_station,rafales_periode ,
+                    periode_mesure_rafale, precipiation_derh, precipitation_3dh, precipitation_6dh,
+                    precipitation_12dh),
+    values_fn = mean,
+    names_expand = TRUE)
+  ) %>%
+  ungroup() %>% 
+  mutate(id_station = as.numeric(levels(id_station))[id_station]) %>% 
+  arrange(annee_mesure,mois_mesure)
+
+# Si possible traitement des NA par la moyenne de la station sur le meme mois
+transpose_by_station = transpose_by_station %>% 
+  group_by(id_station, mois_mesure) %>% 
+  mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
+  ungroup() %>% 
+  arrange(annee_mesure,mois_mesure)
+
+# Traitement des NA résiduels par la moyenne de la station
+transpose_by_station = transpose_by_station %>% 
+  group_by(id_station) %>% 
+  mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
+  ungroup() %>% 
+  arrange(annee_mesure,mois_mesure)
+
+# LAG / mean pour les données générales
+var = 4
+for (i in 4:31){
+
+varname = paste0(colnames(transpose_by_station)[var],"__ok")
+print(varname)
+
+test = transpose_by_station %>% 
+  group_by(id_station) %>% 
+  arrange(annee_mesure, mois_mesure) %>% 
+  mutate(across(3:30, ~ cummean(lag(.x, default = first(.x))), 
+                .names = "{col}_"))
+  
+  
+  mutate(across(c(pression_niveau_mer_14, pression_niveau_mer_23), list(lag = lag, cummean = cummean)))
+  mutate(col_cummean_lag = cummean(lag(col, default = first(col))))
+  
+  
+  
+  #mutate(accross(c),lag(cummean(pression_niveau_mer_14), n=1, default=0))
+  #mutate(across(4:30, ~ cur_data()[[3]]))
+    #!!varname := lag(cummean(cur_data()[[var-1]])))
+    #test = lag(cummean(cur_data()[[var]])))
+
+
+var = var+1
+}
+
+
+check = test %>% 
+  filter(id_station == 7190)%>% 
+  select(id_station,annee_mesure,mois_mesure,ends_with("_"))
+
+
+check33 = check3 %>% 
+  filter(id_station == 7190) 
+
+colSums(is.na(test))
+
+
