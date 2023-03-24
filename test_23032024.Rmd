@@ -41,7 +41,10 @@ test = transpose_by_station %>%
   group_by(id_station) %>% 
   arrange(annee_mesure, mois_mesure) %>% 
   mutate(across(3:30, ~ cummean(lag(.x, default = first(.x))), 
-                .names = "{col}_"))
+                .names = "{col}_test")) %>% 
+  select(id_station,annee_mesure,mois_mesure,ends_with("_test")) %>% 
+  rename_with(~gsub("_test", "", .), everything())
+
   
   
   mutate(across(c(pression_niveau_mer_14, pression_niveau_mer_23), list(lag = lag, cummean = cummean)))
@@ -60,8 +63,7 @@ var = var+1
 
 
 check = test %>% 
-  filter(id_station == 7190)%>% 
-  select(id_station,annee_mesure,mois_mesure,ends_with("_"))
+  filter(id_station == 7190)
 
 
 check33 = check3 %>% 
