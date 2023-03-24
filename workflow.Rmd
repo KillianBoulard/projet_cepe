@@ -255,7 +255,7 @@ inc_dataset$surface_agricole<-as.integer(inc_dataset$surface_agricole)
 inc_dataset = inc_dataset %>% 
   arrange(date_alerte)
 
-test_cross = base_dataset %>% 
+synt_gen_comm_dataset = base_dataset %>% 
         left_join(inc_dataset, keep= F, suffix = c('_g', '_m'), 
           by=c("code_insee","annee","mois")) %>% 
   select(annee,mois,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
@@ -277,7 +277,8 @@ test_cross = base_dataset %>%
           orig_alerte_ppr   = ifelse(origine_alerte=="Pompiers pre-positionnes",1,0) ,
           orig_alerte_pop   = ifelse(origine_alerte=="Population",1,0) ,
           orig_alerte_vcam  = ifelse(origine_alerte=="Vigie-camera",1,0)
-  )                                                       %>% 
+  )                                                       %>%
+  mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .))) %>% 
   select(- c(nature,origine_alerte)) %>% 
   group_by(code_insee) %>%
 arrange(annee,mois) %>%
@@ -288,92 +289,7 @@ arrange(annee,mois) %>%
         moy_surface_foret  = lag(round(cummean(surface_foret),3)),
         moy_surface_maquis = lag(round(cummean(surface_maquis),3)),
         moy_surface_nat_autre_foret = lag(round(cummean(surface_nat_autre_foret),3)),
-        moy_surface_agricole        = lag(round(mean(surface_agricole),3)),
-        moy_surface_autre_terre_boisee  = lag(round(cummean(surface_autre_terre_boisee),3)),
-        moy_surface_non_boisee_nat      = lag(round(cummean(surface_non_boisee_nat),3)),
-        moy_surface_non_boisee_art      = lag(round(cummean(surface_non_boisee_art),3)),
-        moy_surface_non_boisee           = lag(round(cummean(surface_non_boisee),3)),
-    
-        moy_nature_ind      = 	lag(cummean(nature_ind)),
-        moy_nature_acc      = 	lag(cummean(nature_acc)),
-        moy_nature_inv_part = 	lag(cummean(nature_inv_part)),
-        moy_nature_inv_trav = 	lag(cummean(nature_inv_trav)),
-        moy_nature_nat      = 	lag(cummean(nature_nat)),
-        moy_nature_malv     = 	lag(cummean(nature_malv)), 
-    
-        moy_orig_alerte_autr  = lag(cummean(orig_alerte_autr)),
-        moy_orig_alerte_ind   = lag(cummean(orig_alerte_ind)),
-        moy_orig_alerte_mae   = lag(cummean(orig_alerte_mae)),
-        moy_orig_alerte_pat   = lag(cummean(orig_alerte_pat)),
-        moy_orig_alerte_ppr   = lag(cummean(orig_alerte_ppr)),
-        moy_orig_alerte_pop   = lag(cummean(orig_alerte_pop)),
-        moy_orig_alerte_vcam  = lag(cummean(orig_alerte_vcam))
-  )  %>%
-
-  distinct(code_insee,
-           annee,
-           mois,
-           ###info surface par commune
-           moy_surface_parcourue,
-           moy_surface_foret,
-           moy_surface_maquis,
-           moy_surface_nat_autre_foret,                               
-           moy_surface_agricole,
-           moy_surface_autre_terre_boisee,
-           moy_surface_non_boisee_nat,
-           moy_surface_non_boisee_art,
-           moy_surface_non_boisee,
-           ###info nature incendie
-           moy_nature_ind,
-           moy_nature_acc,
-           moy_nature_inv_part,
-           moy_nature_inv_trav,
-           moy_nature_nat,
-           moy_nature_malv,
-           ###info origine incendie
-           moy_orig_alerte_autr, moy_orig_alerte_ind  ,moy_orig_alerte_mae  ,
-           moy_orig_alerte_pat,  moy_orig_alerte_ppr , moy_orig_alerte_pop , moy_orig_alerte_vcam) %>% 
-           select(-moy_surface_agricole) %>%
-           ungroup()
-
-
-
-
-synt_gen_comm_dataset <-inc_dataset %>%
-  select(annee,mois,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
-         surface_nat_autre_foret,surface_agricole,surface_autre_terre_boisee,surface_non_boisee_nat,
-         surface_non_boisee_art,surface_non_boisee,nature) %>% 
- # select(- c(annee))                   %>%
-  mutate_if(is.numeric, funs(ifelse(is.na(.), 0, .)))     %>%
-  mutate(
-          nature_ind = ifelse(nature=="",1,0) ,
-          nature_acc = ifelse(nature=="Accidentelle",1,0),
-          nature_inv_part = ifelse(nature=="Involontaire (particulier)",1,0),
-          nature_inv_trav = ifelse(nature=="Involontaire (travaux)",1,0),
-          nature_nat   = ifelse(nature=="Naturelle",1,0),
-          nature_malv  = ifelse(nature=="Malveillance",1,0), 
-
-          orig_alerte_autr  = ifelse(origine_alerte=="Autre",1,0) ,
-          orig_alerte_ind   = ifelse(origine_alerte=="Indetermine",1,0) ,
-          orig_alerte_mae   = ifelse(origine_alerte=="Moyen aerien",1,0) ,
-          orig_alerte_pat   = ifelse(origine_alerte=="Patrouille",1,0) ,
-          orig_alerte_ppr   = ifelse(origine_alerte=="Pompiers pre-positionnes",1,0) ,
-          orig_alerte_pop   = ifelse(origine_alerte=="Population",1,0) ,
-          orig_alerte_vcam  = ifelse(origine_alerte=="Vigie-camera",1,0)
-  )                                                       %>% 
-  select(- c(nature,origine_alerte)) %>% 
-  group_by(code_insee) %>%
-  
-arrange(annee,mois) %>% 
-  
-  mutate (
-       moy_surface_parcourue = lag(round(cummean(surface_parcourue),3)),
-
-        moy_surface_parcourue = lag(round(cummean(surface_parcourue),3)),
-        moy_surface_foret  = lag(round(cummean(surface_foret),3)),
-        moy_surface_maquis = lag(round(cummean(surface_maquis),3)),
-        moy_surface_nat_autre_foret = lag(round(cummean(surface_nat_autre_foret),3)),
-        moy_surface_agricole        = lag(round(mean(surface_agricole),3)),
+        moy_surface_agricole        = lag(round(cummean(surface_agricole),3)),
         moy_surface_autre_terre_boisee  = lag(round(cummean(surface_autre_terre_boisee),3)),
         moy_surface_non_boisee_nat      = lag(round(cummean(surface_non_boisee_nat),3)),
         moy_surface_non_boisee_art      = lag(round(cummean(surface_non_boisee_art),3)),
@@ -424,6 +340,8 @@ arrange(annee,mois) %>%
 synt_gen_comm_dataset = synt_gen_comm_dataset %>% 
   group_by(annee,mois,code_insee) %>% 
 filter(row_number()==1)
+
+synt_gen_comm_dataset <- synt_gen_comm_dataset %>% replace(is.na(.), 0)
 
 synt_mois_comm_dataset <-inc_dataset %>%
   select(annee,code_insee,origine_alerte,surface_parcourue,surface_foret,surface_maquis,
@@ -549,7 +467,8 @@ METEO_QUANTI <- meteo %>%
          ) %>% 
   filter(heure_mesure == c("14","23")) %>% #"8","14","17","23" / A définir
   #on remplace par les moyennes les na restants
-  mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE)))
+  mutate_if(is.double, ~replace_na(.,mean(., na.rm = TRUE))) %>% 
+  arrange(annee_mesure,mois_mesure,heure_mesure)
 
 # Transpose des variables par heures sur l'id station
 transpose_by_station = METEO_QUANTI %>%
