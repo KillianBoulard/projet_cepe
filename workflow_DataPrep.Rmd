@@ -602,7 +602,8 @@ base_dataset_full = base_dataset_full %>%
 #Pour les données météo générales, on remplace par la dernière valeur connue
 base_dataset_full = base_dataset_full %>% 
   group_by(id_station) %>%
-  fill(c(ends_with("23_g"), ends_with("14_g")), .direction = "up")
+  fill(c(ends_with("23_g"), ends_with("14_g")), .direction = "up") %>% 
+  ungroup()
 
 #Travail sur échantillon pour des raisons de temps de calcul 
 #x <- sample(1:nrow(base_dataset_full), 10000)
@@ -662,7 +663,7 @@ dataset = base_dataset_full %>%
   mutate(Y = as.factor(Y)) %>% 
   inner_join(inter, by="code_insee")
 
-rm(list = setdiff(ls(), c("dataset")))
+#rm(list = setdiff(ls(), c("dataset")))
 
 #write.csv2(dataset, file="C:/Users/VOYK743/Downloads/dataset.csv")
 #write_xlsx(dataset,"C:/Users/VOYK743/Downloads/dataset.xlsx")
