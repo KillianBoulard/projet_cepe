@@ -601,7 +601,8 @@ base_dataset_full = base_dataset_full %>%
 
 #Pour les données météo générales, on remplace par la dernière valeur connue
 base_dataset_full = base_dataset_full %>% 
-  fill(c(ends_with("23_g"), ends_with("14_g")), .direction = "down")
+  group_by(id_station) %>%
+  fill(c(ends_with("23_g"), ends_with("14_g")), .direction = "up")
 
 #Travail sur échantillon pour des raisons de temps de calcul 
 #x <- sample(1:nrow(base_dataset_full), 10000)
@@ -650,14 +651,18 @@ var = indexv1
 ### Etape 5.4 : Selection des données finales
 
 ```{r}
+inter = com_dataset %>% 
+  select(code_insee, gps)
+
 dataset = base_dataset_full %>% 
   select(-c(ends_with("_m"),
             (starts_with("periode_mesure_rafale")))) %>% 
   rename(Y = presence_feu) %>% 
   mutate(across(where(is.character), factor)) %>% 
-  mutate(Y = as.factor(Y))
+  mutate(Y = as.factor(Y)) %>% 
+  inner_join(inter, by="code_insee")
 
-rm(list = setdiff(ls(), c("dataset", "incendies_infos", "station_dataset")))
+rm(list = setdiff(ls(), c("dataset")))
 
 #write.csv2(dataset, file="C:/Users/VOYK743/Downloads/dataset.csv")
 #write_xlsx(dataset,"C:/Users/VOYK743/Downloads/dataset.xlsx")
