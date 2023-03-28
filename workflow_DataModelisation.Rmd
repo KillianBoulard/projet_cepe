@@ -22,85 +22,168 @@ library(caret)
 ```{r setup}
 knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
 knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
+dataset = readRDS(file = "dataset.RDS")
 ```
 
-# Etape 1 : Corélation des variables
+# Etape 1 : Création de l'échantillon
 
 ```{r}
-mcor <- cor(dataset)
-corrplot(mcor, type="upper", order="hclust", tl.col="black", tl.srt=45)
+rm(list = setdiff(ls(), c("dataset")))
+new_data <- c("2021")
+
+target_train_test <- c("2011", "2012","2013","2014","2015","2016","2017","2018","2019","2020")
+
+set.seed(44)
+
+#2.36% de Y == 1
+train_test_set = dataset %>% 
+  filter(annee %in% target_train_test)
+
+#Les données sont déséquilibrées, donc remise en forme des proportions
+#20 185 / 855 480 = 2.36%
+#En appliquant la méthode X3 /3 cela donne 60 555 / 285 160 soit 21.24%
+poids_presence_feu <- 10000 * 0.3
+poids_non_feu <- 10000 * 0.7
+
+echantillon_A <- train_test_set %>% filter(Y == "1") %>% sample_n(size = poids_presence_feu, replace = FALSE)
+echantillon_B <- train_test_set %>% filter(Y == "0") %>% sample_n(size = poids_non_feu, replace = FALSE)
+train_test_set <- bind_rows(echantillon_A, echantillon_B)
+train_test_set = train_test_set[sample(1:nrow(train_test_set)), ]
+
+rm(echantillon_A,echantillon_B)
+
+#Création des datasets train / test avec proportion de 80%
+i <- createDataPartition(y = train_test_set$Y, times = 1, p = 0.8, list = FALSE)
+training_set <- train_test_set[i,]
+test_set <- train_test_set[-i,]
+
+training_set = training_set %>% 
+  select(-c(annee, code_insee, id_station))
+
+test_set = test_set %>% 
+  select(-c(annee, code_insee, id_station))
+
+#new_dataset = dataset %>% 
+#  filter(annee %in% new_data) %>% 
+#  select(-c(annee, code_insee, id_station))
+
+training_set = training_set[sample(1:nrow(training_set)), ]
+test_set = test_set[sample(1:nrow(test_set)), ]
+rm(train_test_set, i, poids_presence_feu,poids_non_feu, target_train_test,new_data)
 ```
 
+# Etape 2 : Modélisation
+
 ```{r}
-target_test_set <- c("2021", "2022")
-target_train_set <- c("2011", "2012","2013","2014","2015","2016","2017","2018","2019","2020")
-
-set.seed(42)
-
-training_set = dataset %>% 
-  filter(annee %in% target_train_set)
-
-test_set = dataset %>% 
-  filter(annee %in% target_test_set) %>% 
-  select(-c(Y))
-
-write.csv(training_set, "C:/Users/VOYK743/Downloads/training_set.csv", row.names=TRUE)
-write.csv(test_set, "C:/Users/VOYK743/Downloads/training_set.csv", row.names=TRUE)
-
-
-#Travail sur échantillon pour des raisons de temps de calcul 
-x <- sample(1:nrow(training_set), 10000)
-training_set = training_set[x, ]
-
-x <- sample(1:nrow(test_set), 10000)
-test_set = test_set[x, ]
-
-
+#KNN
 preProcess <- c("center","scale")
-trControl <- trainControl(method = "repeatedcv",number = 2,repeats = 2)
+trControl <- trainControl(method = "repeatedcv",number = 5,repeats = 5)
 
 model <- train(Y ~ ., method='knn', data = training_set, metric='Accuracy',preProcess = preProcess, trControl=trControl)
 
-test_set$pred <- predict(model, test_set)
-
+test_set$pred <- predict(model, test_set[,-which(names(test_set) == "Y")])
 test_set$factor_pred <- as.factor(test_set$pred)
-test_set$factor_truth <- as.factor(test_set$output)
+test_set$factor_truth <- as.factor(test_set$Y)
+
 precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
-recall <- sensitivity(test_set$factor_truth, test_set$factor_pred)
+cm <- confusionMatrix(test_set$pred, test_set$Y)
 
-
-
-set.seed(42)
-train_split = initial_split(training, prop = 0.8, strata = target)
-train_set = training(train_split)
-eval_set = testing(train_split)
-train_set
-
-cat(dim(train_set),'/',dim(eval_set),'/',dim(test_set))
 ```
 
 
 ```{r}
-## Etape 1 : Techniques de clustering / corélations des variables
-########################################### tentative de PCA #########################
-x <- sample(1:nrow(base_dataset_full), 100000)
-test_acp = base_dataset_full[x, ]
-test_acp <- test_acp %>% select(-annee,-mois,-code_insee)
-test_acp = scale(test_acp)
-res.pca <- PCA(test_acp, graph = TRUE)
-######################################################################################
+#XGBOOST
 
-### matrice de corrélation des données 
-mcor <- (cor(test_acp))
-mcor
-df<-as.data.frame((mcor))
-corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
-corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
+#Training with xgboost - gives better scores than 'rf'
+xgb_trcontrol = trainControl(method = "cv", number = 5, allowParallel = TRUE, 
+    verboseIter = FALSE, returnData = FALSE)
 
-corrplot(mcor)
-test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
+#nrounds: nombre d’itérations de boosting à effectuer. Plus il est grand, et plus c’est lent
+#max_depth: profondeur d’arbre maximale. Risque d’over-fit si trop grand, et d’under-fit si trop petit
+#colsample_bytree: pourcentage des colonnes pris pour construire un arbre (rappelle-toi, un arbre est #construit avec un sous-ensemble des données: lignes et colonnes)
+#eta: ou learning rate, ce paramètre contrôle la vitesse à laquelle on convergence lors de la descente du #gradient fonctionnelle (par défaut = 0.3)
+#gamma: diminution minimale de la valeur de la loss (fonction objectif) pour prendre la décision de #"partitionner une feuille
 
-cor(base_dataset_full, method = c("pearson", "kendall", "spearman"))
- sapply(base_dataset_full,class)
+xgbGrid <- expand.grid(nrounds = 100,  
+                       max_depth = c(3, 5, 10, 15, 20),
+                       colsample_bytree = seq(0.5, 0.9, length.out = 5),
+                       ## valeurs par défaut : 
+                       eta = 0.1,
+                       gamma=0,
+                       min_child_weight = 1,
+                       subsample = 1
+                      )
+
+xgb_model = train(Y ~.,
+                  data = training_set,
+                  trControl = xgb_trcontrol,
+                  tuneGrid = xgbGrid, 
+                  method = "xgbTree",
+                  verbosity = 0)
+
+
+test_set$pred <- predict(xgb_model, test_set[,-which(names(test_set) == "Y")])
+test_set$factor_pred <- as.factor(test_set$pred)
+test_set$factor_truth <- as.factor(test_set$Y)
+
+precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
+cm <- confusionMatrix(test_set$pred, test_set$Y)
+
+cm
+```
+
+```{r}
+#RandomForest
+preProcess <- c("center","scale")
+
+abalone_no_nzv_pca <- preProcess(select(training_set), 
+                        method = c("center", "scale", "nzv", "pca"))
+abalone_no_nzv_pca
+
+
+metric <- "Accuracy"
+customRF <- list(type = "Classification",
+                 library = "randomForest",
+                 loop = NULL)
+
+customRF$parameters <- data.frame(parameter = c("mtry", "ntree"),
+                                  class = rep("numeric", 2),
+                                  label = c("mtry", "ntree"))
+
+customRF$grid <- function(x, y, len = NULL, search = "grid") {}
+
+customRF$fit <- function(x, y, wts, param, lev, last, weights, classProbs) {
+  randomForest(x, y,
+               mtry = param$mtry,
+               ntree=param$ntree)
+}
+
+#Predict label
+customRF$predict <- function(modelFit, newdata, preProc = NULL, submodels = NULL)
+   predict(modelFit, newdata)
+
+#Predict prob
+customRF$prob <- function(modelFit, newdata, preProc = NULL, submodels = NULL)
+   predict(modelFit, newdata, type = "prob")
+
+customRF$sort <- function(x) x[order(x[,1]),]
+customRF$levels <- function(x) x$classes
+
+
+control <- trainControl(method="repeatedcv", 
+                        number=10, 
+                        repeats=3,
+                        allowParallel = TRUE)
+
+tunegrid <- expand.grid(.mtry=c(1:15),.ntree=c(1000,1500))
+
+custom <- train(Y~., data=training_set, 
+                method=customRF, 
+                metric=metric, 
+                tuneGrid=tunegrid, 
+                trControl=control)
+
+summary(custom)
+
 ```
 
