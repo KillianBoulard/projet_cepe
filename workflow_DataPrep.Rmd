@@ -130,7 +130,7 @@ inc_dataset = incendies %>%
   mutate(code_insee = ifelse(code_insee == '13055',"13001",code_insee)) %>% 
   mutate(code_insee = ifelse(code_insee == '83999',"83067",code_insee)) %>%
   mutate(
-    date_alerte = as.Date(date_alerte, format = "%Y-%m-%d"),#%d/%m/%Y
+    date_alerte = as.Date(date_alerte, format = "%d/%m/%Y"),#%Y-%m-%d
     annee = format(date_alerte,"%Y"),
     mois = format(date_alerte,"%m"),
     date_m_1 = date_alerte %m+% months(-1),
