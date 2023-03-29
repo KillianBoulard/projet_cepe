@@ -205,8 +205,19 @@ test <- meteo %>%
 #==> graphiques echelle nationale / dep
 #==> modélisation
     
-tablet = synt_gen_comm_dataset %>% 
-    filter(code_insee == "01017")
+tablet = synt_gen_comm_dataset_test %>% 
+    filter(code_insee == "2A139") %>% 
+  arrange(annee,mois)
+
+tablet2 = inc_dataset %>% 
+  filter(code_insee == "2A139") %>% 
+  arrange(annee,mois)
+
+tablet3 = synt_gen_comm_dataset %>% 
+  filter(code_insee == "2A139") %>% 
+  arrange(annee,mois)
+
+
   
 test = meteo %>% 
   distinct(id_station,latitude, longitude) %>% 
