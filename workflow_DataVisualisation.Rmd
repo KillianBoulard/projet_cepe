@@ -1,57 +1,57 @@
----
-title: "Projet climat LBP"
-output: html_notebook
-authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
----
+data_clean<-data %>% mutate(  incendie  = ifelse(Y==0,"incendie=0","incendie=1") ) %>% 
+  filter (annee != 2022)
 
-# Etape 1 : Déclaration des librairies
-```{r warning=FALSE}
-library(tidymodels)
-library(tidyverse)
-library(geosphere)
-library(purrr)
-library(lubridate)
-library(FactoMineR)
-library(corrplot)
-library(missMDA)
-library(psych)
-library("writexl")
-```
+data_incendies <-data_clean%>% filter(Y==1)
 
-```{r setup}
-knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
-knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
-```
+library(leaflet)
 
-# Etape 1 : Corélation des variables
+pal <- colorFactor(
+  palette = 'Accent',
+  domain = data_incendies$annee
+)
+ 
 
-```{r}
-mcor <- cor(dataset)
-corrplot(mcor, type="upper", order="hclust", tl.col="black", tl.srt=45)
-```
+mean_surface<-mean(data_incendies$superficie)
+mediane_surface<-median(data_incendies$superficie)
+
+mean_surface
+
+leaflet(data_incendies) %>% addTiles() %>%
+  setView(-2.213749, 46.227638,zoom=5) %>%
+  addCircles(lng = ~lat, lat = ~long, weight = 1,
+             radius = ~sqrt(superficie) * 50, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
+             color = ~pal(annee), fillOpacity = 0.5)
 
 
-```{r}
-## Etape 1 : Techniques de clustering / corélations des variables
-########################################### tentative de PCA #########################
-x <- sample(1:nrow(base_dataset_full), 100000)
-test_acp = base_dataset_full[x, ]
-test_acp <- test_acp %>% select(-annee,-mois,-code_insee)
-test_acp = scale(test_acp)
-res.pca <- PCA(test_acp, graph = TRUE)
-######################################################################################
 
-### matrice de corrélation des données 
-mcor <- (cor(test_acp))
-mcor
-df<-as.data.frame((mcor))
-corrplot(mcor,type="upper", order="hclust", tl.col="black", tl.srt=45)
-corrplot(mcor, method = 'circle', order = 'AOE', diag = FALSE)
+data_incendies_majeurs<- data_incendies %>%
+  filter(superficie>mediane_surface)
 
-corrplot(mcor)
-test<-METEO_QUANTI[1:10000,c("id_station","date_mesure","heure_mesure")]
+leaflet(data_incendies_majeurs)  %>% addProviderTiles("OpenStreetMap.France")%>%
+  setView(2.792276, 46.461114,zoom=5) %>%
+  addCircles(lng = ~lat, lat = ~long, weight = 1,
+             radius = ~sqrt(superficie) *60, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
+             color = ~pal(annee), fillOpacity = 0.5)
 
-cor(base_dataset_full, method = c("pearson", "kendall", "spearman"))
- sapply(base_dataset_full,class)
-```
 
+[10:55] BIGAS Laurent
+
+
+
+
+repartition des incendies par annee :
+ggplot(data_incendies, aes(x=superficie)) + geom_histogram() + 
+  geom_vline(aes(xintercept=mean(superficie)),color="blue", linetype="dashed", size=1) +
+  xlab("superficie") +
+  ylab("effectifs") +
+facet_wrap(annee ~ .)
+
+
+ggplot(data_clean, aes(x=temperature_23_g)) + 
+  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="lightblue") + 
+  facet_wrap(incendie ~ .)
+
+
+             
+             
