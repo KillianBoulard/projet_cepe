@@ -23,6 +23,7 @@ library(caret)
 knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
 knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
 dataset = readRDS(file = "dataset.RDS")
+dataset = dataset[sample(1:nrow(dataset)), ]
 ```
 
 # Etape 1 : Création de l'échantillon
@@ -30,27 +31,38 @@ dataset = readRDS(file = "dataset.RDS")
 ```{r}
 rm(list = setdiff(ls(), c("dataset")))
 new_data <- c("2021")
-
 target_train_test <- c("2011", "2012","2013","2014","2015","2016","2017","2018","2019","2020")
 
 set.seed(44)
+
 
 #2.36% de Y == 1
 train_test_set = dataset %>% 
   filter(annee %in% target_train_test)
 
+new_data = dataset %>% 
+  filter(annee %in% new_data)
+
 #Les données sont déséquilibrées, donc remise en forme des proportions
 #20 185 / 855 480 = 2.36%
 #En appliquant la méthode X3 /3 cela donne 60 555 / 285 160 soit 21.24%
-poids_presence_feu <- 10000 * 0.3
-poids_non_feu <- 10000 * 0.7
+poids_presence_feu <- 10000 * 0.5
+poids_non_feu <- 10000 * 0.5
 
 echantillon_A <- train_test_set %>% filter(Y == "1") %>% sample_n(size = poids_presence_feu, replace = FALSE)
 echantillon_B <- train_test_set %>% filter(Y == "0") %>% sample_n(size = poids_non_feu, replace = FALSE)
 train_test_set <- bind_rows(echantillon_A, echantillon_B)
 train_test_set = train_test_set[sample(1:nrow(train_test_set)), ]
-
 rm(echantillon_A,echantillon_B)
+
+#Au cas ou : tester sur les données fraiches
+#poids_presence_feu_new_data <- 9500 * 0.2
+#poids_non_feu_new_data <- 9500 * 0.8
+#echantillon_A <- new_data %>% filter(Y == "1") %>% sample_n(size = #poids_presence_feu_new_data, replace = FALSE)
+#echantillon_B <- new_data %>% filter(Y == "0") %>% sample_n(size = #poids_non_feu_new_data, replace = FALSE)
+#new_data <- bind_rows(echantillon_A, echantillon_B)
+#new_data = new_data[sample(1:nrow(new_data)), ]
+#rm(echantillon_A,echantillon_B)
 
 #Création des datasets train / test avec proportion de 80%
 i <- createDataPartition(y = train_test_set$Y, times = 1, p = 0.8, list = FALSE)
@@ -69,25 +81,79 @@ test_set = test_set %>%
 
 training_set = training_set[sample(1:nrow(training_set)), ]
 test_set = test_set[sample(1:nrow(test_set)), ]
-rm(train_test_set, i, poids_presence_feu,poids_non_feu, target_train_test,new_data)
+rm(train_test_set, i, poids_presence_feu,poids_non_feu, target_train_test)
 ```
 
 # Etape 2 : Modélisation
 
 ```{r}
 #KNN
-preProcess <- c("center","scale")
+preProcess <-  c("center", "scale", "nzv", "pca")
 trControl <- trainControl(method = "repeatedcv",number = 5,repeats = 5)
+trControl <- trainControl(method = "cv",number = 10)
 
 model <- train(Y ~ ., method='knn', data = training_set, metric='Accuracy',preProcess = preProcess, trControl=trControl)
 
 test_set$pred <- predict(model, test_set[,-which(names(test_set) == "Y")])
+
 test_set$factor_pred <- as.factor(test_set$pred)
 test_set$factor_truth <- as.factor(test_set$Y)
 
 precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
 cm <- confusionMatrix(test_set$pred, test_set$Y)
 
+
+#new_data$pred <- predict(model, new_data[,-which(names(new_data) == "Y")])
+#new_data$factor_pred <- as.factor(new_data$pred)
+#new_data$factor_truth <- as.factor(new_data$Y)
+
+#precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
+#cm <- confusionMatrix(new_data$pred, new_data$Y)
+
+```
+
+
+```{r}
+#XGB 1 : 
+preProcess <-  c("center", "scale", "nzv", "pca")
+xgb_trcontrol = trainControl(method = "cv", number = 5, allowParallel = TRUE, 
+    verboseIter = FALSE, returnData = FALSE)
+
+xgbGrid <- expand.grid(nrounds = c(100,200),  
+                       max_depth = c(3, 5, 10, 15, 20),
+                       colsample_bytree = seq(0.5, 0.9, length.out = 5),
+                       ## valeurs par défaut : 
+                       eta = 0.1,
+                       gamma=0,
+                       min_child_weight = 1,
+                       subsample = 1
+                      )
+
+set.seed(0)
+xgb_model = train(Y ~ .,
+                  trControl = xgb_trcontrol,
+                  tuneGrid = xgbGrid, 
+                  preProcess = preProcess,
+                  method = "xgbTree",
+                  data = training_set,
+                  verbosity = 0)
+
+test_set$pred <- predict(xgb_model, test_set[,-which(names(test_set) == "Y")])
+test_set$factor_pred <- as.factor(test_set$pred)
+test_set$factor_truth <- as.factor(test_set$Y)
+
+precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
+cm <- confusionMatrix(test_set$pred, test_set$Y)
+
+
+#new_data$pred <- predict(xgb_model, new_data[,-which(names(new_data) == "Y")])
+#new_data$factor_pred <- as.factor(new_data$pred)
+#new_data$factor_truth <- as.factor(new_data$Y)
+
+#precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
+#cm <- confusionMatrix(new_data$pred, new_data$Y)
+
+#varImp(xgb_model,scale=FALSE)
 ```
 
 
@@ -134,56 +200,15 @@ cm
 
 ```{r}
 #RandomForest
-preProcess <- c("center","scale")
+preProcess <-  c("center", "scale", "nzv", "pca")
 
-abalone_no_nzv_pca <- preProcess(select(training_set), 
-                        method = c("center", "scale", "nzv", "pca"))
-abalone_no_nzv_pca
-
-
-metric <- "Accuracy"
-customRF <- list(type = "Classification",
-                 library = "randomForest",
-                 loop = NULL)
-
-customRF$parameters <- data.frame(parameter = c("mtry", "ntree"),
-                                  class = rep("numeric", 2),
-                                  label = c("mtry", "ntree"))
-
-customRF$grid <- function(x, y, len = NULL, search = "grid") {}
-
-customRF$fit <- function(x, y, wts, param, lev, last, weights, classProbs) {
-  randomForest(x, y,
-               mtry = param$mtry,
-               ntree=param$ntree)
-}
-
-#Predict label
-customRF$predict <- function(modelFit, newdata, preProc = NULL, submodels = NULL)
-   predict(modelFit, newdata)
-
-#Predict prob
-customRF$prob <- function(modelFit, newdata, preProc = NULL, submodels = NULL)
-   predict(modelFit, newdata, type = "prob")
-
-customRF$sort <- function(x) x[order(x[,1]),]
-customRF$levels <- function(x) x$classes
-
-
-control <- trainControl(method="repeatedcv", 
-                        number=10, 
-                        repeats=3,
-                        allowParallel = TRUE)
-
-tunegrid <- expand.grid(.mtry=c(1:15),.ntree=c(1000,1500))
-
-custom <- train(Y~., data=training_set, 
-                method=customRF, 
-                metric=metric, 
-                tuneGrid=tunegrid, 
-                trControl=control)
-
-summary(custom)
-
+param_grid <- expand.grid(
+  ntree = seq(50, 200, 50),
+  mtry = seq(2, 6, 1),
+  max_depth = seq(5, 15, 2)
+)
+model <- train(Y ~ ., data = training_set, method = "rf",
+               trControl = trainControl(method = "cv", number = 10),
+               tuneGrid = param_grid)
 ```
 
