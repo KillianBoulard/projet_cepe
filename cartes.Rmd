@@ -1,0 +1,48 @@
+data_clean<-data %>% mutate(  incendie  = ifelse(Y==0,"incendie=0","incendie=1") ) %>% 
+  filter (annee != 2022)
+
+ 
+
+
+data_incendies <-data_clean%>% filter(Y==1)
+
+ 
+
+library(leaflet)
+
+ 
+
+pal <- colorFactor(
+  palette = 'Accent',
+  domain = data_incendies$annee
+)
+
+ 
+
+mean_surface<-mean(data_incendies$superficie)
+mediane_surface<-median(data_incendies$superficie)
+
+ 
+
+mean_surface
+
+ 
+
+
+leaflet(data_incendies) %>% addTiles() %>%
+  setView(-2.213749, 46.227638,zoom=5) %>%
+  addCircles(lng = ~lat, lat = ~long, weight = 1,
+             radius = ~sqrt(superficie) * 50, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
+             color = ~pal(annee), fillOpacity = 1)
+
+ 
+
+
+data_incendies_majeurs<- data_incendies %>%
+  filter(superficie>mediane_surface)
+
+leaflet(data_incendies_majeurs)  %>% addProviderTiles("OpenStreetMap.France")%>%
+  setView(2.792276, 46.461114,zoom=5) %>%
+  addCircles(lng = ~lat, lat = ~long, weight = 1,
+             radius = ~sqrt(superficie) *60, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
+             color = ~pal(annee), fillOpacity = 0.5)
