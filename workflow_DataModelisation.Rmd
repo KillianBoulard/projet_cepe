@@ -22,7 +22,7 @@ library(caret)
 ```{r setup}
 knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
 knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
-dataset = readRDS(file = "C:/Users/User/Desktop/Cours et documents/formation R ensae/DATA/dataset.rds")
+dataset = readRDS(file = "dataset.RDS")
 dataset = dataset[sample(1:nrow(dataset)), ]
 ```
 
@@ -33,8 +33,7 @@ rm(list = setdiff(ls(), c("dataset")))
 new_data <- c("2021")
 target_train_test <- c("2011", "2012","2013","2014","2015","2016","2017","2018","2019","2020")
 
-set.seed(44)
-
+set.seed(150)
 
 #2.36% de Y == 1
 train_test_set = dataset %>% 
@@ -46,8 +45,8 @@ new_data = dataset %>%
 #Les données sont déséquilibrées, donc remise en forme des proportions
 #20 185 / 855 480 = 2.36%
 #En appliquant la méthode X3 /3 cela donne 60 555 / 285 160 soit 21.24%
-poids_presence_feu <- 10000 * 0.5
-poids_non_feu <- 10000 * 0.5
+poids_presence_feu <- 40000 * 0.5
+poids_non_feu <- 40000 * 0.5
 
 echantillon_A <- train_test_set %>% filter(Y == "1") %>% sample_n(size = poids_presence_feu, replace = FALSE)
 echantillon_B <- train_test_set %>% filter(Y == "0") %>% sample_n(size = poids_non_feu, replace = FALSE)
@@ -103,20 +102,20 @@ precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
 cm <- confusionMatrix(test_set$pred, test_set$Y)
 
 
-#new_data$pred <- predict(model, new_data[,-which(names(new_data) == "Y")])
-#new_data$factor_pred <- as.factor(new_data$pred)
-#new_data$factor_truth <- as.factor(new_data$Y)
+new_data$pred <- predict(model, new_data[,-which(names(new_data) == "Y")])
+new_data$factor_pred <- as.factor(new_data$pred)
+new_data$factor_truth <- as.factor(new_data$Y)
 
-#precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
-#cm <- confusionMatrix(new_data$pred, new_data$Y)
+precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
+cm <- confusionMatrix(new_data$pred, new_data$Y)
 
 ```
 
 
 ```{r}
 #XGB 1 : 
-preProcess <-  c("center", "scale", "nzv", "pca")
-xgb_trcontrol = trainControl(method = "cv", number = 5, allowParallel = TRUE, 
+#preProcess <-  c("center", "scale", "nzv", "pca")
+xgb_trcontrol = trainControl(method = "cv", number = 10, allowParallel = TRUE, 
     verboseIter = FALSE, returnData = FALSE)
 
 xgbGrid <- expand.grid(nrounds = c(100,200),  
@@ -129,11 +128,11 @@ xgbGrid <- expand.grid(nrounds = c(100,200),
                        subsample = 1
                       )
 
-set.seed(0)
+set.seed(150)
 xgb_model = train(Y ~ .,
                   trControl = xgb_trcontrol,
                   tuneGrid = xgbGrid, 
-                  preProcess = preProcess,
+                  #preProcess = preProcess,
                   method = "xgbTree",
                   data = training_set,
                   verbosity = 0)
@@ -146,69 +145,67 @@ precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
 cm <- confusionMatrix(test_set$pred, test_set$Y)
 
 
-#new_data$pred <- predict(xgb_model, new_data[,-which(names(new_data) == "Y")])
-#new_data$factor_pred <- as.factor(new_data$pred)
-#new_data$factor_truth <- as.factor(new_data$Y)
+new_data$pred <- predict(xgb_model, new_data[,-which(names(new_data) == "Y")])
+new_data$factor_pred <- as.factor(new_data$pred)
+new_data$factor_truth <- as.factor(new_data$Y)
 
-#precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
-#cm <- confusionMatrix(new_data$pred, new_data$Y)
+precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
+cm <- confusionMatrix(new_data$pred, new_data$Y)
 
-#varImp(xgb_model,scale=FALSE)
+varImp(xgb_model,scale=FALSE)
 ```
 
-
 ```{r}
-#XGBOOST
+#3 sda (Shrinkage Discriminant Analysis)
+metric = "Accuracy"
+new_data = new_data[1:153]
+set.seed(12345)
+control <- trainControl(method="cv", number=10)
+m_sda <- train(Y~., data=training_set, method="sda", metric=metric, 
+               
+               trControl=control, preProcess = c("center", "scale","nzv") )
 
-#Training with xgboost - gives better scores than 'rf'
-xgb_trcontrol = trainControl(method = "cv", number = 5, allowParallel = TRUE, 
-    verboseIter = FALSE, returnData = FALSE)
-
-#nrounds: nombre d’itérations de boosting à effectuer. Plus il est grand, et plus c’est lent
-#max_depth: profondeur d’arbre maximale. Risque d’over-fit si trop grand, et d’under-fit si trop petit
-#colsample_bytree: pourcentage des colonnes pris pour construire un arbre (rappelle-toi, un arbre est #construit avec un sous-ensemble des données: lignes et colonnes)
-#eta: ou learning rate, ce paramètre contrôle la vitesse à laquelle on convergence lors de la descente du #gradient fonctionnelle (par défaut = 0.3)
-#gamma: diminution minimale de la valeur de la loss (fonction objectif) pour prendre la décision de #"partitionner une feuille
-
-xgbGrid <- expand.grid(nrounds = 100,  
-                       max_depth = c(3, 5, 10, 15, 20),
-                       colsample_bytree = seq(0.5, 0.9, length.out = 5),
-                       ## valeurs par défaut : 
-                       eta = 0.1,
-                       gamma=0,
-                       min_child_weight = 1,
-                       subsample = 1
-                      )
-
-xgb_model = train(Y ~.,
-                  data = training_set,
-                  trControl = xgb_trcontrol,
-                  tuneGrid = xgbGrid, 
-                  method = "xgbTree",
-                  verbosity = 0)
-
-
-test_set$pred <- predict(xgb_model, test_set[,-which(names(test_set) == "Y")])
+test_set$pred <- predict(m_sda, test_set[,-which(names(test_set) == "Y")])
 test_set$factor_pred <- as.factor(test_set$pred)
 test_set$factor_truth <- as.factor(test_set$Y)
 
 precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
 cm <- confusionMatrix(test_set$pred, test_set$Y)
 
-cm
+
+new_data$pred <- predict(m_sda, new_data[,-which(names(new_data) == "Y")])
+new_data$factor_pred <- as.factor(new_data$pred)
+new_data$factor_truth <- as.factor(new_data$Y)
+
+precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
+cm <- confusionMatrix(new_data$pred, new_data$Y)
+
+varImp(xgb_model,scale=FALSE)
 ```
 
 ```{r}
-#RandomForest
-preProcess <-  c("center", "scale", "nzv", "pca")
+#2 (pda) Penalized Discriminant Analysis
+metric = "Accuracy"
+new_data = new_data[1:153]
+control <- trainControl(method="cv", number=10)
+set.seed(12345)
+m_pda <- train(Y ~ ., data=training_set, method="pda", metric=metric, 
+               trControl=control, preProcess = c("center", "scale","nzv") )
 
-param_grid <- expand.grid(
-  ntree = seq(50, 200, 50),
-  mtry = seq(2, 6, 1),
-  max_depth = seq(5, 15, 2)
-)
-model <- train(Y ~ ., data = training_set, method = "rf",
-               trControl = trainControl(method = "cv", number = 10),
-               tuneGrid = param_grid)
+test_set$pred <- predict(m_pda, test_set[,-which(names(test_set) == "Y")])
+test_set$factor_pred <- as.factor(test_set$pred)
+test_set$factor_truth <- as.factor(test_set$Y)
+
+precision <- posPredValue(test_set$factor_truth, test_set$factor_pred)
+cm <- confusionMatrix(test_set$pred, test_set$Y)
+
+
+new_data$pred <- predict(m_pda, new_data[,-which(names(new_data) == "Y")])
+new_data$factor_pred <- as.factor(new_data$pred)
+new_data$factor_truth <- as.factor(new_data$Y)
+
+precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
+cm <- confusionMatrix(new_data$pred, new_data$Y)
+
+varImp(xgb_model,scale=FALSE)
 ```
-
