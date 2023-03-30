@@ -1,15 +1,9 @@
-data_clean<-data %>% mutate(  incendie  = ifelse(Y==0,"incendie=0","incendie=1") ) %>% 
-  filter (annee != 2022)
-
-data_incendies <-data_clean%>% filter(Y==1)
-
 library(leaflet)
 
 pal <- colorFactor(
   palette = 'Accent',
   domain = data_incendies$annee
 )
- 
 
 mean_surface<-mean(data_incendies$superficie)
 mediane_surface<-median(data_incendies$superficie)
@@ -20,23 +14,26 @@ leaflet(data_incendies) %>% addTiles() %>%
   setView(-2.213749, 46.227638,zoom=5) %>%
   addCircles(lng = ~lat, lat = ~long, weight = 1,
              radius = ~sqrt(superficie) * 50, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
-             color = ~pal(annee), fillOpacity = 0.5)
-
-
+             color = ~pal(annee), fillOpacity = 1)
 
 data_incendies_majeurs<- data_incendies %>%
   filter(superficie>mediane_surface)
 
-leaflet(data_incendies_majeurs)  %>% addProviderTiles("OpenStreetMap.France")%>%
-  setView(2.792276, 46.461114,zoom=5) %>%
+leaflet(data_incendies_majeurs)  %>% 
+  addProviderTiles("OpenStreetMap.France") %>%
+  setView(2.792276, 46.461114,zoom=5)      %>%
   addCircles(lng = ~lat, lat = ~long, weight = 1,
-             radius = ~sqrt(superficie) *60, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
-             color = ~pal(annee), fillOpacity = 0.5)
-
-
-[10:55] BIGAS Laurent
-
-
+             radius = ~sqrt(superficie) *60, 
+             popup = ~paste(sep = "<br/>",
+                            "<b>Surface (hectares) </b>", superficie,
+                            "<b>Commune </b>",code_insee,
+                            "<b>Année </b>",annee),
+             color = ~pal(annee), fillOpacity = 0.75) %>%
+  addLegend("bottomright", pal = pal, values = ~annee,
+            title = " Répartition des incendies majeurs",
+            labFormat = labelFormat(prefix = " "),
+            opacity = 1
+  )
 
 
 repartition des incendies par annee :
