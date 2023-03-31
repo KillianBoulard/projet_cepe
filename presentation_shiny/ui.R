@@ -1,5 +1,6 @@
 library(shiny)
 library(leaflet)
+library(shinyalert)
 
 vars <- c(
     "2020" = "superzip",
@@ -11,7 +12,7 @@ vars <- c(
 
 
 
-navbarPage("Projet Incendie CEPE", id="main",
+navbarPage("Projet Incendie CEPE / LBP", id="main",
            tabPanel("Carte",
                     div(class="outer",
                         tags$head(
@@ -19,34 +20,58 @@ navbarPage("Projet Incendie CEPE", id="main",
                             includeCSS("styles.css"),
                             includeScript("gomap.js")
                         ),
-                    leafletOutput("map", height=1000),
+                        useShinyalert(), 
+                    leafletOutput("incmap", height=1000),
                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                   draggable = TRUE, top = 150, left = 20, right = "auto", bottom = "auto",
                                   width = 200, height = "auto",
                                   h4("Choix des années"),
-                                  actionLink("selectAll","Tout selectionner"),
-                                  checkboxGroupInput("checkGroup", "Année : ",
-                                                     choices = 2011:2021,
-                                                          selected = 1)),
-                    
+                                  actionLink("selectall","Tout cocher / décocher"),
+                                  checkboxGroupInput("check_year", "Année : ",
+                                                     choices = 2021:2011)),
+                    absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                  draggable = TRUE, top = 600, left = 20, right = "auto", bottom = "auto",
+                                  width = 410, height = "auto",
+                                  h4("Probabilité d'avoir un feu dans ma commune :"),
+                                  selectInput(
+                                     "input_code_insee",
+                                     "Code insee :",
+                                     choices = unique(dataset$code_insee)),
+                                  selectInput(
+                                     "input_mois",
+                                     "Mois :",
+                                     choices = c(
+                                        "Janvier" = "01",
+                                        "Février" = "02",
+                                        "Mars" = "03",
+                                        "Avril" = "04",
+                                        "Mai" = "05",
+                                        "Juin" = "06",
+                                        "Juillet" = "07",
+                                        "Août" = "08",
+                                        "Septembre" = "09",
+                                        "Octobre" = "10",
+                                        "Novembre" = "11",
+                                        "Décembre" = "12"
+                                     )),
+                                  selectInput(
+                                     "input_model",
+                                     "Je choisis mon algorithme de prédiction :",
+                                     # "Refresh interval",
+                                     choices = c(
+                                        "XGboost" = 1,
+                                        "Modèle Linéaire" = 2,
+                                        "Random Forest" = 3
+                                     )),
+                                  actionButton("valid_model", "Je prédis", icon("paper-plane"), 
+                                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                                  #textOutput("application_name")
+                                  ),
                     tags$div(id="cite",
-                             'Data compiled for ', tags$em('Coming Apart: The State of White America, 1960–2010'), ' by Charles Murray (Crown Forum, 2012).'
+                             'Travaux réalisés par: ', tags$em('Laurent BIGAS / Killian BOULARD / Matthieu DA SILVA'), '2023'
                     ))
                     ),
-           tabPanel("Data", DT::dataTableOutput("data")))
+           tabPanel("Données du projet", DT::dataTableOutput("data")),
+           tabPanel("Data Lab (prévisions)"),
+           tabPanel("A propos du projet"))
 
-
-
-   #        checkboxGroupInput("checkGroup", "Week Day",
-    #                          choices = c("2011" = 2011,
-     #                                     "2012" = 2012,
-   #                                     "2013" = 2013,
-   #                                     "2014" = 2014,
-   #                                     "2015" = 2015,
-   #                                    "2016" = 2016,
-   #                                     "2017" = 2017,
-   #                                    "2018" = 2018,
-   #                                 "2019" = 2019,
-   #                                      "2020" = 2020,
-   #                                    "2021" = 2021),
-   #                        selected = 1)),
