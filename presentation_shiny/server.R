@@ -4,13 +4,15 @@ library(leaflet)
 library(DT)
 library(ggplot2)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+    #Import des paramètres du XGboost
+    xgb_model = readRDS("XGboost.rda")
+    data_2021 = dataset %>% filter(annee == 2021)
+    
     # Import Data and clean it
     data_clean <- dataset %>% mutate(incendie = ifelse(Y==0,"incendie=0","incendie=1") ) %>%
         filter (annee != 2022) %>% filter (annee != 2010)
     data_incendies <-data_clean%>% filter(Y==1)
-    
-    bb_data = data_incendies
     
     #50% des incendies les plus importants (surface_parcourue)
     mean_surface<-mean(data_incendies$superficie)
@@ -24,8 +26,12 @@ shinyServer(function(input, output) {
         palette = 'Accent',
         domain = data_incendies$annee
     )
+    
+    output$application_name <- renderText(paste(input$input_code_insee))
+    output$application_name2 = renderText(paste(input$input_model))
+    
     # create the leaflet map  
-    output$map <- renderLeaflet({
+    output$incmap <- renderLeaflet({
         leaflet(data_incendies_majeurs) %>%
             addCircles(lng = ~lat, lat = ~long, weight = 1,
                        group = "mygroup",
@@ -36,21 +42,27 @@ shinyServer(function(input, output) {
                                       "<b>Année </b>",annee),
                        color = ~pal(annee), fillOpacity = 0.75) %>% 
             addTiles() %>%
-            addLayersControl(
-                position = "bottomright",
-                overlayGroups = c("2021", "2020", "2019", "2018", "2017"),
-                options = layersControlOptions(collapsed = FALSE)) %>% 
-            hideGroup(c("2021", "2020", "2019", "2018", "2017")) %>% 
             setView(2.792276, 46.461114,zoom=6.25) %>%
             addLegend("topright", pal = pal, values = ~annee,
                       title = " Répartition des incendies majeurs",
                       labFormat = labelFormat(prefix = " "),
-                      opacity = 1
-            )
+                      opacity = 1)
     })
-    mydata_filtered <- reactive(data_incendies_majeurs[data_incendies_majeurs$annee %in% input$checkGroup, ])
-    observeEvent(input$checkGroup, {
-        leafletProxy("map", data = mydata_filtered()) %>%
+
+    observeEvent(input$selectall,{
+        if(input$selectall == 0) return(NULL) 
+        else if (input$selectall%%2 == 0)
+        {
+            updateCheckboxGroupInput(session,"check_year", "Année : ",choices = 2021:2011)
+        }
+        else
+        {
+            updateCheckboxGroupInput(session,"check_year", "Année : ",choices = 2021:2011,selected=2021:2011)
+        }
+    })
+
+    observeEvent(input$check_year, {
+        leafletProxy("incmap", data = filteredData()) %>%
             clearGroup ("mygroup") %>%
             addCircles(lng = ~lat, lat = ~long, weight = 1,
                        group = "mygroup",
@@ -59,11 +71,48 @@ shinyServer(function(input, output) {
                                       "<b>Surface (hectares) </b>", superficie,
                                       "<b>Commune </b>",code_insee,
                                       "<b>Année </b>",annee),
-                       color = ~pal(annee), fillOpacity = 0.75)
+                       color = ~pal(annee), fillOpacity = 0.75) %>% 
+            clearControls() %>% 
+            addLegend("topright", pal = pal, values = ~annee,
+                      title = " Répartition des incendies majeurs",
+                      labFormat = labelFormat(prefix = " "),
+                      opacity = 1)
+    },ignoreNULL = F)
+
+    observeEvent(input$valid_model, {
+        code_insee = input$input_code_insee
+        mois = input$input_mois
+        a_prevoir = data_2021 %>% filter(code_insee == !!code_insee) %>% filter(mois == !!mois)
+
+        a_prevoir = a_prevoir %>% 
+            select(-c(annee, code_insee, id_station, -Y))
+        
+        test = predict(xgb_model, a_prevoir, type="prob")
+        result = test[,2]
+        
+        if (result >= 0.50) {
+            shinyalert("Résultat de la prédiction :",
+                       paste("Vous avez",
+                             paste0(round(result,4),
+                             "% de chance d'avoir un feu dans votre commune "),code_insee,"en",mois), 
+                       type = "warning")
+        } else {
+            shinyalert("Résultat de la prédiction :",
+                       paste("Vous avez",
+                             paste0(round(result,4),
+                             "% de chance d'avoir un feu dans votre commune "),code_insee,"en",mois), 
+                       type = "success")}
     })
     
+    filteredData <- reactive({
+        if (length(input$check_year) == 0) {
+            data_incendies_majeurs[data_incendies_majeurs$annee %in% 2010, ]
+        } else {
+            data_incendies_majeurs[data_incendies_majeurs$annee %in% input$check_year, ]
+        }
+    })
     
     output$data <-DT::renderDataTable(datatable(
-        bb_data[,c(-1,-23,-24,-25,-28:-35)],filter = 'top',
+        data_incendies_majeurs,filter = 'top',
     ))
 })
