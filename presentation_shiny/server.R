@@ -17,6 +17,9 @@ shinyServer(function(input, output, session) {
     #50% des incendies les plus importants (surface_parcourue)
     mean_surface<-mean(data_incendies$superficie)
     mediane_surface<-median(data_incendies$superficie)
+    min_surface<-min(data_incendies$superficie)
+    max_surface<-max(data_incendies$superficie)
+    
     
     data_incendies_majeurs<- data_incendies %>%
         filter(superficie>mediane_surface)
@@ -32,8 +35,8 @@ shinyServer(function(input, output, session) {
     
     # create the leaflet map  
     output$incmap <- renderLeaflet({
-        leaflet(data_incendies_majeurs) %>%
-            addCircles(lng = ~lat, lat = ~long, weight = 1,
+        leaflet(data_incendies) %>%
+            addCircles(lng = ~long, lat = ~lat, weight = 1,
                        group = "mygroup",
                        radius = ~sqrt(superficie) *60,
                        popup = ~paste(sep = "<br/>",
@@ -44,7 +47,7 @@ shinyServer(function(input, output, session) {
             addTiles() %>%
             setView(2.792276, 46.461114,zoom=6.25) %>%
             addLegend("topright", pal = pal, values = ~annee,
-                      title = " Répartition des incendies majeurs",
+                      title = " Répartition des incendies",
                       labFormat = labelFormat(prefix = " "),
                       opacity = 1)
     })
@@ -60,11 +63,23 @@ shinyServer(function(input, output, session) {
             updateCheckboxGroupInput(session,"check_year", "Année : ",choices = 2021:2011,selected=2021:2011)
         }
     })
-
-    observeEvent(input$check_year, {
-        leafletProxy("incmap", data = filteredData()) %>%
+    
+    observeEvent(input$median_button,{
+        updateSliderInput(session, "slidersurface", value = 2512)
+    })
+    
+    observeEvent(input$mean_button,{
+      updateSliderInput(session, "slidersurface", value = 3709)
+    })
+    
+    observeEvent(eventExpr = {
+      input$check_year
+      input$slidersurface
+      },
+      handlerExpr =  {
+        leafletProxy("incmap", data = intersect(filteredData(), filteredDataSlider())) %>%
             clearGroup ("mygroup") %>%
-            addCircles(lng = ~lat, lat = ~long, weight = 1,
+            addCircles(lng = ~long, lat = ~lat, weight = 1,
                        group = "mygroup",
                        radius = ~sqrt(superficie) *60,
                        popup = ~paste(sep = "<br/>",
@@ -78,6 +93,7 @@ shinyServer(function(input, output, session) {
                       labFormat = labelFormat(prefix = " "),
                       opacity = 1)
     },ignoreNULL = F)
+    
 
     observeEvent(input$valid_model, {
         code_insee = input$input_code_insee
@@ -89,30 +105,40 @@ shinyServer(function(input, output, session) {
         
         test = predict(xgb_model, a_prevoir, type="prob")
         result = test[,2]
+        result = result*100
         
-        if (result >= 0.50) {
+        if (result >= 50) {
             shinyalert("Résultat de la prédiction :",
                        paste("Vous avez",
-                             paste0(round(result,4),
-                             "% de chance d'avoir un feu dans votre commune "),code_insee,"en",mois), 
+                             paste0(round(result,2),
+                             "% de chance d'avoir un feu dans votre commune ")), 
                        type = "warning")
         } else {
             shinyalert("Résultat de la prédiction :",
                        paste("Vous avez",
-                             paste0(round(result,4),
-                             "% de chance d'avoir un feu dans votre commune "),code_insee,"en",mois), 
+                             paste0(round(result,2),
+                             "% de chance d'avoir un feu dans votre commune ")), 
                        type = "success")}
     })
     
+    
     filteredData <- reactive({
         if (length(input$check_year) == 0) {
-            data_incendies_majeurs[data_incendies_majeurs$annee %in% 2010, ]
+          data_incendies[data_incendies$annee %in% 2010, ]
         } else {
-            data_incendies_majeurs[data_incendies_majeurs$annee %in% input$check_year, ]
+          data_incendies[data_incendies$annee %in% input$check_year, ]
         }
     })
     
+    filteredDataSlider <- reactive({
+      if (input$slidersurface > 0) {
+        data_incendies[data_incendies$superficie <= input$slidersurface, ]
+      } else {
+        data_incendies[data_incendies$superficie %in% 0, ]
+      }
+    })
+    
     output$data <-DT::renderDataTable(datatable(
-        data_incendies_majeurs,filter = 'top',
+      data_incendies,filter = 'top',
     ))
 })

@@ -22,7 +22,7 @@ library(caret)
 ```{r setup}
 knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA")
 knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
-dataset = readRDS(file = "dataset.RDS")
+dataset = readRDS(file = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA/dataset.RDS")
 dataset = dataset[sample(1:nrow(dataset)), ]
 ```
 
@@ -45,8 +45,8 @@ new_data = dataset %>%
 #Les données sont déséquilibrées, donc remise en forme des proportions
 #20 185 / 855 480 = 2.36%
 #En appliquant la méthode X3 /3 cela donne 60 555 / 285 160 soit 21.24%
-poids_presence_feu <- 40000 * 0.5
-poids_non_feu <- 40000 * 0.5
+poids_presence_feu <- 2000 * 0.5
+poids_non_feu <- 2000 * 0.5
 
 echantillon_A <- train_test_set %>% filter(Y == "1") %>% sample_n(size = poids_presence_feu, replace = FALSE)
 echantillon_B <- train_test_set %>% filter(Y == "0") %>% sample_n(size = poids_non_feu, replace = FALSE)
@@ -153,6 +153,10 @@ precision <- posPredValue(new_data$factor_truth, new_data$factor_pred)
 cm <- confusionMatrix(new_data$pred, new_data$Y)
 
 varImp(xgb_model,scale=FALSE)
+
+
+#saveRDS(xgb_model, file = "c:/Users/User/Desktop/Cours et documents/formation R ensae/projet_cepe/projet_cepe/presentation_shiny/XGboost.rda")
+
 ```
 
 ```{r}

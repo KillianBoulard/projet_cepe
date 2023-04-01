@@ -1,6 +1,8 @@
 library(shiny)
 library(leaflet)
 library(shinyalert)
+library(shinyWidgets)
+
 
 vars <- c(
     "2020" = "superzip",
@@ -29,6 +31,16 @@ navbarPage("Projet Incendie CEPE / LBP", id="main",
                                   actionLink("selectall","Tout cocher / décocher"),
                                   checkboxGroupInput("check_year", "Année : ",
                                                      choices = 2021:2011)),
+                    absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                  draggable = TRUE, top = 75, left = 300, right = "auto", bottom = "auto",
+                                  width = 400, height = "auto",
+                                  sliderInput("slidersurface", "Seuil de surface parcourue :",
+                                              min = 0, max = 75821, value = 2512
+                                  ),
+                                  actionButton("median_button", "Médiane", icon(""), 
+                                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                                  actionButton("mean_button", "Moyenne", icon(""), 
+                                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4")),
                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                   draggable = TRUE, top = 600, left = 20, right = "auto", bottom = "auto",
                                   width = 410, height = "auto",
