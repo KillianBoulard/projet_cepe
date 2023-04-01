@@ -1,54 +1,22 @@
-library(leaflet)
-
-pal <- colorFactor(
-  palette = 'Accent',
-  domain = data_incendies$annee
-)
-
-mean_surface<-mean(data_incendies$superficie)
-mediane_surface<-median(data_incendies$superficie)
-
-mean_surface
-
-leaflet(data_incendies) %>% addTiles() %>%
-  setView(-2.213749, 46.227638,zoom=5) %>%
-  addCircles(lng = ~lat, lat = ~long, weight = 1,
-             radius = ~sqrt(superficie) * 50, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
-             color = ~pal(annee), fillOpacity = 1)
-
-data_incendies_majeurs<- data_incendies %>%
-  filter(superficie>mediane_surface)
-
-leaflet(data_incendies_majeurs)  %>% 
-  addProviderTiles("OpenStreetMap.France") %>%
-  setView(2.792276, 46.461114,zoom=5)      %>%
-  addCircles(lng = ~lat, lat = ~long, weight = 1,
-             radius = ~sqrt(superficie) *60, 
-             popup = ~paste(sep = "<br/>",
-                            "<b>Surface (hectares) </b>", superficie,
-                            "<b>Commune </b>",code_insee,
-                            "<b>Année </b>",annee),
-             color = ~pal(annee), fillOpacity = 0.75) %>%
-  addLegend("bottomright", pal = pal, values = ~annee,
-            title = " Répartition des incendies majeurs",
-            labFormat = labelFormat(prefix = " "),
-            opacity = 1
-  )
-
-
-repartition des incendies par annee :
-ggplot(data_incendies, aes(x=superficie)) + geom_histogram() + 
-  geom_vline(aes(xintercept=mean(superficie)),color="blue", linetype="dashed", size=1) +
-  xlab("superficie") +
-  ylab("effectifs") +
+```{r}
+library(ggplot2)
+#repartition des incendies par annee :
+ggplot(data_incendies, aes(x=superficie)) + geom_histogram() +
+ geom_vline(aes(xintercept=mean(superficie)),color="blue", linetype="dashed", size=1) +
+ xlab("superficie") +
+ ylab("effectifs") +
 facet_wrap(annee ~ .)
 
 
 ggplot(data_clean, aes(x=temperature_23_g)) + 
-  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
-  geom_density(alpha=.2, fill="lightblue") + 
-  facet_wrap(incendie ~ .)
+ geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+ geom_density(alpha=.2, fill="lightblue") + 
+ facet_wrap(incendie ~ .)
 
 
              
              
+
+```
+
+library(leafle

@@ -3,17 +3,6 @@ library(leaflet)
 library(shinyalert)
 library(shinyWidgets)
 
-
-vars <- c(
-    "2020" = "superzip",
-    "Centile score" = "centile",
-    "College education" = "college",
-    "Median income" = "income",
-    "Population" = "adultpop"
-)
-
-
-
 navbarPage("Projet Incendie CEPE / LBP", id="main",
            tabPanel("Carte",
                     div(class="outer",
