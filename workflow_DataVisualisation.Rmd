@@ -174,21 +174,22 @@ ggplot(data=data_group_by, aes(x=mois, y=mean_temp_14_g, group=Y)) +
 
 #bonne version###
 ######################################################################################"
+#ok###################
 ggplot(data_group_by, aes(x=mois, y=mean_temp_14_m_1, group=Y)) +
   geom_line(aes(linetype=Y, color=Y))+
   geom_point(aes(color=Y))+
   theme(legend.position="top")+facet_wrap(annee~.)
-
+#ok###################
 ggplot(data_group_by, aes(x=mois, y=mean_temp_23_m_1, group=Y)) +
   geom_line(aes(linetype=Y, color=Y))+
   geom_point(aes(color=Y))+
   theme(legend.position="top")+facet_wrap(annee~.)
-
+#ok###################
 ggplot(data_group_by, aes(x=mois, y=mean_temp_14_m_12, group=Y)) +
   geom_line(aes(linetype=Y, color=Y))+
   geom_point(aes(color=Y))+
   theme(legend.position="top")+facet_wrap(annee~.)
-
+#ok###################
 ggplot(data_group_by, aes(x=mois, y=mean_temp_23_m_12, group=Y)) +
   geom_line(aes(linetype=Y, color=Y))+
   geom_point(aes(color=Y))+
@@ -200,7 +201,7 @@ ggplot(data_group_by, aes(x=annee, y=mean_humidite_14_m_1, group=Y)) +
   geom_point(aes(color=Y))+
   theme(legend.position="top")+facet_wrap(mois~.)
 
-
+#ok###################
 incendies<- read.csv(file="Incendies.csv",
                      col.names = c("annee","id","departement","code_insee",
                                    "nom_commune","date_alerte","origine_alerte","moyens_premiere_intervention",
@@ -245,25 +246,12 @@ incendies$departement<-as.factor(incendies$departement)
 
 incendies$date_alerte <-  as.Date(incendies$date_alerte,format = "%Y-%m-%d")
 
-
-
-
-#################################################################
-
-
 incendiestest<-incendies %>% filter (nature != "" & dir_ven !="")
 
 
 
 
-
-ggplot(data=incendiestest,aes(x=nature,fill=dir_ven),position="dodge")+geom_bar()
-
-
-ggplot(data=incendiestest,aes(x=annee,fill=nature),position="dodge")+geom_bar()
-
-
-
+#ok###################
 ggplot(incendiestest, aes(x = annee, fill=nature)) +
   geom_bar(position = position_dodge()) +
   geom_text(stat="count",
@@ -274,7 +262,7 @@ ggplot(incendiestest, aes(x = annee, fill=nature)) +
        x="Année de l'incendie", y = "nb incendies")
 theme_economist_white()
 
-
+#ok###################
 ggplot(incendiestest, aes(x = annee, fill=origine_alerte)) +
   geom_bar(position = position_dodge()) +
   geom_text(stat="count",
