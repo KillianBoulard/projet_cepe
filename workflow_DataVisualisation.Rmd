@@ -1,22 +1,204 @@
-```{r}
 library(ggplot2)
-#repartition des incendies par annee :
-ggplot(data_incendies, aes(x=superficie)) + geom_histogram() +
- geom_vline(aes(xintercept=mean(superficie)),color="blue", linetype="dashed", size=1) +
- xlab("superficie") +
- ylab("effectifs") +
+library(dplyr)
+library(tidyr)
+library(geosphere)
+library(tidyverse)
+library(purrr)
+
+library(rlang)
+
+library(caret)
+
+
+
+
+#travail
+setwd("C:/Users/bigas/Documents/laurent/formation_cepe/projets_MachineLearning/data")
+
+
+#taff
+setwd("C:/Users/vhle524/OneDrive - LA POSTE GROUPE/Documents/projetcepe/data")
+
+
+
+data<-readRDS("dataset.rds", refhook = NULL)
+
+
+table (data$annee)
+
+data_clean<-data %>% mutate(  incendie  = ifelse(Y==0,"incendie=0","incendie=1") ) %>% 
+  filter (annee != 2022)
+
+data_incendies <-data_clean%>% filter(Y==1)
+
+library(leaflet)
+
+pal <- colorFactor(
+  palette = 'Accent',
+  domain = data_incendies$annee
+)
+
+mean_surface<-mean(data_incendies$superficie)
+mediane_surface<-median(data_incendies$superficie)
+
+data_incendies_majeurs<- data_incendies %>%
+  filter(superficie>mediane_surface)
+
+###############################################################################################
+
+
+#ok###############################################
+ggplot(data_incendies) +
+  aes(x = superficie) +
+  geom_density(color="darkblue", fill="lightblue") +
+  geom_vline(aes(xintercept=mean(superficie)),
+             color="darkblue", linetype="dashed", size=1)
+  ggtitle("superficie brulée") +
+  xlab("superficie") +
+  ylab("Densité") 
+
+
+ggplot(data_incendies, aes(x=superficie)) + geom_histogram() + 
+  geom_vline(aes(xintercept=mean(superficie)),color="blue", linetype="dashed", size=1) +
+  xlab("superficie") +
+  ylab("effectifs") +
 facet_wrap(annee ~ .)
+  
+#ok###############################################
+ggplot(data_incendies, aes(x=superficie)) + 
+  geom_histogram(aes(y=..density..), alpha=1, binwidth = 30,colour="lightblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="blue") 
 
 
-ggplot(data_clean, aes(x=temperature_23_g)) + 
- geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
- geom_density(alpha=.2, fill="lightblue") + 
- facet_wrap(incendie ~ .)
+
+#ok###############################################
+ggplot(data_clean, aes(x=temperature_23_g)) + 
+  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="lightblue") + 
+  facet_wrap(incendie ~ .)
+
+#ok###############################################
+ggplot(data_clean, aes(x=temperature_14_g)) + 
+  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="lightblue") + 
+  facet_grid(incendie ~ .)
 
 
-             
-             
 
-```
 
-library(leafle
+ggplot(data_clean, aes(x=temperature_14_m_1)) + 
+  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="lightblue") +
+  facet_grid(incendie ~ .)
+
+ggplot(data_clean, aes(x=temperature_23_m_1)) + 
+  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="lightblue") +
+  facet_grid(incendie ~ .)
+
+
+ggplot(data_clean, aes(x=pression_niveau_mer_23_m_1)) + 
+  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="lightblue") +
+  facet_grid(incendie ~ .)
+
+
+ggplot(data_incendies, aes(x=superficie)) + 
+  geom_histogram(aes(y=..density..), colour="darkblue", fill="lightblue")+
+  geom_density(alpha=.2, fill="lightblue") +
+  facet_grid(annee ~ .)
+####################################################################################################
+
+
+
+leaflet(data_incendies) %>% addTiles() %>%
+  setView(-2.213749, 46.227638,zoom=5) %>%
+  addCircles(lng = ~lat, lat = ~long, weight = 1,
+             radius = ~sqrt(superficie) * 50, popup = ~paste("superficie :", superficie,"code insee :",code_insee,annee),
+             color = ~pal(annee), fillOpacity = 1) 
+
+
+data_incendies_majeurs<- data_incendies %>%
+  filter(superficie>mediane_surface)
+  
+leaflet(data_incendies_majeurs)  %>% 
+  addCircles(lng = ~lat, lat = ~long, weight = 1,
+             radius = ~sqrt(superficie) *60, 
+             popup = ~paste(sep = "<br/>",
+                            "<b>Surface (hectares) </b>", superficie,
+                            "<b>Commune </b>",code_insee,
+                            "<b>Année </b>",annee),
+             color = ~pal(annee), fillOpacity = 0.75) %>%
+  addLegend("bottomright", pal = pal, values = ~annee,
+            title = " Répartition des incendies majeurs",
+            labFormat = labelFormat(prefix = " "),
+            opacity = 1
+  ) %>% 
+  addProviderTiles("OpenStreetMap.France") %>%
+  setView(2.792276, 46.461114,zoom=5)     
+
+
+####################################################################################################
+  
+  
+#evolution de la temperature moyenne
+ggplot(data=data_incendies_majeurs, aes(x=annee, y=temperature_14_g, group=1)) +
+  geom_line()+
+  geom_point()
+
+
+data_group_by<-data_clean %>% select(annee,mois,code_insee,
+                                     Y,id_station,superficie,temperature_23_m_1,
+                                     temperature_14_m_1,temperature_23_m_12,temperature_14_m_12,
+                                     point_rosee_14_m_1,point_rosee_14_m_12,
+                                     humidite_14_m_1,humidite_14_m_12
+                                     ) %>% 
+  group_by(annee,mois,Y) %>%
+  mutate(mean_temp_23_m_1 =mean(temperature_23_m_1),
+         mean_temp_14_m_1 =mean(temperature_14_m_1),
+         mean_temp_23_m_12 =mean(temperature_23_m_12),
+         mean_temp_14_m_12 =mean(temperature_14_m_12),
+         mean_point_rosee_14_m_1=mean(point_rosee_14_m_1),
+         mean_point_rosee_14_m_12=mean(point_rosee_14_m_12),
+         mean_humidite_14_m_1=mean(humidite_14_m_1),
+         mean_humidite_14_m_12=mean(humidite_14_m_12)
+         ) %>%
+  distinct(annee,mois,Y,mean_temp_23_m_1,mean_temp_14_m_1,mean_temp_23_m_12,
+           mean_temp_14_m_12,mean_point_rosee_14_m_1,mean_point_rosee_14_m_12,
+           mean_humidite_14_m_1,mean_humidite_14_m_12)
+  
+  
+ggplot(data=data_group_by, aes(x=mois, y=mean_temp_14_g, group=Y)) +
+  geom_line()+
+  geom_point() +facet_wrap(annee~.)
+
+#bonne version###
+######################################################################################"
+ggplot(data_group_by, aes(x=mois, y=mean_temp_14_m_1, group=Y)) +
+  geom_line(aes(linetype=Y, color=Y))+
+  geom_point(aes(color=Y))+
+  theme(legend.position="top")+facet_wrap(annee~.)
+
+ggplot(data_group_by, aes(x=mois, y=mean_temp_23_m_1, group=Y)) +
+  geom_line(aes(linetype=Y, color=Y))+
+  geom_point(aes(color=Y))+
+  theme(legend.position="top")+facet_wrap(annee~.)
+
+ggplot(data_group_by, aes(x=mois, y=mean_temp_14_m_12, group=Y)) +
+  geom_line(aes(linetype=Y, color=Y))+
+  geom_point(aes(color=Y))+
+  theme(legend.position="top")+facet_wrap(annee~.)
+
+ggplot(data_group_by, aes(x=mois, y=mean_temp_23_m_12, group=Y)) +
+  geom_line(aes(linetype=Y, color=Y))+
+  geom_point(aes(color=Y))+
+  theme(legend.position="top")+facet_wrap(annee~.)
+
+
+ggplot(data_group_by, aes(x=annee, y=mean_humidite_14_m_1, group=Y)) +
+  geom_line(aes(linetype=Y, color=Y))+
+  geom_point(aes(color=Y))+
+  theme(legend.position="top")+facet_wrap(mois~.)
+
+
+
