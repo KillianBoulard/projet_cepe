@@ -39,7 +39,7 @@ shinyServer(function(input, output, session) {
   # create the leaflet map  
   output$incmap <- renderLeaflet({
     leaflet(data_incendies) %>%
-      addCircles(lng = ~lat, lat = ~long, weight = 1,
+      addCircles(lng = ~long, lat = ~lat, weight = 1,
                  group = "mygroup",
                  radius = ~sqrt(superficie) *60,
                  popup = ~paste(sep = "<br/>",
@@ -82,7 +82,7 @@ shinyServer(function(input, output, session) {
   handlerExpr =  {
     leafletProxy("incmap", data = intersect(filteredData(), filteredDataSlider())) %>%
       clearGroup ("mygroup") %>%
-      addCircles(lng = ~lat, lat = ~long, weight = 1,
+      addCircles(lng = ~long, lat = ~lat, weight = 1,
                  group = "mygroup",
                  radius = ~sqrt(superficie) *60,
                  popup = ~paste(sep = "<br/>",
