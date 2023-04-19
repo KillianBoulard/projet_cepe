@@ -1,7 +1,9 @@
 ---
 title: "Projet climat LBP"
-output: html_notebook
-authors: "Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD"
+output:
+  html_notebook: default
+  word_document: default
+authors: Laurent BIGAS, Mathieu DA SILVA, Killian BOULARD
 ---
 
 # Etape 1 : Déclaration des librairies
