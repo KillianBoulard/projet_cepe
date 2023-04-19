@@ -78,7 +78,7 @@ shinyServer(function(input, output, session) {
                  group = "mygroup",
                  radius = ~sqrt(superficie) *60,
                  popup = ~paste(sep = "<br/>",
-                                "<b>Surface (hectares) </b>", superficie,
+                                "<b>Surface (m2) </b>", superficie,
                                 "<b>Commune </b>",code_insee,
                                 "<b>Année </b>",annee),
                  color = ~pal(annee), fillOpacity = 0.75) %>% 
@@ -190,7 +190,8 @@ shinyServer(function(input, output, session) {
   ))
   
   output$plot1<-renderPlot({
-    ggplot(data_incendies, aes(x=superficie, xmax=3000)) + geom_boxplot(aes(fill=annee)) 
+    ggplot(data_incendies %>% filter(superficie < 30000), aes(x=superficie)) + geom_boxplot(aes(fill=annee)) +
+      coord_flip()
       #facet_wrap(annee ~ .)
   })
   
