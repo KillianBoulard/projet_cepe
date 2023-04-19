@@ -6,7 +6,7 @@ library(ggplot2)
 library(RColorBrewer)
 
 shinyServer(function(input, output, session) {
-  #dataset = readRDS(file = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA/dataset.RDS")
+  #dataset = readRDS(file = "c:/Users/User/Desktop/Cours et documents/formations/formation R ensae/DATA/dataset.RDS")
   #Import des paramètres du XGboost
   xgb_model = readRDS("XGboost.rda")
   data_2021 = dataset %>% filter(annee == 2021)
