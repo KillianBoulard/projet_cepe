@@ -77,17 +77,23 @@ navbarPage("Projet Incendie CEPE / LBP", id="main",
            ),
            tabPanel("Données du projet", DT::dataTableOutput("data")),
            navbarMenu("Analyses",
-                      tabPanel("Plot 1",
-                               plotOutput("plot1")
+                      tabPanel("Origine incendie",
+                               plotOutput("plot5")
                       ),
-                      tabPanel("Plot 2",
-                               plotOutput("plot2")
+                      tabPanel("Nature incendie",
+                               plotOutput("plot6")
                       ),
                       tabPanel("Plot 3",
                                plotOutput("plot3")
                       ),
                       tabPanel("Plot 4",
                                plotOutput("plot4")
+                      ),
+                      tabPanel("Box plot",
+                               plotOutput("plot1")
+                               ),
+                      tabPanel("Plot 2",
+                               plotOutput("plot2")
                       )
            ),
            tabPanel("A propos du projet"))
