@@ -89,7 +89,7 @@ rm(train_test_set, i, poids_presence_feu,poids_non_feu, target_train_test)
 ```{r}
 #KNN
 preProcess <-  c("center", "scale", "nzv")
-#trControl <- trainControl(method = "repeatedcv",number = 5,repeats = 5)
+trControl <- trainControl(method = "repeatedcv",number = 5,repeats = 5)
 #trControl <- trainControl(method = "timeslice",
 #                          initialWindows
 #                          number = 10)
