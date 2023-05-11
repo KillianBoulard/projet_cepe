@@ -21,8 +21,8 @@ library(caret)
 
 ```{r setup}
 knitr::opts_knit$set(root.dir = "c:/Users/User/Desktop/Cours et documents/formation/formation R ensae/DATA")
-knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
-dataset = readRDS(file = "c:/Users/User/Desktop/Cours et documents/formation R ensae/DATA/dataset.RDS")
+#knitr::opts_knit$set(root.dir = "C:/Users/VOYK743/Desktop/Fichiers Perso/Formation ENSAI/Datasets")
+dataset = readRDS(file = "c:/Users/User/Desktop/Cours et documents/formations/formation R ensae/DATA/dataset.RDS")
 set.seed(42)
 dataset = dataset[sample(1:nrow(dataset)), ]
 ```
