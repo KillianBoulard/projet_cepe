@@ -1,5 +1,5 @@
 ---
-title: "Projet climat LBP"
+title: "Projet climat CEPE"
 output:
   html_notebook: default
   word_document: default
